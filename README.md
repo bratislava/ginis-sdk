@@ -14,11 +14,7 @@ or
 
 ## Using the library
 
-TODO - waiting for feedback on JSON endpoints, will add more afterwards.
-
-TODO - docs for GINIS structure
-
-TODO - "simple" service for most common requests, requiring and returning just the data needed.
+To understand how the structure of `Ginis.xml` and `urls` part of the config relates to the GINIS system, read the [GINIS section](https://bratislava.github.io/GINIS) of our documentation site.
 
 You'll need the GINIS credentials. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.
 
@@ -53,11 +49,14 @@ const { data, status, statusText } = await ginis.xml.ude.seznamDokumentu({
 })
 ```
 
+TODO - waiting for feedback on JSON endpoints, will add more afterwards.
+TODO - "simple" service for most common requests, requiring and returning just the data needed.
+
 ## Extending the library
 
 TODO - waiting for feedback on JSON endpoints, will add more afterwards.
 
-TODO - docs for GINIS structure
+The `src/api` is structured after the GINIS modules, each method available on the exported API object maps to a single action - for more info on the hierarchy, see our [GINIS docs](https://bratislava.github.io/GINIS).
 
 You can read / reproduce / add new requests in the /src/api/\[service-name\].ts. Each function exported form these files should contain the full (templated) headers and body definition, as well as a link to the Gordic docs, all of which can be used to construct and customize your requests. The `bodyObj` also follows the (key names should match the ones from Gordic).
 

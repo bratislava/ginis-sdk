@@ -16,8 +16,7 @@
 <a href="#ginis-sdk" id="ginis-sdk" style="color: inherit; text-decoration: none;">
   <h1>ginis-sdk</h1>
 </a>
-<!-- [![npm](https://img.shields.io/npm/v/json-schema-xsd-tools)](https://www.npmjs.com/package/json-schema-xsd-tools) -->
-
+<p><a href="https://www.npmjs.com/package/@bratislava/ginis-sdk"><img src="https://img.shields.io/npm/v/@bratislava/ginis-sdk" alt="npm"></a></p>
 <p>A small wrapper for most commonly used requests towards the GINIS system. Made to be used by applications of city of <a href="https://github.com/bratislava">Bratislava</a></p>
 
 <a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
@@ -30,9 +29,7 @@
 <a href="#using-the-library" id="using-the-library" style="color: inherit; text-decoration: none;">
   <h2>Using the library</h2>
 </a>
-<p>TODO - waiting for feedback on JSON endpoints, will add more afterwards.</p>
-<p>TODO - docs for GINIS structure</p>
-<p>TODO - &quot;simple&quot; service for most common requests, requiring and returning just the data needed.</p>
+<p>To understand how the structure of <code>Ginis.xml</code> and <code>urls</code> part of the config relates to the GINIS system, read the <a href="https://bratislava.github.io/GINIS">GINIS section</a> of our documentation site.</p>
 <p>You&#39;ll need the GINIS credentials. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.</p>
 <p>Initialize the Ginis class within your project:</p>
 <pre><code class="language-ts"><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">ginis</span><span class="hl-1"> = </span><span class="hl-0">new</span><span class="hl-1"> </span><span class="hl-3">Ginis</span><span class="hl-1">({</span><br/><span class="hl-1">  </span><span class="hl-4">// connect to any subset of services needed, all the urls are optional but requests to services missing urls will fail</span><br/><span class="hl-1">  </span><span class="hl-5">urls:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-5">ude:</span><span class="hl-1"> </span><span class="hl-6">&#39;http://host/your/ude/endpoint/Ude.svc&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">ssl:</span><span class="hl-1"> </span><span class="hl-6">&#39;http://host/your/ssl/endpoint/Ssl.svc&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">  </span><span class="hl-4">// credentials</span><br/><span class="hl-1">  </span><span class="hl-5">username:</span><span class="hl-1"> </span><span class="hl-5">process</span><span class="hl-1">.</span><span class="hl-5">env</span><span class="hl-1">.</span><span class="hl-2">GINIS_USERNAME</span><span class="hl-1">,</span><br/><span class="hl-1">  </span><span class="hl-5">password:</span><span class="hl-1"> </span><span class="hl-5">process</span><span class="hl-1">.</span><span class="hl-5">env</span><span class="hl-1">.</span><span class="hl-2">GINIS_PASSWORD</span><span class="hl-1">,</span><br/><span class="hl-1">  </span><span class="hl-4">// if debug === true prints all the requests and responses into console</span><br/><span class="hl-1">  </span><span class="hl-4">// warning - these logs WILL include credentials!</span><br/><span class="hl-1">  </span><span class="hl-5">debug:</span><span class="hl-1"> </span><span class="hl-0">true</span><span class="hl-1">,</span><br/><span class="hl-1">})</span>
@@ -40,12 +37,14 @@
 <p>Use the xml-returning requests:</p>
 <pre><code class="language-ts"><span class="hl-4">// data will contain the unformatted xml as a string, status and statusText from axios response</span><br/><span class="hl-4">// the options object uses same keys as the requests in Ginis docs</span><br/><span class="hl-4">// i.e. https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&amp;moduleName=UDE&amp;version=390&amp;methodName=seznam-dokumentu&amp;type=request</span><br/><span class="hl-4">// will throw if the request fails</span><br/><span class="hl-0">const</span><span class="hl-1"> { </span><span class="hl-2">data</span><span class="hl-1">, </span><span class="hl-2">status</span><span class="hl-1">, </span><span class="hl-2">statusText</span><span class="hl-1"> } = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-5">ginis</span><span class="hl-1">.</span><span class="hl-5">xml</span><span class="hl-1">.</span><span class="hl-5">ude</span><span class="hl-1">.</span><span class="hl-3">seznamDokumentu</span><span class="hl-1">({</span><br/><span class="hl-1">  </span><span class="hl-5">Stav:</span><span class="hl-1"> </span><span class="hl-6">&#39;vyveseno&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">  </span><span class="hl-6">&#39;Id-uredni-desky&#39;</span><span class="hl-5">:</span><span class="hl-1"> </span><span class="hl-6">&#39;MAG0AWO0A03L&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">})</span>
 </code></pre>
+<p>TODO - waiting for feedback on JSON endpoints, will add more afterwards.
+TODO - &quot;simple&quot; service for most common requests, requiring and returning just the data needed.</p>
 
 <a href="#extending-the-library" id="extending-the-library" style="color: inherit; text-decoration: none;">
   <h2>Extending the library</h2>
 </a>
 <p>TODO - waiting for feedback on JSON endpoints, will add more afterwards.</p>
-<p>TODO - docs for GINIS structure</p>
+<p>The <code>src/api</code> is structured after the GINIS modules, each method available on the exported API object maps to a single action - for more info on the hierarchy, see our <a href="https://bratislava.github.io/GINIS">GINIS docs</a>.</p>
 <p>You can read / reproduce / add new requests in the /src/api/[service-name].ts. Each function exported form these files should contain the full (templated) headers and body definition, as well as a link to the Gordic docs, all of which can be used to construct and customize your requests. The <code>bodyObj</code> also follows the (key names should match the ones from Gordic).</p>
 <p>TS docs frequently reference <a href="https://robot.gordic.cz/xrg/Default.html">the official Gordic documentation</a> (you&#39;ll need to create an account to access it). Once you are logged in, you can browse the full docs with request/reponse formats and all the available endpoints (of which we wrap just a subset).</p>
 <p>Example:</p>
