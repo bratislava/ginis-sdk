@@ -39,30 +39,35 @@ const ginis = new Ginis({
 Use the xml-returning requests:
 
 ```ts
-// data will contain the unformatted xml as a string, status and statusText from axios response
 // the options object uses same keys as the requests in Ginis docs
 // i.e. https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=request
-// will throw if the request fails
-const { data, status, statusText } = await ginis.xml.ude.seznamDokumentu({
-  Stav: 'vyveseno',
-  'Id-uredni-desky': 'MAG0AWO0A03L',
+// will throw an Axios error if the request fails
+const data = await ginis.json.ssl.detailDokumentu({
+  'Id-dokumentu': 'MAG0X03RYYSN',
 })
 ```
 
-TODO - waiting for feedback on JSON endpoints, will add more afterwards.
-TODO - "simple" service for most common requests, requiring and returning just the data needed.
-
 ## Extending the library
 
-TODO - waiting for feedback on JSON endpoints, will add more afterwards.
+The `src/api` is structured after the GINIS modules, each subdirectory a single service, each file a single action - for more info on the hierarchy, see our [GINIS docs](https://bratislava.github.io/GINIS).
 
-The `src/api` is structured after the GINIS modules, each method available on the exported API object maps to a single action - for more info on the hierarchy, see our [GINIS docs](https://bratislava.github.io/GINIS).
-
-You can read / reproduce / add new requests in the /src/api/\[service-name\].ts. Each function exported form these files should contain the full (templated) headers and body definition, as well as a link to the Gordic docs, all of which can be used to construct and customize your requests. The `bodyObj` also follows the (key names should match the ones from Gordic).
+You can read / reproduce / add new requests in the /src/api/\[service-name\]/\[Action-name\].ts. Read through a couple files and you should be set. To get the typescript typing, either copy the structure from official Gordic docs and update the right-hand side by hand (they are usually strings), or make a manual request and use a tool such as quicktype.io.
 
 TS docs frequently reference [the official Gordic documentation](https://robot.gordic.cz/xrg/Default.html) (you'll need to create an account to access it). Once you are logged in, you can browse the full docs with request/reponse formats and all the available endpoints (of which we wrap just a subset).
 
-Example:
+## Developing and running tests
+
+For each new service / request you should add appropriate tests in the `__tests__` subdirectory of the service directory.
+
+You need to have GINIS credentials setup in `.env` file - see `.env.example`. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.
+
+Start the test using
+
+`yarn test`
+
+## XML example
+
+We should have services we need available as JSON endpoints, previous xml requests are kept in as documentation.
 
 ```ts
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=request
@@ -110,16 +115,6 @@ export const seznamDokumentu = async (
   return makeAxiosRequest(axiosConfig, url, body, config.debug)
 }
 ```
-
-## Developing and running tests
-
-For each new service / request you should add appropriate tests in the `__tests__` directory.
-
-You need to have GINIS credentials setup in `.env` file - see `.env.example`. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.
-
-Start the test using
-
-`yarn test`
 
 ## Documentation
 
