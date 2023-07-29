@@ -1,7 +1,7 @@
 // full SSL service docs: https://robot.gordic.cz/xrg/Default.html?c=OpenModuleDetail&moduleName=SSL&language=cs-CZ&version=390
 import type { AxiosRequestConfig } from 'axios'
-import type { GinisConfig } from '../ginis'
-import { makeAxiosRequest } from '../utils/api'
+import type { GinisConfig } from '../../ginis'
+import { makeAxiosRequest } from '../../utils/api'
 
 /**
  * full docs https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=request
