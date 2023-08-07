@@ -51,13 +51,13 @@ const data = await ginis.json.ssl.detailDokumentu({
 
 The `src/api` is structured after the GINIS modules, each subdirectory a single service, each file a single action - for more info on the hierarchy, see our [GINIS docs](https://bratislava.github.io/GINIS).
 
-You can read / reproduce / add new requests in the /src/api/\[service-name\]/\[Action-name\].ts. Read through a couple files and you should be set. To get the typescript typing, either copy the structure from official Gordic docs and update the right-hand side by hand (they are usually strings), or make a manual request and use a tool such as quicktype.io.
+You can read / reproduce / add new requests in the `/src/api/json/[service-name]/[Action-name].ts` (`/src/api/xml` request considered legacy and have slightly different structure). Read through a couple files and you should be set. To get the typescript typing, either copy the structure from official Gordic docs and update the right-hand side by hand (they are usually strings), or make a manual request and use a tool such as quicktype.io.
 
 TS docs frequently reference [the official Gordic documentation](https://robot.gordic.cz/xrg/Default.html) (you'll need to create an account to access it). Once you are logged in, you can browse the full docs with request/reponse formats and all the available endpoints (of which we wrap just a subset).
 
 ## Developing and running tests
 
-For each new service / request you should add appropriate tests in the `__tests__` subdirectory of the service directory.
+For each new service / request you should add appropriate tests in the `__tests__` subdirectory of the service directory. For xml, place them directly in `src/api/xml/__tests__`, one file per service.
 
 You need to have GINIS credentials setup in `.env` file - see `.env.example`. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.
 

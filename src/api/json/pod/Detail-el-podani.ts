@@ -49,7 +49,7 @@ export async function detailElPodani(
     {
       GRestHeader: getGRestHeader(
         this.config,
-        'http://www.gordic.cz/xrg/ssl/wfl-dokument/detail-el-podani/request/v_1.0.0.0'
+        'http://www.gordic.cz/xrg/pod/detail-el-podani/request/v_1.0.0.0'
       ),
       Xrg: { 'Detail-el-podani': bodyObj },
     },
