@@ -4,7 +4,7 @@ import type { GinisConfig } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 
 /**
- * full docs https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=request
+ * full docs https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=pridat-soubor&type=request
  */
 export type pridatSoubor = {
   'Id-dokumentu'?: string
