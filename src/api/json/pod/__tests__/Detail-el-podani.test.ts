@@ -20,8 +20,8 @@ describe('Detail-el-podani', () => {
 
   test('Basic request', async () => {
     const data = await ginis.json.pod.detailElPodani({
-      'Id-el-podani': '28a3e8de-95a7-4834-962e-f27b6c',
+      'Id-zpravy': '4f700d05-9989-4798-a469-1b05f03c9cb7',
     })
-    expect(data['Detail-el-podani']['Datum-prijeti']).toBeTruthy()
+    expect(data.DetailElPodani[0]?.IdDokumentu).toBe('MAG0X03RZA55')
   })
 })

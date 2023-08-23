@@ -11,23 +11,23 @@ export type DetailElPodaniRequest = {
 }
 
 export type DetailElPodaniXrg = {
-  'Detail-el-podani': {
-    'Datum-prijeti': string
-    'Stav-zpracovani': string
-    'Duvod-odmitnuti'?: string
-    'Stav-podani-kod': string
-    'Stav-podani-text'?: string
-    'Stav-odpovedi-kod': string
-    'Stav-odpovedi-text'?: string
-    'Id-dokumentu': string
+  DetailElPodani: {
+    DatumPrijeti: string
+    StavZpracovani: string
+    DuvodOdmitnuti?: string
+    StavPodaniKod: string
+    StavPodaniText?: string
+    StavOdpovediKod: string
+    StavOdpovediText?: string
+    IdDokumentu: string
     Vec?: string
-    'Spis-znacka'?: string
+    SpisZnacka?: string
     Znacka?: string
-  }
-  'Navazany-dokument'?: {
-    'Id-dokumentu': string
+  }[]
+  NavazanyDokument?: {
+    IdDokumentu: string
     Vec?: string
-    'Spis-znacka'?: string
+    SpisZnacka?: string
     Znacka?: string
   }
 }

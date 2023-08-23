@@ -31,7 +31,13 @@ export const makeAxiosRequest = async <T>(
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
     if (debug) {
-      console.error(error)
+      let anyError = error as any
+      console.error(anyError)
+      console.log('########### GINIS ERROR RESPONSE ###########')
+      console.log('status: ', anyError?.response?.status)
+      console.log('statusText: ', anyError?.response?.statusText)
+      console.log('data: ', anyError?.response?.data)
+      console.log('########### GINIS RESPONSE END ###########')
     }
     throw error
   }
