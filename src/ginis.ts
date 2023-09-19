@@ -1,5 +1,6 @@
 import ssl from './api/json/ssl'
 import pod from './api/json/pod'
+import gin from './api/json/gin'
 import { bind, mapValues } from 'lodash'
 
 export type GinisConfig = {
@@ -9,6 +10,7 @@ export type GinisConfig = {
     ude?: string
     ssl?: string
     pod?: string
+    gin?: string
   }
   debug?: boolean
 }
@@ -32,6 +34,14 @@ export type Pod = {
   [P in keyof _Pod]: OmitThisParameter<_Pod[P]>
 }
 
+type _Gin = typeof gin
+/**
+ * full GIN service docs: https://robot.gordic.cz/xrg/Default.html?c=OpenModuleDetail&moduleName=GIN&language=cs-CZ&version=390
+ */
+export type Gin = {
+  [P in keyof _Gin]: OmitThisParameter<_Gin[P]>
+}
+
 // exports all services with server config bound to the one passed at construction
 export class Ginis {
   config: GinisConfig
@@ -43,6 +53,7 @@ export class Ginis {
   json: {
     ssl: Ssl
     pod: Pod
+    gin: Gin
   }
 
   constructor(config: GinisConfig) {
@@ -53,6 +64,7 @@ export class Ginis {
     this.json = {
       ssl: mapValues(ssl, (v) => bind(v, this)),
       pod: mapValues(pod, (v) => bind(v, this)),
+      gin: mapValues(gin, (v) => bind(v, this)),
     }
   }
 }
