@@ -10,11 +10,11 @@ describe('Detail-funkcniho-mista', () => {
     )
     ginis = new Ginis({
       urls: {
-        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01/Gin.svc',
+        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01_BRA/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
-      debug: true,
+      debug: false,
     })
   })
 
@@ -22,6 +22,6 @@ describe('Detail-funkcniho-mista', () => {
     const data = await ginis.json.gin.detailFunkcnihoMista({
       'Id-funkce': 'MAG0SF00A19L',
     })
-    expect(data?.DetailFunkcnihoMista['Id-funkce']).toBe('MAG0SF00A19L')
+    expect(data?.DetailFunkcnihoMista[0]?.IdFunkce).toBe('MAG0SF00A19L')
   })
 })

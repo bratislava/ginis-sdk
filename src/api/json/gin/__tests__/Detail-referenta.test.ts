@@ -10,7 +10,7 @@ describe('Detail-referenta', () => {
     )
     ginis = new Ginis({
       urls: {
-        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01/Gin.svc',
+        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01_BRA/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -20,8 +20,8 @@ describe('Detail-referenta', () => {
 
   test('Basic request', async () => {
     const data = await ginis.json.gin.detailReferenta({
-      'Id-osoby': 'MAG0SF00A19L',
+      'Id-osoby': 'MAG0SR00A0BU',
     })
-    expect(data?.DetailReferenta?.['Id-osoby']).toBe('MAG0SF00A19L')
+    expect(data?.DetailReferenta[0]?.IdOsoby).toBe('MAG0SR00A0BU')
   })
 })

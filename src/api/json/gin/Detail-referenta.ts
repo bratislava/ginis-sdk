@@ -10,32 +10,32 @@ export type DetailReferentaRequest = {
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-referenta&type=response
 export type DetailReferentaXrg = {
   Atribut_Xrg_ixsExt?: string
-  DetailReferenta: {
-    'Id-osoby': string
+  DetailReferenta: Array<{
+    IdOsoby: string
     Aktivita: string
     Nazev?: string
     Zkratka?: string
     Jmeno?: string
     Prijmeni?: string
     Poznamka?: string
-    'Datum-od': string
-    'Datum-do': string
-    'Id-spisoveho-uzlu': string
+    DatumOd: string
+    DatumDo: string
+    IdSpisovehoUzlu: string
     Login?: string
-    'Alt-login'?: string
-    'Ext-sys-login'?: string
-    'Titul-pred'?: string
-    'Titul-za'?: string
-    'Osobni-cislo'?: string
-    'Rodne-cislo'?: string
-    'Rodne-prijmeni'?: string
+    AltLogin?: string
+    ExtSysLogin?: string
+    TitulPred?: string
+    TitulZa?: string
+    OsobniCislo?: string
+    RodneCislo?: string
+    RodnePrijmeni?: string
     Mail?: string
     Telefon?: string
-    'Telefon-privat'?: string
-    'Telefon-mobil'?: string
+    TelefonPrivat?: string
+    TelefonMobil?: string
     Fax?: string
-    'Datum-zmena': string
-  }
+    DatumZmena: string
+  }>
 }
 
 export type DetailReferentaResponse = {
@@ -55,7 +55,7 @@ export async function detailReferenta(
     {
       GRestHeader: getGRestHeader(
         this.config,
-        'http://www.gordic.cz/xrg/detail-referenta/request/v_1.0.0.0'
+        'http://www.gordic.cz/xrg/gin/detail-referenta/request/v_1.0.0.0'
       ),
       Xrg: { 'Detail-referenta': bodyObj },
     },

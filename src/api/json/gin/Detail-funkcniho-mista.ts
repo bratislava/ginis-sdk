@@ -10,32 +10,32 @@ export type DetailFunkcnihoMistaRequest = {
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-funkcniho-mista&type=response
 export interface DetailFunkcnihoMistaXrg {
   Atribut_Xrg_ixsExt?: string
-  DetailFunkcnihoMista: {
-    'Id-funkce': string
+  DetailFunkcnihoMista: Array<{
+    IdFunkce: string
     Aktivita: string
     Nazev?: string
     Zkratka?: string
-    'Oficialni-nazev'?: string
+    OficialniNazev?: string
     Poznamka?: string
-    'Datum-od': string
-    'Datum-do': string
-    'Id-spisoveho-uzlu': string
-    'Nazev-spisoveho-uzlu'?: string
-    'Zkratka-spisoveho-uzlu'?: string
-    'Uroven-funkce': string
-    'Kod-funkce'?: string
-    'Id-nad'?: string
-    'Id-referenta': string
-    'Nazev-referenta'?: string
-    'Id-orj': string
-    'Nazev-orj'?: string
-    'Kod-mistnosti'?: string
+    DatumOd: string
+    DatumDo: string
+    IdSpisovehoUzlu: string
+    NazevSpisovehoUzlu?: string
+    ZkratkaSpisovehoUzlu?: string
+    UrovenFunkce: string
+    KodFunkce?: string
+    IdNad?: string
+    IdReferenta: string
+    NazevReferenta?: string
+    IdOrj: string
+    NazevOrj?: string
+    KodMistnosti?: string
     Url?: string
     Mail?: string
     Telefon?: string
     Fax?: string
-    'Datum-zmena': string
-  }
+    DatumZmena: string
+  }>
 }
 export type DetailFunkcnihoMistaResponse = {
   GRestHeader: GRestHeader
@@ -54,7 +54,7 @@ export async function detailFunkcnihoMista(
     {
       GRestHeader: getGRestHeader(
         this.config,
-        'http://www.gordic.cz/xrg/detail-funkcniho-mista/request/v_1.0.0.0'
+        'http://www.gordic.cz/xrg/gin/detail-funkcniho-mista/request/v_1.0.0.0'
       ),
       Xrg: { 'Detail-funkcniho-mista': bodyObj },
     },
