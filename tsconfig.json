@@ -26,11 +26,7 @@
     "checkJs": true,
     "declaration": true,
     "declarationMap": true,
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin"
-      }
-    ]
+    "plugins": []
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "docs", "node_modules", "bin"]
