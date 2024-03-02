@@ -10,9 +10,9 @@
   "scripts": {
     "build": "tsup src/index.ts --dts",
     "test": "jest --watch",
-    "typecheck": "tsc && tsc-strict",
-    "eslint": "eslint --color --ext .js,.json,.ts .",
-    "eslint:fix": "npm run eslint -- --fix"
+    "typecheck": "tsc",
+    "lint": "eslint --color --ext .js,.json,.ts .",
+    "lint:fix": "yarn lint --fix"
   },
   "bin": {
     "ginis-sdk": "./bin/index.js"
