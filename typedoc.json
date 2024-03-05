@@ -1,9 +1,0 @@
-{
-  "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src/index.ts", "./src/api/ssl.ts", "./src/api/ude.ts"],
-  "entryPointStrategy": "Expand",
-  "plugin": ["typedoc-theme-hierarchy"],
-  "theme": "hierarchy",
-  "name": "GINIS SDK",
-  "out": "docs"
-}
