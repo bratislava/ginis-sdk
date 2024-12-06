@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - run: yarn --frozen-lockfile
+      - run: npm ci
       - name: Typescript check
         uses: EPMatt/reviewdog-action-tsc@v1
         with:
@@ -31,8 +31,8 @@ jobs:
           # https://github.com/reviewdog/reviewdog#reporters
           level: warning
       - name: Typescript strict plugin check
-        run: yarn typecheck
+        run: npm run typecheck
 
       # Tests require internal network - until we have GINIS mocked for ci we're omitting
       # - name: Tests
-      #   run: yarn test:ci
+      #   run: npm run test:ci
