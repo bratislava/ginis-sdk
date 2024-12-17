@@ -1,6 +1,7 @@
 import ssl from './api/json/ssl'
 import pod from './api/json/pod'
 import gin from './api/json/gin'
+import ude from './api/xml/ude'
 import { bind, mapValues } from 'lodash'
 
 export type GinisConfig = {
@@ -17,6 +18,14 @@ export type GinisConfig = {
 
 // presently empty, prepared in case we're to add default values in the future
 export const defaultConfig = {}
+
+type _Ude = typeof ude
+/**
+ * full UDE service docs: https://robot.gordic.cz/xrg/Default.html?c=OpenModuleDetail&moduleName=UDE&language=cs-CZ&version=524
+ */
+export type Ude = {
+  [P in keyof _Ude]: OmitThisParameter<_Ude[P]>
+}
 
 type _Ssl = typeof ssl
 /**
@@ -56,6 +65,10 @@ export class Ginis {
     gin: Gin
   }
 
+  xml: {
+    ude: Ude
+  }
+
   constructor(config: GinisConfig) {
     this.config = {
       ...defaultConfig,
@@ -65,6 +78,9 @@ export class Ginis {
       ssl: mapValues(ssl, (v) => bind(v, this)),
       pod: mapValues(pod, (v) => bind(v, this)),
       gin: mapValues(gin, (v) => bind(v, this)),
+    }
+    this.xml = {
+      ude: mapValues(ude, (v) => bind(v, this)),
     }
   }
 }
