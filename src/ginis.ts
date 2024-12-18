@@ -1,6 +1,6 @@
-import ssl from './api/json/ssl'
-import pod from './api/json/pod'
-import gin from './api/json/gin'
+import ssl from './api/xml/ssl'
+import pod from './api/xml/pod'
+import gin from './api/xml/gin'
 import ude from './api/xml/ude'
 import { bind, mapValues } from 'lodash'
 
@@ -57,15 +57,11 @@ export class Ginis {
   /**
    * Exports functions of the api's with config and url values bound.
    * See documentation of the api for request options.
-   * Inputs are typed objects, outputs unformatted xml.
    */
-  json: {
+  xml: {
     ssl: Ssl
     pod: Pod
     gin: Gin
-  }
-
-  xml: {
     ude: Ude
   }
 
@@ -74,12 +70,11 @@ export class Ginis {
       ...defaultConfig,
       ...config,
     }
-    this.json = {
+
+    this.xml = {
       ssl: mapValues(ssl, (v) => bind(v, this)),
       pod: mapValues(pod, (v) => bind(v, this)),
       gin: mapValues(gin, (v) => bind(v, this)),
-    }
-    this.xml = {
       ude: mapValues(ude, (v) => bind(v, this)),
     }
   }

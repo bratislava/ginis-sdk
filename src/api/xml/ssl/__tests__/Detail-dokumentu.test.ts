@@ -14,12 +14,12 @@ describe('Detail-dokumentu', () => {
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
-      debug: true,
+      debug: false,
     })
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.ssl.detailDokumentu({
+    const data = await ginis.xml.ssl.detailDokumentu({
       'Id-dokumentu': 'MAG0X03RYYSN',
     })
     expect(data?.HistorieDokumentu?.length).toBeGreaterThan(0)

@@ -2,7 +2,7 @@ import { Ginis } from '../../../../index'
 
 jest.setTimeout(20000)
 
-describe('Detail-el-podani', () => {
+describe('Detail-funkcniho-mista', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -10,7 +10,7 @@ describe('Detail-el-podani', () => {
     )
     ginis = new Ginis({
       urls: {
-        pod: 'http://172.25.1.195/gordic/ginis/ws/POD01/Pod.svc',
+        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01_BRA/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -19,9 +19,9 @@ describe('Detail-el-podani', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.pod.detailElPodani({
-      'Id-zpravy': '4f700d05-9989-4798-a469-1b05f03c9cb7',
+    const data = await ginis.xml.gin.detailFunkcnihoMista({
+      'Id-funkce': 'MAG0SF00A19L',
     })
-    expect(data.DetailElPodani[0]?.IdDokumentu).toBe('MAG0X03RZA55')
+    expect(data?.DetailFunkcnihoMista[0]?.IdFunkce).toBe('MAG0SF00A19L')
   })
 })

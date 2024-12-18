@@ -21,12 +21,12 @@ describe('Pridat-soubor', () => {
 
   test('Basic request', async () => {
     console.log('start reading')
-    const contents = await fs.readFile('./src/api/json/ssl/__tests__/raw-data.bin', {
+    const contents = await fs.readFile('./src/api/xml/ssl/__tests__/raw-data.bin', {
       encoding: 'base64',
     })
     console.log('done reading ')
 
-    const data = await ginis.json.ssl.pridatSoubor({
+    const data = await ginis.xml.ssl.pridatSoubor({
       'Id-dokumentu': 'MAG0X03RYYSN',
       'Jmeno-souboru': 'raw-data.bin',
       'Typ-vazby': 'elektronicka-priloha',

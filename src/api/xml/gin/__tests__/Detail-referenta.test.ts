@@ -19,7 +19,7 @@ describe('Detail-referenta', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.gin.detailReferenta({
+    const data = await ginis.xml.gin.detailReferenta({
       'Id-osoby': 'MAG0SR00A0BU',
     })
     expect(data?.DetailReferenta[0]?.IdOsoby).toBe('MAG0SR00A0BU')
