@@ -11,7 +11,7 @@ describe('Pridat-soubor', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_BRA/Ssl.svc',
+        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -21,17 +21,17 @@ describe('Pridat-soubor', () => {
 
   test('Basic request', async () => {
     console.log('start reading')
-    const contents = await fs.readFile('./src/api/json/ssl/__tests__/raw-data.bin', {
+    const contents = await fs.readFile('./src/api/xml/ssl/__tests__/raw-data.bin', {
       encoding: 'base64',
     })
     console.log('done reading ')
 
-    const data = await ginis.json.ssl.pridatSoubor({
+    const data = await ginis.xml.ssl.pridatSoubor({
       'Id-dokumentu': 'MAG0X03RYYSN',
       'Jmeno-souboru': 'raw-data.bin',
       'Typ-vazby': 'elektronicka-priloha',
       Data: contents,
     })
-    expect(data['PridatSoubor'][0]?.['VerzeSouboru']).toBeTruthy()
+    expect(data['Pridat-soubor']?.['Verze-souboru']).toBeTruthy()
   })
 })

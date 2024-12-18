@@ -4,7 +4,7 @@ import type { GinisConfig } from '../ginis'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'text/xml; charset=utf-8',
   },
 }
 

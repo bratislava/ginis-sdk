@@ -2,7 +2,7 @@ import { Ginis } from '../../../../index'
 
 jest.setTimeout(20000)
 
-describe('Detail-funkcniho-mista', () => {
+describe('nacist-soubor', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -10,7 +10,7 @@ describe('Detail-funkcniho-mista', () => {
     )
     ginis = new Ginis({
       urls: {
-        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01_BRA/Gin.svc',
+        ude: process.env['GINIS_UDE_HOST'] ?? 'http://172.25.1.195/gordic/ginis/ws/Ude01/Ude.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -19,9 +19,12 @@ describe('Detail-funkcniho-mista', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.gin.detailFunkcnihoMista({
-      'Id-funkce': 'MAG0SF00A19L',
+    const dataXrg = await ginis.xml.ude.nacistSoubor({
+      'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
     })
-    expect(data?.DetailFunkcnihoMista[0]?.IdFunkce).toBe('MAG0SF00A19L')
+
+    let loadedFile = dataXrg['Nacist-soubor']
+
+    expect(loadedFile?.['Jmeno-souboru']).toBe('Plnenie UZN c. 135_2015 február 2021.pdf')
   })
 })

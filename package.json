@@ -1,6 +1,6 @@
 {
   "name": "@bratislava/ginis-sdk",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "A small wrapper for most commonly used requests towards the Bratislava GINIS system",
   "main": "dist/index.js",
   "files": [
@@ -35,6 +35,7 @@
     "@babel/preset-typescript": "^7.26.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
+    "@types/xml2json": "^0.11.6",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "babel-jest": "^29.7.0",
@@ -59,7 +60,8 @@
     "crypto-browserify": "^3.12.1",
     "lodash": "^4.17.21",
     "stream-browserify": "^3.0.0",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "xml2json": "^0.12.0"
   },
   "volta": {
     "node": "20.11.1"
