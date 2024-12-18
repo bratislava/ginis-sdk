@@ -1,35 +1,37 @@
 import type { Ginis } from '../../../ginis'
-import { makeAxiosRequest, getGRestHeader, GRestHeader } from '../../../utils/api'
+import { makeAxiosRequest } from '../../../utils/api'
 import { GinisError } from '../../../utils/errors'
+import { createXmlRequestBody, createXmlRequestConfig, extractResponseJson } from '../request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=request
+const pridatSouborRequestProperties = [
+  'Id-dokumentu',
+  'Id-souboru',
+  'Jmeno-souboru',
+  'Typ-vazby',
+  'Popis-souboru',
+  'Podrobny-popis-souboru',
+  'Data',
+  'Kontrola-podpisu',
+  'Priz-platna-verze',
+  'Priz-archiv-verze',
+  'Id-kategorie-typu-prilohy',
+] as const
+
 export type PridatSouborRequest = {
-  'Id-dokumentu': string
-  'Id-souboru'?: string
-  'Jmeno-souboru': string
-  'Typ-vazby': string
-  'Popis-souboru'?: string
-  'Podrobny-popis-souboru'?: string
-  Data: string
-  'Kontrola-podpisu'?: string
-  'Priz-platna-verze'?: 0 | 1
-  'Priz-archiv-verze'?: 0 | 1
-  'Id-kategorie-typu-prilohy'?: string
+  [K in (typeof pridatSouborRequestProperties)[number] as K]?: string
+}
+
+type PridatSouborReponseItem = {
+  'Datum-zmeny': string
+  'Id-souboru': string
+  'Verze-souboru': string
 }
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=response
 export type PridatSouborXrg = {
-  Atribut_Xrg_ixsExt?: string
-  PridatSoubor: Array<{
-    DatumZmeny: string
-    IdSouboru: string
-    VerzeSouboru: number
-  }>
-}
-
-export type PridatSouborResponse = {
-  GRestHeader: GRestHeader
-  Xrg: PridatSouborXrg
+  ixsExt?: string
+  'Pridat-soubor': PridatSouborReponseItem
 }
 
 export async function pridatSoubor(
@@ -38,17 +40,21 @@ export async function pridatSoubor(
 ): Promise<PridatSouborXrg> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
-  const response = await makeAxiosRequest<PridatSouborResponse>(
-    undefined,
-    `${url}/json/Pridat-soubor`,
-    {
-      GRestHeader: getGRestHeader(
-        this.config,
-        'http://www.gordic.cz/xrg/ssl/wfl-dokument/pridat-soubor/request/v_1.0.0.0'
-      ),
-      Xrg: { 'Pridat-soubor': bodyObj },
-    },
+
+  const requestName = 'Pridat-soubor'
+  const requestNamespace = 'http://www.gordic.cz/svc/xrg-ssl/v_1.0.0.0'
+
+  const response = await makeAxiosRequest<string>(
+    createXmlRequestConfig(requestName, requestNamespace),
+    url,
+    createXmlRequestBody(this.config, {
+      name: requestName,
+      namespace: requestNamespace,
+      xrgNamespace: 'http://www.gordic.cz/xrg/ssl/wfl-dokument/pridat-soubor/request/v_1.0.0.0',
+      paramsBody: bodyObj,
+      paramOrder: pridatSouborRequestProperties,
+    }),
     this.config.debug
   )
-  return response.data.Xrg
+  return extractResponseJson<PridatSouborXrg>(response.data, requestName)
 }

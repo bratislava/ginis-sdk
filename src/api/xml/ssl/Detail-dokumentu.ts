@@ -1,121 +1,206 @@
 import type { Ginis } from '../../../ginis'
-import { makeAxiosRequest, getGRestHeader, GRestHeader } from '../../../utils/api'
+import { makeAxiosRequest } from '../../../utils/api'
 import { GinisError } from '../../../utils/errors'
+import { createXmlRequestBody, createXmlRequestConfig, extractResponseJson } from '../request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=request
+const detailDokumentuRequestProperties = [
+  'Id-dokumentu',
+  'Vyradit-historii',
+  'Vyradit-obsah-spisu',
+  'Vyradit-prilohy',
+  'Vyradit-souvisejici',
+  'Id-esu',
+  'Vyradit-doruceni',
+  'Id-eu',
+] as const
+
 export type DetailDokumentuRequest = {
-  'Id-dokumentu': string
-  'Vyradit-historii'?: string
-  'Vyradit-obsah-spisu'?: string
-  'Vyradit-prilohy'?: string
-  'Vyradit-souvisejici'?: string
-  'Id-esu'?: string
-  'Vyradit-doruceni'?: string
-  'Id-eu'?: string
+  [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
 export interface DetailDokumentuXrg {
-  WflDokument: WflDokument[]
-  Doruceni: Doruceni
-  EDoruceni: EDoruceni
-  HistorieDokumentu: HistorieDokumentu[]
-  CjDokumentu: CjDokumentu
-  Atribut_Xrg_IxsExt: string
+  ixsExt?: string
+  'Wfl-dokument': WflDokumentResponseItem
+  Doruceni?: DoruceniResponseItem
+  'E-doruceni'?: EDoruceniResponseItem
+  'Historie-dokumentu'?: HistorieDokumentuResponseItem | HistorieDokumentuResponseItem[]
+  'Ssl-dokument'?: SslDokumentResponseItem
+  'Ssl-spis'?: SslSpisResponseItem
+  'Ssl-obsah-spis'?: SslObsahSpisResponseItem | SslObsahSpisResponseItem[]
+  'Cj-dokumentu'?: CjDokumentuResponseItem
+  'Prilohy-dokumentu'?: PrilohyDokumentuResponseItem | PrilohyDokumentuResponseItem[]
+  'Souvisejici-dokumenty'?: SouvisejiciDokumentyResponseItem | SouvisejiciDokumentyResponseItem[]
+  Spisovna?: SpisovnaResponseItem | SpisovnaResponseItem[]
+  'Vlozeno-do-spisu'?: VlozenoDoSpisuResponseItem
 }
 
-export interface CjDokumentu {
-  IdInitDokumentu: string
-  Atribut_IdInitDokumentu_Externi: string
-  IdVyrizDokumentu: string
-  Atribut_IdVyrizDokumentu_Externi: string
-  Atribut_IdVyrizDokumentu_Nil: string
-  DenikCj: string
-  RokCj: string
-  PoradoveCisloCj: string
-  ZnackaCj: string
-  StavCj: string
-  DatumEvidence: string
-  IdZpusobVyrizeni: string
-  Atribut_IdZpusobVyrizeni_Externi: string
-  Atribut_IdZpusobVyrizeni_Nil: string
-  DoplnekCj: string
+type WflDokumentResponseItem = {
+  'Id-dokumentu': string
+  'Id-spisu': string
+  'Priznak-spisu': string
+  'Priznak-cj': string
+  'Id-funkce-vlastnika': string
+  Vec?: string
+  Znacka?: string
+  'Stav-distribuce': string
+  'Stav-dokumentu': string
+  'Id-agendy': string
+  'Id-typu-dokumentu': string
+  'Priznak-doruceni': string
+  'Priznak-evidence-ssl': string
+  'Misto-vzniku'?: string
+  'Datum-podani': string
+  'Priznak-fyz-existence': string
+  'Priznak-el-obrazu': string
+  'Id-souboru'?: string
+  'Jmeno-souboru'?: string
+  'Popis-souboru'?: string
+  'Datum-zmeny': string
+  'Id-zmenu-provedl': string
+  'Id-originalu'?: string
+  'Verze-souboru'?: string
+  'Datum-zmeny-souboru'?: string
+  'Velikost-souboru'?: string
+  Barcode?: string
+  'Priznak-souboru-ro'?: string
 }
-
-export interface Doruceni {
-  IdDokumentu: string
-  Atribut_IdDokumentu_Externi: string
-  Stat: string
-  DatumOdeslani: string
-  ZnackaOdesilatele: string
-  DatumZeDne: string
-  PodaciCislo: string
-  ZpusobDoruceni: string
-  DruhZasilky: string
-  DruhZachazeni: string
-  DatumPrijmuPodani: string
-  IdOdesilatele: string
-  Atribut_IdOdesilatele_Externi: string
-  PocetPriloh: string
-  IdUzluPodani: string
-  Atribut_IdUzluPodani_Externi: string
-  PoradoveCisloPodani: string
+type DoruceniResponseItem = {
+  'Id-dokumentu': string
+  Stat?: string
+  Psc?: string
+  'Datum-odeslani'?: string
+  'Znacka-odesilatele'?: string
+  'Datum-ze-dne'?: string
+  'Podaci-cislo'?: string
+  'Zpusob-doruceni'?: string
+  'Druh-zasilky': string
+  'Druh-zachazeni': string
+  'Datum-prijmu-podani'?: string
+  'Id-odesilatele'?: string
+  'Pocet-listu'?: string
+  'Pocet-priloh'?: string
+  'Pocet-stran'?: string
+  'Pocet-kopii'?: string
+  'Pocet-listu-priloh'?: string
+  'Poznamka-k-doruceni'?: string
+  'Id-uzlu-podani'?: string
+  'Poradove-cislo-podani': string
 }
-
-export interface EDoruceni {
-  DatumPrijeti: string
-  DatumDoruceni: string
-  IdDsOdesilatele: string
+type EDoruceniResponseItem = {
+  'Datum-prijeti'?: string
+  'Datum-doruceni'?: string
+  'Id-ds-odesilatele': string
 }
-
-export interface HistorieDokumentu {
-  IdDokumentu: string
-  Atribut_IdDokumentu_Externi: string
-  TextZmeny: string
-  Poznamka: string
-  DatumZmeny: string
-  IdZmenuProvedl: string
-  Atribut_IdZmenuProvedl_Externi: string
-  IdKtgZmeny: string
+type HistorieDokumentuResponseItem = {
+  'Id-dokumentu': string
+  'Text-zmeny'?: string
+  Poznamka?: string
+  'Datum-zmeny': string
+  'Id-zmenu-provedl': string
+  'Id-ktg-zmeny': string
 }
-
-export interface WflDokument {
-  IdDokumentu: string
-  Atribut_IdDokumentu_Externi: string
-  IdSpisu: string
-  Atribut_IdSpisu_Externi: string
-  PriznakSpisu: string
-  PriznakCj: string
-  IdFunkceVlastnika: string
-  Atribut_IdFunkceVlastnika_Externi: string
-  Vec: string
-  Znacka: string
-  StavDistribuce: string
-  StavDokumentu: string
-  IdAgendy: string
-  IdTypuDokumentu: string
-  PriznakDoruceni: string
-  PriznakEvidenceSsl: string
-  MistoVzniku: string
-  DatumPodani: string
-  PriznakFyzExistence: string
-  PriznakElObrazu: string
-  IdSouboru: string
-  Atribut_IdSouboru_Externi: string
-  JmenoSouboru: string
-  PopisSouboru: string
-  DatumZmeny: string
-  IdZmenuProvedl: string
-  Atribut_IdZmenuProvedl_Externi: string
-  VerzeSouboru: string
-  DatumZmenySouboru: string
-  VelikostSouboru: string
-  PriznakSouboruRo: string
+type SslDokumentResponseItem = {
+  'Id-dokumentu': string
+  'Id-spisoveho-planu'?: string
+  'Id-spisoveho-znaku'?: string
+  'Skartacni-znak'?: string
+  'Skartacni-lhuta'?: string
+  Pristup?: string
+  'Id-stupne-utajeni'?: string
+  'Vec-podrobne'?: string
+  Poznamka?: string
+  'Pocet-listu'?: string
+  'Pocet-priloh'?: string
+  'Pocet-stran'?: string
+  'Pocet-kopii'?: string
+  'Pocet-listu-priloh'?: string
+  'Id-umisteni'?: string
+  Umisteni?: string
+  'Id-funkce-resitele'?: string
+  'Datum-ulozeni'?: string
+  'Datum-pravni-moci'?: string
+  'Datum-vykonatelnosti'?: string
 }
-
-export type DetailDokumentuResponse = {
-  GRestHeader: GRestHeader
-  Xrg: DetailDokumentuXrg
+type SslSpisResponseItem = {
+  'Id-spisu': string
+  'Id-zpusob-vyrizeni'?: string
+  'Poznamka-k-vyrizeni'?: string
+  'Datum-vyrizeni'?: string
+  'Id-funkce-vyrizovatele'?: string
+  'Id-funkce-schvalovatele'?: string
+  'Datum-uzavreni'?: string
+  'Id-funkce-uzaviratele'?: string
+  'Datum-pravni-moci'?: string
+  'Datum-vyrizeni-do'?: string
+  'Denik-spisu': string
+  'Rok-spisu': string
+  'Poradove-cislo-spisu': string
+  'Doplnek-cj'?: string
+}
+type SslObsahSpisResponseItem = {
+  'Id-spisu': string
+  'Id-vlozeneho-dokumentu': string
+  'Poradove-cislo'?: string
+  'Datum-vlozeni'?: string
+  'Datum-vyjmuti'?: string
+  'Vztah-ke-spisu'?: string
+  Aktivita: string
+  'Poradove-cislo-uziv'?: string
+  Poznamka?: string
+}
+type CjDokumentuResponseItem = {
+  'Id-init-dokumentu': string
+  'Id-vyriz-dokumentu'?: string
+  'Denik-cj': string
+  'Rok-cj': string
+  'Poradove-cislo-cj': string
+  'Vec-cj'?: string
+  'Znacka-cj': string
+  'Stav-cj': string
+  'Datum-evidence': string
+  'Datum-vyrizeni-do'?: string
+  'Datum-vyrizeni'?: string
+  'Datum-vlozeni'?: string
+  'Datum-vyjmuti'?: string
+  'Id-zpusob-vyrizeni'?: string
+  'Doplnek-cj'?: string
+}
+type PrilohyDokumentuResponseItem = {
+  'Poradove-cislo': string
+  Titulek?: string
+  Popis?: string
+  Poznamka?: string
+  'Priznak-el-obrazu': string
+  'Id-souboru'?: string
+  'Verze-souboru'?: string
+  'Datum-zmeny-souboru'?: string
+  'Jmeno-souboru'?: string
+  'Velikost-souboru'?: string
+  'Ke-zverejneni'?: string
+  'Stav-anonymizace'?: string
+  'Kategorie-prilohy': string
+  'Kategorie-prilohy-txt'?: string
+  'Priznak-souboru-ro'?: string
+}
+type SouvisejiciDokumentyResponseItem = {
+  'Typ-vazby': string
+  'Id-dokumentu': string
+  Poznamka?: string
+  'Id-agendy': string
+}
+type SpisovnaResponseItem = {
+  'Stav-ulozeni-kod': string
+  'Stav-ulozeni': string
+  'Datum-skartace'?: string
+  'Id-archivu-nda'?: string
+}
+type VlozenoDoSpisuResponseItem = {
+  'Id-spisu': string
+  'Poradove-cislo'?: string
+  'Poradove-cislo-uziv'?: string
+  Poznamka?: string
 }
 
 export async function detailDokumentu(
@@ -124,17 +209,21 @@ export async function detailDokumentu(
 ): Promise<DetailDokumentuXrg> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
-  const response = await makeAxiosRequest<DetailDokumentuResponse>(
-    undefined,
-    `${url}/json/Detail-dokumentu`,
-    {
-      GRestHeader: getGRestHeader(
-        this.config,
-        'http://www.gordic.cz/xrg/ssl/wfl-dokument/detail-dokumentu/request/v_1.0.0.0'
-      ),
-      Xrg: { 'Detail-dokumentu': bodyObj },
-    },
+
+  const requestName = 'Detail-Dokumentu'
+  const requestNamespace = 'http://www.gordic.cz/svc/xrg-ssl/v_1.0.0.0'
+
+  const response = await makeAxiosRequest<string>(
+    createXmlRequestConfig(requestName, requestNamespace),
+    url,
+    createXmlRequestBody(this.config, {
+      name: requestName,
+      namespace: requestNamespace,
+      xrgNamespace: 'http://www.gordic.cz/xrg/ssl/wfl-dokument/detail-dokumentu/request/v_1.0.0.0',
+      paramsBody: bodyObj,
+      paramOrder: detailDokumentuRequestProperties,
+    }),
     this.config.debug
   )
-  return response.data.Xrg
+  return extractResponseJson<DetailDokumentuXrg>(response.data, requestName)
 }

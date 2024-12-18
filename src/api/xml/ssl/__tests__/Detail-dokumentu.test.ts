@@ -10,7 +10,7 @@ describe('Detail-dokumentu', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_BRA/Ssl.svc',
+        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -22,6 +22,6 @@ describe('Detail-dokumentu', () => {
     const data = await ginis.xml.ssl.detailDokumentu({
       'Id-dokumentu': 'MAG0X03RYYSN',
     })
-    expect(data?.HistorieDokumentu?.length).toBeGreaterThan(0)
+    expect(data?.['Wfl-dokument']?.['Id-dokumentu']).toBe('MAG0X03RYYSN')
   })
 })

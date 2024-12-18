@@ -1,40 +1,44 @@
 import type { Ginis } from '../../../ginis'
-import { makeAxiosRequest, getGRestHeader, GRestHeader } from '../../../utils/api'
+import { makeAxiosRequest } from '../../../utils/api'
 import { GinisError } from '../../../utils/errors'
+import { createXmlRequestBody, createXmlRequestConfig, extractResponseJson } from '../request-util'
+
+const detailElPodaniRequestProperties = [
+  'Id-zpravy',
+  'Id-el-podani',
+  'Id-esu',
+  'Id-eu',
+  'Zaradit-navazane',
+] as const
 
 export type DetailElPodaniRequest = {
-  'Id-zpravy'?: string
-  'Id-el-podani'?: string
-  'Id-esu'?: string
-  'Id-eu'?: string
-  'Zaradit-navazane'?: string
+  [K in (typeof detailElPodaniRequestProperties)[number] as K]?: string
+}
+type DetailElPodaniResponseItem = {
+  'Datum-prijeti': string
+  'Stav-zpracovani': string
+  'Duvod-odmitnuti'?: string
+  'Stav-podani-kod': string
+  'Stav-podani-text'?: string
+  'Stav-odpovedi-kod': string
+  'Stav-odpovedi-text'?: string
+  'Id-dokumentu'?: string
+  Vec?: string
+  'Spis-znacka'?: string
+  Znacka?: string
+}
+
+type NavazanyDokumentResponseItem = {
+  'Id-dokumentu': string
+  Vec?: string
+  'Spis-znacka'?: string
+  Znacka?: string
 }
 
 export type DetailElPodaniXrg = {
-  DetailElPodani: {
-    DatumPrijeti: string
-    StavZpracovani: string
-    DuvodOdmitnuti?: string
-    StavPodaniKod: string
-    StavPodaniText?: string
-    StavOdpovediKod: string
-    StavOdpovediText?: string
-    IdDokumentu: string
-    Vec?: string
-    SpisZnacka?: string
-    Znacka?: string
-  }[]
-  NavazanyDokument?: {
-    IdDokumentu: string
-    Vec?: string
-    SpisZnacka?: string
-    Znacka?: string
-  }
-}
-
-export type DetailElPodaniResponse = {
-  GRestHeader: GRestHeader
-  Xrg: DetailElPodaniXrg
+  ixsExt?: string
+  'Detail-el-podani': DetailElPodaniResponseItem
+  'Navazany-dokument'?: NavazanyDokumentResponseItem | NavazanyDokumentResponseItem[]
 }
 
 export async function detailElPodani(
@@ -43,17 +47,21 @@ export async function detailElPodani(
 ): Promise<DetailElPodaniXrg> {
   const url = this.config.urls.pod
   if (!url) throw new GinisError('GINIS SDK Error: Missing POD url in GINIS config')
-  const response = await makeAxiosRequest<DetailElPodaniResponse>(
-    undefined,
-    `${url}/json/Detail-el-podani`,
-    {
-      GRestHeader: getGRestHeader(
-        this.config,
-        'http://www.gordic.cz/xrg/pod/detail-el-podani/request/v_1.0.0.0'
-      ),
-      Xrg: { 'Detail-el-podani': bodyObj },
-    },
+
+  const requestName = 'Detail-el-podani'
+  const requestNamespace = 'http://www.gordic.cz/svc/xrg-pod/v_1.0.0.0'
+
+  const response = await makeAxiosRequest<string>(
+    createXmlRequestConfig(requestName, requestNamespace),
+    url,
+    createXmlRequestBody(this.config, {
+      name: requestName,
+      namespace: requestNamespace,
+      xrgNamespace: 'http://www.gordic.cz/xrg/pod/detail-el-podani/request/v_1.0.0.0',
+      paramsBody: bodyObj,
+      paramOrder: detailElPodaniRequestProperties,
+    }),
     this.config.debug
   )
-  return response.data.Xrg
+  return extractResponseJson<DetailElPodaniXrg>(response.data, requestName)
 }

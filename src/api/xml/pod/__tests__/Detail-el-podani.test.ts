@@ -10,7 +10,7 @@ describe('Detail-el-podani', () => {
     )
     ginis = new Ginis({
       urls: {
-        pod: 'http://172.25.1.195/gordic/ginis/ws/POD01/Pod.svc',
+        pod: 'http://172.25.1.195/gordic/ginis/ws/POD01_TEST/Pod.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -22,6 +22,6 @@ describe('Detail-el-podani', () => {
     const data = await ginis.xml.pod.detailElPodani({
       'Id-zpravy': '4f700d05-9989-4798-a469-1b05f03c9cb7',
     })
-    expect(data.DetailElPodani[0]?.IdDokumentu).toBe('MAG0X03RZA55')
+    expect(data?.['Detail-el-podani']?.['Id-dokumentu']).toBe('MAG0X03RZA55')
   })
 })
