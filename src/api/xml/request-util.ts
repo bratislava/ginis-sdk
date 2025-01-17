@@ -49,11 +49,12 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
 </s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1')
 }
 
-function parseXml(xml: string): any {
+function parseXml(xml: string, ignoreAttributes = true): any {
   let result: any
 
   const options = {
     explicitArray: false,
+    ignoreAttrs: ignoreAttributes,
   }
 
   parseString(xml, options, (err, parsedResult) => {
@@ -84,10 +85,20 @@ export function extractResponseJson<T>(responseXml: string, requestName: string)
 function throwErrorFaultDetail(response: any, error: any, includeError = true): never {
   let fault: any
   try {
-    fault = response['s:Envelope']['s:Body']['s:Fault'].faultstring['_']
+    fault = response['s:Envelope']['s:Body']['s:Fault']
   } catch (ignored) {
     throw error
   }
   let originalError = includeError ? error.message + '\n' : ''
-  throw new Error(originalError + `Error response details: ${fault}`)
+  throw new Error(originalError + `Error response details: ${JSON.stringify(fault, null, 2)}`)
+}
+
+export function throwErrorResponseDetail(responseXml: string, error: any): never {
+  let response: any
+  try {
+    response = parseXml(responseXml, false)
+  } catch (ignored) {
+    throw error
+  }
+  throwErrorFaultDetail(response, error)
 }

@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import crypto from 'crypto'
 import type { GinisConfig } from '../ginis'
+import { throwErrorResponseDetail } from '../api/xml/request-util'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
   headers: {
@@ -30,15 +31,15 @@ export const makeAxiosRequest = async <T>(
   try {
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
+    let anyError = error as any
     if (debug) {
-      let anyError = error as any
       console.log('########### GINIS ERROR RESPONSE ###########')
       console.log('status: ', anyError?.response?.status)
       console.log('statusText: ', anyError?.response?.statusText)
       console.log('data: ', anyError?.response?.data)
       console.log('########### GINIS RESPONSE END ###########')
     }
-    throw error
+    throwErrorResponseDetail(anyError?.response?.data, error)
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')
