@@ -9,7 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --dts",
-    "test": "jest --watch",
+    "test": "jest --watch --detectOpenHandles",
     "typecheck": "tsc",
     "lint": "eslint --color --ext .js,.json,.ts .",
     "lint:fix": "npm run lint -- --fix"
