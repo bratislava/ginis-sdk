@@ -210,7 +210,7 @@ export async function detailDokumentu(
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
-  const requestName = 'Detail-Dokumentu'
+  const requestName = 'Detail-dokumentu'
   const requestNamespace = 'http://www.gordic.cz/svc/xrg-ssl/v_1.0.0.0'
 
   const response = await makeAxiosRequest<string>(
