@@ -10,7 +10,9 @@ describe('seznam-dokumentu', () => {
     )
     ginis = new Ginis({
       urls: {
-        ude: process.env['GINIS_UDE_HOST'] ?? 'http://172.25.1.195/gordic/ginis/ws/Ude01/Ude.svc',
+        ude:
+          process.env['GINIS_UDE_HOST'] ??
+          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/Ude01/Ude.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,

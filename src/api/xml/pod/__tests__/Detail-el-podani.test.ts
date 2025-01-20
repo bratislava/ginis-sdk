@@ -10,7 +10,7 @@ describe('Detail-el-podani', () => {
     )
     ginis = new Ginis({
       urls: {
-        pod: 'http://172.25.1.195/gordic/ginis/ws/POD01/Pod.svc',
+        pod: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/POD01/Pod.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,

@@ -11,7 +11,7 @@ describe('Pridat-soubor', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
+        ssl: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
