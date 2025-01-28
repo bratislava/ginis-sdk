@@ -218,7 +218,7 @@ export type DokumentyResponseItem = {
 }
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
-export interface SeznamDokumentuResponseXrg {
+export type SeznamDokumentuResponseXrg = {
   ixsExt: string
   'Seznam-dokumentu'?: SeznamDokumentuResponseItem | SeznamDokumentuResponseItem[]
   'Sejmute-dokumenty'?: DokumentyResponseItem | DokumentyResponseItem[]

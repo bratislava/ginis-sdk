@@ -20,7 +20,7 @@ export type DetailDokumentuRequest = {
 }
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
-export interface DetailDokumentuXrg {
+export type DetailDokumentuXrg = {
   ixsExt?: string
   'Wfl-dokument': WflDokumentResponseItem
   Doruceni?: DoruceniResponseItem

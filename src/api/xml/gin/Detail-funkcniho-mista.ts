@@ -38,7 +38,7 @@ type DetailFunkcnihoMistaResponseItem = {
 }
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-funkcniho-mista&type=response
-export interface DetailFunkcnihoMistaXrg {
+export type DetailFunkcnihoMistaXrg = {
   ixsExt?: string
   'Detail-funkcniho-mista': DetailFunkcnihoMistaResponseItem
 }
