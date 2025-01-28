@@ -20,8 +20,8 @@ describe('Detail-el-podani', () => {
 
   test('Basic request', async () => {
     const data = await ginis.xml.pod.detailElPodani({
-      'Id-zpravy': '4f700d05-9989-4798-a469-1b05f03c9cb7',
+      'Id-zpravy': '598f50c0-d08a-41bd-bfcd-6f1a1dad9843',
     })
-    expect(data?.['Detail-el-podani']?.['Id-dokumentu']).toBe('MAG0X03RZA55')
+    expect(data?.['Detail-el-podani']?.['Id-dokumentu']).toBe('MAG0X03RYYSN')
   })
 })
