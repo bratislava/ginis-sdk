@@ -225,5 +225,5 @@ export async function detailDokumentu(
     }),
     this.config.debug
   )
-  return extractResponseJson<DetailDokumentuXrg>(response.data, requestName)
+  return await extractResponseJson<DetailDokumentuXrg>(response.data, requestName)
 }

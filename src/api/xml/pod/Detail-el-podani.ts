@@ -63,5 +63,5 @@ export async function detailElPodani(
     }),
     this.config.debug
   )
-  return extractResponseJson<DetailElPodaniXrg>(response.data, requestName)
+  return await extractResponseJson<DetailElPodaniXrg>(response.data, requestName)
 }

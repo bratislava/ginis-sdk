@@ -53,5 +53,5 @@ export async function nacistSoubor(
     }),
     this.config.debug
   )
-  return extractResponseJson<NacistSouborResponseXrg>(response.data, requestName)
+  return await extractResponseJson<NacistSouborResponseXrg>(response.data, requestName)
 }

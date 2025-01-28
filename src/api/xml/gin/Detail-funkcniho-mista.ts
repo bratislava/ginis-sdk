@@ -65,5 +65,5 @@ export async function detailFunkcnihoMista(
     }),
     this.config.debug
   )
-  return extractResponseJson<DetailFunkcnihoMistaXrg>(response.data, requestName)
+  return await extractResponseJson<DetailFunkcnihoMistaXrg>(response.data, requestName)
 }

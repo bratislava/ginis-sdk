@@ -1,5 +1,5 @@
 import { GinisConfig } from '../../ginis'
-import { parseString } from 'xml2js'
+import { parseStringPromise as parseXml } from 'xml2js'
 
 export type XmlRequestInfo = {
   name: string
@@ -12,8 +12,8 @@ export type XmlRequestInfo = {
 export function createXmlRequestConfig(requestName: string, requestNamespace: string) {
   return {
     headers: {
-    SOAPAction: `${requestNamespace}/${requestName}`,
-    'Content-Type': 'text/xml; charset=utf-8',
+      SOAPAction: `${requestNamespace}/${requestName}`,
+      'Content-Type': 'text/xml; charset=utf-8',
     },
   }
 }
@@ -45,26 +45,22 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
 </s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1')
 }
 
-function parseXml(xml: string, ignoreAttributes = true): any {
-  let result: any
-
+export async function extractResponseJson<T>(responseXml: string, requestName: string): Promise<T> {
   const options = {
     explicitArray: false,
-    ignoreAttrs: ignoreAttributes,
+    ignoreAttrs: true,
   }
 
-  parseString(xml, options, (err, parsedResult) => {
-    if (err) {
-      throw new Error(`Failed to parse XML: ${err.message}`)
-    }
-    result = parsedResult
-  })
-  return result
-}
+  let response: any
 
-export function extractResponseJson<T>(responseXml: string, requestName: string): T {
-  let response = parseXml(responseXml)
-  if (typeof response == 'undefined' || !response) {
+  try {
+    response = await parseXml(responseXml, options)
+  } catch (error) {
+    let message = error instanceof Error ? `: ${error.message}` : ''
+    throw new Error(`Failed to parse XML${message}`)
+  }
+
+  if (!response) {
     throw new Error('Parsed XML response is empty.')
   }
 
@@ -96,10 +92,10 @@ function throwErrorFaultDetail(response: any, error: any, includeError = true): 
   throw new Error(errorDetail)
 }
 
-export function throwErrorResponseDetail(responseXml: string, error: any): never {
+export async function throwErrorResponseDetail(responseXml: string, error: any): Promise<never> {
   let response: any
   try {
-    response = parseXml(responseXml, false)
+    response = await parseXml(responseXml, { explicitArray: false })
   } catch (ignored) {
     throw error
   }

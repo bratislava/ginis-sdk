@@ -247,5 +247,5 @@ export async function seznamDokumentu(
     }),
     this.config.debug
   )
-  return extractResponseJson<SeznamDokumentuResponseXrg>(response.data, requestName)
+  return await extractResponseJson<SeznamDokumentuResponseXrg>(response.data, requestName)
 }

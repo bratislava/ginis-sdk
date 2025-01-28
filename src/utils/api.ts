@@ -39,7 +39,8 @@ export const makeAxiosRequest = async <T>(
       console.log('data: ', anyError?.response?.data)
       console.log('########### GINIS RESPONSE END ###########')
     }
-    throwErrorResponseDetail(anyError?.response?.data, error)
+    await throwErrorResponseDetail(anyError?.response?.data, error)
+    throw error
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')

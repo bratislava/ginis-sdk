@@ -56,5 +56,5 @@ export async function pridatSoubor(
     }),
     this.config.debug
   )
-  return extractResponseJson<PridatSouborXrg>(response.data, requestName)
+  return await extractResponseJson<PridatSouborXrg>(response.data, requestName)
 }

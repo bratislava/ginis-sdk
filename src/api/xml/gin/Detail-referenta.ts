@@ -75,5 +75,5 @@ export async function detailReferenta(
     }),
     this.config.debug
   )
-  return extractResponseJson<DetailReferentaXrg>(response.data, requestName)
+  return await extractResponseJson<DetailReferentaXrg>(response.data, requestName)
 }

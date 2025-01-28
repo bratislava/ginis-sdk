@@ -61,5 +61,5 @@ export async function seznamKategorii(
     }),
     this.config.debug
   )
-  return extractResponseJson<SeznamKategoriiResponseXrg>(response.data, requestName)
+  return await extractResponseJson<SeznamKategoriiResponseXrg>(response.data, requestName)
 }
