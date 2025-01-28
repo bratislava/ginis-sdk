@@ -64,21 +64,18 @@ export async function extractResponseJson<T>(responseXml: string, requestName: s
     throw new Error('Parsed XML response is empty.')
   }
 
-  let error: any
-  try {
-    return response['s:Envelope']['s:Body'][`${requestName}Response`][`${requestName}Result`].Xrg
-  } catch (e) {
-    error = e
+  const xrg =
+    response?.['s:Envelope']?.['s:Body']?.[`${requestName}Response`]?.[`${requestName}Result`]?.Xrg
+  if (typeof xrg != 'undefined') {
+    return xrg
   }
 
-  throwErrorFaultDetail(response, new Error(`Error parsing response data: ${error.message}`), false)
+  throwErrorFaultDetail(response, new Error(`Error parsing response data.`), false)
 }
 
 function throwErrorFaultDetail(response: any, error: any, includeError = true): never {
-  let fault: any
-  try {
-    fault = response['s:Envelope']['s:Body']['s:Fault']
-  } catch (ignored) {
+  const fault = response?.['s:Envelope']?.['s:Body']?.['s:Fault']
+  if (typeof fault == 'undefined' || !fault) {
     throw error
   }
   let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
