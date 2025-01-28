@@ -11,14 +11,10 @@ export type XmlRequestInfo = {
 
 export function createXmlRequestConfig(requestName: string, requestNamespace: string) {
   return {
-    headers: createXmlRequestHeader(requestName, requestNamespace),
-  }
-}
-
-export function createXmlRequestHeader(requestName: string, requestNamespace: string) {
-  return {
+    headers: {
     SOAPAction: `${requestNamespace}/${requestName}`,
     'Content-Type': 'text/xml; charset=utf-8',
+    },
   }
 }
 
