@@ -85,13 +85,15 @@ function throwErrorFaultDetail(response: any, error: any, includeError = true): 
   } catch (ignored) {
     throw error
   }
-  let originalError = includeError ? error?.message + '\r\n' : ''
-  let newMessage = `${originalError}\r\nError response details: ${JSON.stringify(fault, null, 2)}`
+  let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
+  if (!includeError) {
+    throw new Error(errorDetail)
+  }
   try {
-    error.message = newMessage
+    error.message = `${error.message}\r\n${errorDetail}`
     throw error
   } catch (ignored) {}
-  throw new Error(newMessage)
+  throw new Error(errorDetail)
 }
 
 export function throwErrorResponseDetail(responseXml: string, error: any): never {
