@@ -1,5 +1,6 @@
 import { GinisConfig } from '../ginis'
 import { parseStringPromise as parseXml } from 'xml2js'
+import { GinisError } from './errors'
 
 export type XmlRequestInfo = {
   name: string
@@ -57,11 +58,11 @@ export async function extractResponseJson<T>(responseXml: string, requestName: s
     response = await parseXml(responseXml, options)
   } catch (error) {
     let message = error instanceof Error ? `: ${error.message}` : ''
-    throw new Error(`Failed to parse XML${message}`)
+    throw new GinisError(`Failed to parse XML${message}`)
   }
 
   if (!response) {
-    throw new Error('Parsed XML response is empty.')
+    throw new GinisError('Parsed XML response is empty.')
   }
 
   const xrg =
@@ -70,7 +71,7 @@ export async function extractResponseJson<T>(responseXml: string, requestName: s
     return xrg
   }
 
-  throwErrorFaultDetail(response, new Error(`Error parsing response data.`), false)
+  throwErrorFaultDetail(response, new GinisError(`Error parsing response data.`), false)
 }
 
 function throwErrorFaultDetail(response: any, error: any, includeError = true): never {
@@ -80,13 +81,13 @@ function throwErrorFaultDetail(response: any, error: any, includeError = true): 
   }
   let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
   if (!includeError) {
-    throw new Error(errorDetail)
+    throw new GinisError(errorDetail)
   }
   try {
     error.message = `${error.message}\r\n${errorDetail}`
     throw error
   } catch (ignored) {}
-  throw new Error(errorDetail)
+  throw new GinisError(errorDetail)
 }
 
 export async function throwErrorResponseDetail(responseXml: string, error: any): Promise<never> {

@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios'
 import crypto from 'crypto'
 import type { GinisConfig } from '../ginis'
 import { throwErrorResponseDetail } from './request-util'
+import { GinisError } from './errors'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
   headers: {
@@ -16,7 +17,7 @@ export const makeAxiosRequest = async <T>(
   debug?: boolean
 ) => {
   if (!url) {
-    throw new Error('Missing GINIS url for the service you are trying to reach.')
+    throw new GinisError('Missing GINIS url for the service you are trying to reach.')
   }
 
   const requestConfig = axiosConfig || defaultAxiosConfig
