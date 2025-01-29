@@ -1,6 +1,4 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import crypto from 'crypto'
-import type { GinisConfig } from '../ginis'
 import { throwErrorResponseDetail } from './request-util'
 import { GinisError } from './errors'
 
@@ -54,27 +52,5 @@ export const makeAxiosRequest = async <T>(
     data: responseAxios.data,
     status: responseAxios.status,
     statusText: responseAxios.statusText,
-  }
-}
-
-export type GRestHeader = {
-  RequestName: string
-  RequestNamespace: string
-  User: string
-  Password: string
-  PasswordText: boolean
-  Nonce: string
-  Created: string
-}
-
-export const getGRestHeader = (config: GinisConfig, requestNamespace: string): GRestHeader => {
-  return {
-    RequestName: 'Xrg',
-    RequestNamespace: requestNamespace,
-    User: config.username,
-    Password: config.password,
-    PasswordText: true,
-    Nonce: crypto.randomBytes(10).toString('base64'),
-    Created: new Date().toISOString(),
   }
 }
