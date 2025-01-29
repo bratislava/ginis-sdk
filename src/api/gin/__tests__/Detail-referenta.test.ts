@@ -1,8 +1,8 @@
-import { Ginis } from '../../../../index'
+import { Ginis } from '../../../index'
 
 jest.setTimeout(20000)
 
-describe('Detail-el-podani', () => {
+describe('Detail-referenta', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -10,7 +10,7 @@ describe('Detail-el-podani', () => {
     )
     ginis = new Ginis({
       urls: {
-        pod: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/POD01/Pod.svc',
+        gin: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/GIN01_TEST/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -19,9 +19,9 @@ describe('Detail-el-podani', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.pod.detailElPodani({
-      'Id-zpravy': '598f50c0-d08a-41bd-bfcd-6f1a1dad9843',
+    const data = await ginis.xml.gin.detailReferenta({
+      'Id-osoby': 'MAG0SR00A0BU',
     })
-    expect(data?.['Detail-el-podani']?.['Id-dokumentu']).toBe('MAG0X03RYYSN')
+    expect(data?.['Detail-referenta']?.['Id-osoby']).toBe('MAG0SR00A0BU')
   })
 })

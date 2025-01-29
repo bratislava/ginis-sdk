@@ -1,4 +1,4 @@
-import { GinisConfig } from '../../ginis'
+import { GinisConfig } from '../ginis'
 import { parseStringPromise as parseXml } from 'xml2js'
 
 export type XmlRequestInfo = {

@@ -1,6 +1,6 @@
-import { Ginis } from '../../../ginis'
-import { makeAxiosRequest } from '../../../utils/api'
-import { GinisError } from '../../../utils/errors'
+import { Ginis } from '../../ginis'
+import { makeAxiosRequest } from '../../utils/api'
+import { GinisError } from '../../utils/errors'
 import { createXmlRequestBody, createXmlRequestConfig, extractResponseJson } from '../request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=request#

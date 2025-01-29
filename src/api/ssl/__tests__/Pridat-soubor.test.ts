@@ -1,4 +1,4 @@
-import { Ginis } from '../../../../index'
+import { Ginis } from '../../../index'
 const fs = require('fs').promises
 
 jest.setTimeout(20000)
@@ -21,7 +21,7 @@ describe('Pridat-soubor', () => {
 
   test('Basic request', async () => {
     console.log('start reading')
-    const contents = await fs.readFile('./src/api/xml/ssl/__tests__/raw-data.bin', {
+    const contents = await fs.readFile('./src/api/ssl/__tests__/raw-data.bin', {
       encoding: 'base64',
     })
     console.log('done reading ')

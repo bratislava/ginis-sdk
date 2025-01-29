@@ -1,4 +1,4 @@
-import { Ginis } from '../../../../index'
+import { Ginis } from '../../../index'
 
 jest.setTimeout(20000)
 

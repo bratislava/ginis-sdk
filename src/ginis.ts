@@ -1,7 +1,7 @@
-import ssl from './api/xml/ssl'
-import pod from './api/xml/pod'
-import gin from './api/xml/gin'
-import ude from './api/xml/ude'
+import ssl from './api/ssl'
+import pod from './api/pod'
+import gin from './api/gin'
+import ude from './api/ude'
 import { bind, mapValues } from 'lodash'
 
 export type GinisConfig = {
