@@ -1,7 +1,11 @@
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
-import { createXmlRequestBody, createXmlRequestConfig, extractResponseJson } from '../request-util'
+import {
+  createXmlRequestBody,
+  createXmlRequestConfig,
+  extractResponseJson,
+} from '../../utils/request-util'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 

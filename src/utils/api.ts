@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import crypto from 'crypto'
 import type { GinisConfig } from '../ginis'
-import { throwErrorResponseDetail } from '../api/request-util'
+import { throwErrorResponseDetail } from './request-util'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
   headers: {
