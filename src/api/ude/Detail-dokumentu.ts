@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -6,11 +7,12 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
 } from '../../utils/request-util'
+import { coercedArray } from '../../utils/validation'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=request#
 const detailDokumentuRequestProperties = ['Vratit-info', 'Id-zaznamu'] as const
 
-type DetailDokumentuRequestBody = {
+type DetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
 
@@ -21,41 +23,41 @@ type DetailDokumentuRequestBody = {
  * - manually checked which fields are required and changed them to required
  * - manually check type and add TSDoc comments for each field
  */
-type DetailDokumentuResponseItem = {
-  'Id-zaznamu': string
-  Stav?: string
-  Kategorie: string
-  Nazev: string
-  Popis?: string
-  Poznamka?: string
+const detailDokumentuSchema = z.object({
+  'Id-zaznamu': z.string(),
+  Stav: z.string().optional(),
+  Kategorie: z.string(),
+  Nazev: z.string(),
+  Popis: z.string().optional(),
+  Poznamka: z.string().optional(),
   /**
    * date
    */
-  'Vyveseno-dne': string
+  'Vyveseno-dne': z.string(),
   /**
    * date
    */
-  'Sejmuto-dne'?: string
-  Zdroj: string
-  'Id-fun-navrhl': string
-  Navrhl: string
-  'Id-fun-schvalil': string
-  Schvalil: string
-  Cj?: string
+  'Sejmuto-dne': z.string().optional(),
+  Zdroj: z.string(),
+  'Id-fun-navrhl': z.string(),
+  Navrhl: z.string(),
+  'Id-fun-schvalil': z.string(),
+  Schvalil: z.string(),
+  Cj: z.string().optional(),
   /**
    * Počet vyvěšených souborů.
    * int
    */
-  'Pocet-souboru': string
-  'Id-dokumentu'?: string
+  'Pocet-souboru': z.string(),
+  'Id-dokumentu': z.string().optional(),
   /**
    * Datum a čas změny záznamu na úřední desce (změna nastala po tomto okamžiku).
    * dateTime
    */
-  'Datum-zmeny': string
-  'Puvod-dokumentu'?: string
-  'Odesilatel-dokumentu'?: string
-  'Typ-dokumentu'?: string
+  'Datum-zmeny': z.string(),
+  'Puvod-dokumentu': z.string().optional(),
+  'Odesilatel-dokumentu': z.string().optional(),
+  'Typ-dokumentu': z.string().optional(),
   /**
    * Příznak, zda je elektronický obraz podepsán. Vráceno v případě, že byl záznam vyvěšen zveřejněním el. obrazu nebo příloh z GINIS dokumentu.
    * int
@@ -65,36 +67,36 @@ type DetailDokumentuResponseItem = {
    * 2 - Soubor je elektronicky podepsán čas. razítkem.
    * 3 - Dokument je opatřen čas. razítkem.
    */
-  'El-obraz-podpis'?: string
-  'Cj-spisu'?: string
-  'Cislo-sml'?: string
-  'Typ-sml'?: string
-  'Nazev-sml'?: string
-  'Subjekt-sml'?: string
-  'Nazev-sub-sml'?: string
-  'Prijmeni-sub-sml'?: string
-  'Jmeno-sub-sml'?: string
-  'Ico-sub-sml'?: string
-  'Obec-sub-sml'?: string
-  'Ulice-sub-sml'?: string
-  'Cor-sub-sml'?: string
-  'Cpop-sub-sml'?: string
-  'Psc-sub-sml'?: string
-  'Typ-sub-sml'?: string
-  'Datum-uzavreni-sml'?: string
-  'Odbor-sml'?: string
-  'Celkova-castka-sml'?: string
-  'Mena-sml'?: string
-}
+  'El-obraz-podpis': z.string().optional(),
+  'Cj-spisu': z.string().optional(),
+  'Cislo-sml': z.string().optional(),
+  'Typ-sml': z.string().optional(),
+  'Nazev-sml': z.string().optional(),
+  'Subjekt-sml': z.string().optional(),
+  'Nazev-sub-sml': z.string().optional(),
+  'Prijmeni-sub-sml': z.string().optional(),
+  'Jmeno-sub-sml': z.string().optional(),
+  'Ico-sub-sml': z.string().optional(),
+  'Obec-sub-sml': z.string().optional(),
+  'Ulice-sub-sml': z.string().optional(),
+  'Cor-sub-sml': z.string().optional(),
+  'Cpop-sub-sml': z.string().optional(),
+  'Psc-sub-sml': z.string().optional(),
+  'Typ-sub-sml': z.string().optional(),
+  'Datum-uzavreni-sml': z.string().optional(),
+  'Odbor-sml': z.string().optional(),
+  'Celkova-castka-sml': z.string().optional(),
+  'Mena-sml': z.string().optional(),
+})
 
-type SouboryDokumentuResponseItem = {
-  'Id-souboru': string
-  Nazev: string
+const souboryDokumentuSchema = z.object({
+  'Id-souboru': z.string(),
+  Nazev: z.string(),
   /**
    * Velikost souboru včetně jednotky (např. KB).
    * string
    */
-  Velikost?: string
+  Velikost: z.string().optional(),
   /**
    * Příznak, zda se jedná o el. obraz GINIS dokumentu. Informace je k dispozici u záznamů vyvěšených přes GINIS v. 364 a vyšší.
    * short
@@ -102,11 +104,11 @@ type SouboryDokumentuResponseItem = {
    * 0 - Soubor není el. obraz GINIS dokumentu (soubor je příloha, nebo vložen přes modul UDA01).
    * 1 - Soubor je el. obraz GINIS dokumentu.
    */
-  'Priznak-el-obr'?: string
+  'Priznak-el-obr': z.string().optional(),
   /**
    * Poznámka k souboru.
    */
-  Poznamka?: string
+  Poznamka: z.string().optional(),
   /**
    * Příznak, zda je soubor el. podepsán. Vráceno v případě, že byl záznam vyvěšen zveřejněním el. obrazu nebo příloh z GINIS dokumentu.
    * short
@@ -116,21 +118,21 @@ type SouboryDokumentuResponseItem = {
    * 2 - Soubor je elektronicky podepsán čas. razítkem.
    * 3 - Dokument je opatřen čas. razítkem.
    */
-  'Priznak-podpis'?: string
-}
+  'Priznak-podpis': z.string().optional(),
+})
 
-type ProtistranySmlResponseItem = {
-  'Typ-protistrany'?: string
-  Subjekt?: string
-  'Nazev-sub'?: string
-  'Prijmeni-sub'?: string
-  'Jmeno-sub'?: string
-  'Ico-sub'?: string
-  'Obec-sub'?: string
-  'Ulice-sub'?: string
-  'Cor-sub'?: string
-  'Cpop-sub'?: string
-  'Psc-sub'?: string
+const protistranySmlSchema = z.object({
+  'Typ-protistrany': z.string().optional(),
+  Subjekt: z.string().optional(),
+  'Nazev-sub': z.string().optional(),
+  'Prijmeni-sub': z.string().optional(),
+  'Jmeno-sub': z.string().optional(),
+  'Ico-sub': z.string().optional(),
+  'Obec-sub': z.string().optional(),
+  'Ulice-sub': z.string().optional(),
+  'Cor-sub': z.string().optional(),
+  'Cpop-sub': z.string().optional(),
+  'Psc-sub': z.string().optional(),
   /**
    * Typ subjektu smlouvy.
    *
@@ -139,25 +141,26 @@ type ProtistranySmlResponseItem = {
    * fyz-osoba - Fyzická osoba
    * fyz-osoba-osvc - Fyzická osoba OSVČ
    */
-  'Typ-sub'?: string
-}
+  'Typ-sub': z.string().optional(),
+})
 
 /**
  * Note:
  * - DetailDokumentu usually comes as an array with one item
  * - SouboryDokumentu usually comes as play item it there is only one file, array otherwise
  */
-export type DetailDokumentuResponseXrg = {
-  ixsExt: string
-  'Detail-dokumentu'?: DetailDokumentuResponseItem
-  'Soubory-dokumentu'?: SouboryDokumentuResponseItem | SouboryDokumentuResponseItem[]
-  'Protistrany-sml'?: ProtistranySmlResponseItem | ProtistranySmlResponseItem[]
-}
+const DetailDokumentuResponseSchema = z.object({
+  'Detail-dokumentu': detailDokumentuSchema.optional(),
+  'Soubory-dokumentu': coercedArray(souboryDokumentuSchema),
+  'Protistrany-sml': coercedArray(protistranySmlSchema),
+})
+
+export type DetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
-  bodyObj: DetailDokumentuRequestBody
-): Promise<DetailDokumentuResponseXrg> {
+  bodyObj: DetailDokumentuRequest
+): Promise<DetailDokumentuResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -176,5 +179,5 @@ export async function detailDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson<DetailDokumentuResponseXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, DetailDokumentuResponseSchema)
 }

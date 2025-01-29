@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -26,22 +27,23 @@ export type PridatSouborRequest = {
   [K in (typeof pridatSouborRequestProperties)[number] as K]?: string
 }
 
-type PridatSouborReponseItem = {
-  'Datum-zmeny': string
-  'Id-souboru': string
-  'Verze-souboru': string
-}
+const pridatSouborSchema = z.object({
+  'Datum-zmeny': z.string(),
+  'Id-souboru': z.string(),
+  'Verze-souboru': z.string(),
+})
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=response
-export type PridatSouborXrg = {
-  ixsExt?: string
-  'Pridat-soubor': PridatSouborReponseItem
-}
+const pridatSouborResponseSchema = z.object({
+  'Pridat-soubor': pridatSouborSchema,
+})
+
+export type PridatSouborResponse = z.infer<typeof pridatSouborResponseSchema>
 
 export async function pridatSoubor(
   this: Ginis,
   bodyObj: PridatSouborRequest
-): Promise<PridatSouborXrg> {
+): Promise<PridatSouborResponse> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
@@ -60,5 +62,5 @@ export async function pridatSoubor(
     }),
     this.config.debug
   )
-  return await extractResponseJson<PridatSouborXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, pridatSouborResponseSchema)
 }

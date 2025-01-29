@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -9,36 +10,37 @@ import {
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 
-type NacistSouborRequestBody = {
+type NacistSouborRequest = {
   [K in (typeof nacistSouborRequestProperties)[number] as K]?: string
 }
 
-type NacistSouborResponseItem = {
+const nacistSouborSchema = z.object({
   /**
    * Jméno el. souboru.
    * string
    * Max. délka: 254, Min. délka: 1,
    */
-  'Jmeno-souboru': string
+  'Jmeno-souboru': z.string(),
   /**
    * Binární data souboru v base64 formátu.
    * base64Binary
    */
-  Data: string
-}
+  Data: z.string(),
+})
 
-export type NacistSouborResponseXrg = {
-  ixsExt: string
+const nacistSouborResponseSchema = z.object({
   /**
    * Nacist-soubor - vyžadován: Ne , max. výskyt: 1
    */
-  'Nacist-soubor'?: NacistSouborResponseItem
-}
+  'Nacist-soubor': nacistSouborSchema.optional(),
+})
+
+export type NacistSouborResponse = z.infer<typeof nacistSouborResponseSchema>
 
 export async function nacistSoubor(
   this: Ginis,
-  bodyObj: NacistSouborRequestBody
-): Promise<NacistSouborResponseXrg> {
+  bodyObj: NacistSouborRequest
+): Promise<NacistSouborResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -57,5 +59,5 @@ export async function nacistSoubor(
     }),
     this.config.debug
   )
-  return await extractResponseJson<NacistSouborResponseXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, nacistSouborResponseSchema)
 }

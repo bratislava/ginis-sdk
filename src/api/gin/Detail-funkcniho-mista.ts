@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -14,43 +15,44 @@ export type DetailFunkcnihoMistaRequest = {
   [K in (typeof detailFunkcnihoMistaRequestProperties)[number] as K]?: string
 }
 
-type DetailFunkcnihoMistaResponseItem = {
-  'Id-funkce': string
-  Aktivita: string
-  Nazev?: string
-  Zkratka?: string
-  'Oficialni-nazev'?: string
-  Poznamka?: string
-  'Datum-od': string
-  'Datum-do': string
-  'Id-spisoveho-uzlu': string
-  'Nazev-spisoveho-uzlu'?: string
-  'Zkratka-spisoveho-uzlu'?: string
-  'Uroven-funkce': string
-  'Kod-funkce'?: string
-  'Id-nad'?: string
-  'Id-referenta': string
-  'Nazev-referenta'?: string
-  'Id-orj': string
-  'Nazev-orj'?: string
-  'Kod-mistnosti'?: string
-  Url?: string
-  Mail?: string
-  Telefon?: string
-  Fax?: string
-  'Datum-zmena': string
-}
+const detailFunkcnihoMistaSchema = z.object({
+  'Id-funkce': z.string(),
+  Aktivita: z.string(),
+  Nazev: z.string().optional(),
+  Zkratka: z.string().optional(),
+  'Oficialni-nazev': z.string().optional(),
+  Poznamka: z.string().optional(),
+  'Datum-od': z.string(),
+  'Datum-do': z.string(),
+  'Id-spisoveho-uzlu': z.string(),
+  'Nazev-spisoveho-uzlu': z.string().optional(),
+  'Zkratka-spisoveho-uzlu': z.string().optional(),
+  'Uroven-funkce': z.string(),
+  'Kod-funkce': z.string().optional(),
+  'Id-nad': z.string().optional(),
+  'Id-referenta': z.string(),
+  'Nazev-referenta': z.string().optional(),
+  'Id-orj': z.string(),
+  'Nazev-orj': z.string().optional(),
+  'Kod-mistnosti': z.string().optional(),
+  Url: z.string().optional(),
+  Mail: z.string().optional(),
+  Telefon: z.string().optional(),
+  Fax: z.string().optional(),
+  'Datum-zmena': z.string(),
+})
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-funkcniho-mista&type=response
-export type DetailFunkcnihoMistaXrg = {
-  ixsExt?: string
-  'Detail-funkcniho-mista': DetailFunkcnihoMistaResponseItem
-}
+const detailFunkcnihoMistaResponseSchema = z.object({
+  'Detail-funkcniho-mista': detailFunkcnihoMistaSchema,
+})
+
+export type DetailFunkcnihoMistaResponse = z.infer<typeof detailFunkcnihoMistaResponseSchema>
 
 export async function detailFunkcnihoMista(
   this: Ginis,
   bodyObj: DetailFunkcnihoMistaRequest
-): Promise<DetailFunkcnihoMistaXrg> {
+): Promise<DetailFunkcnihoMistaResponse> {
   const url = this.config.urls.gin
   if (!url) throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
 
@@ -69,5 +71,5 @@ export async function detailFunkcnihoMista(
     }),
     this.config.debug
   )
-  return await extractResponseJson<DetailFunkcnihoMistaXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, detailFunkcnihoMistaResponseSchema)
 }

@@ -21,9 +21,9 @@ describe('nacist-soubor', () => {
   })
 
   test('Basic request', async () => {
-    let dataXrg: any
+    let data: any
     try {
-      dataXrg = await ginis.xml.ude.nacistSoubor({
+      data = await ginis.xml.ude.nacistSoubor({
         'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
       })
     } catch (error: unknown) {
@@ -40,7 +40,7 @@ describe('nacist-soubor', () => {
       }
     }
 
-    let loadedFile = dataXrg['Nacist-soubor']
+    let loadedFile = data['Nacist-soubor']
 
     expect(loadedFile?.['Jmeno-souboru']).toBe('Plnenie UZN c. 135_2015 február 2021.pdf')
   })

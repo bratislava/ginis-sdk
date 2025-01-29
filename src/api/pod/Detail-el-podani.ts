@@ -1,5 +1,7 @@
+import { z } from 'zod'
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
+import { coercedArray } from '../../utils/validation'
 import { GinisError } from '../../utils/errors'
 import {
   createXmlRequestBody,
@@ -18,37 +20,39 @@ const detailElPodaniRequestProperties = [
 export type DetailElPodaniRequest = {
   [K in (typeof detailElPodaniRequestProperties)[number] as K]?: string
 }
-type DetailElPodaniResponseItem = {
-  'Datum-prijeti': string
-  'Stav-zpracovani': string
-  'Duvod-odmitnuti'?: string
-  'Stav-podani-kod': string
-  'Stav-podani-text'?: string
-  'Stav-odpovedi-kod': string
-  'Stav-odpovedi-text'?: string
-  'Id-dokumentu'?: string
-  Vec?: string
-  'Spis-znacka'?: string
-  Znacka?: string
-}
 
-type NavazanyDokumentResponseItem = {
-  'Id-dokumentu': string
-  Vec?: string
-  'Spis-znacka'?: string
-  Znacka?: string
-}
+const detailElPodaniSchema = z.object({
+  'Datum-prijeti': z.string(),
+  'Stav-zpracovani': z.string(),
+  'Duvod-odmitnuti': z.string().optional(),
+  'Stav-podani-kod': z.string(),
+  'Stav-podani-text': z.string().optional(),
+  'Stav-odpovedi-kod': z.string(),
+  'Stav-odpovedi-text': z.string().optional(),
+  'Id-dokumentu': z.string().optional(),
+  Vec: z.string().optional(),
+  'Spis-znacka': z.string().optional(),
+  Znacka: z.string().optional(),
+})
 
-export type DetailElPodaniXrg = {
-  ixsExt?: string
-  'Detail-el-podani': DetailElPodaniResponseItem
-  'Navazany-dokument'?: NavazanyDokumentResponseItem | NavazanyDokumentResponseItem[]
-}
+const navazanyDokumentSchema = z.object({
+  'Id-dokumentu': z.string(),
+  Vec: z.string().optional(),
+  'Spis-znacka': z.string().optional(),
+  Znacka: z.string().optional(),
+})
+
+const detailElPodaniResponseSchema = z.object({
+  'Detail-el-podani': detailElPodaniSchema,
+  'Navazany-dokument': coercedArray(navazanyDokumentSchema),
+})
+
+export type DetailElPodaniResponse = z.infer<typeof detailElPodaniResponseSchema>
 
 export async function detailElPodani(
   this: Ginis,
   bodyObj: DetailElPodaniRequest
-): Promise<DetailElPodaniXrg> {
+): Promise<DetailElPodaniResponse> {
   const url = this.config.urls.pod
   if (!url) throw new GinisError('GINIS SDK Error: Missing POD url in GINIS config')
 
@@ -67,5 +71,5 @@ export async function detailElPodani(
     }),
     this.config.debug
   )
-  return await extractResponseJson<DetailElPodaniXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, detailElPodaniResponseSchema)
 }

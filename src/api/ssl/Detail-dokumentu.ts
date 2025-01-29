@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -6,6 +7,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
 } from '../../utils/request-util'
+import { coercedArray } from '../../utils/validation'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=request
 const detailDokumentuRequestProperties = [
@@ -23,194 +25,195 @@ export type DetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
 
-// https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
-export type DetailDokumentuXrg = {
-  ixsExt?: string
-  'Wfl-dokument': WflDokumentResponseItem
-  Doruceni?: DoruceniResponseItem
-  'E-doruceni'?: EDoruceniResponseItem
-  'Historie-dokumentu'?: HistorieDokumentuResponseItem | HistorieDokumentuResponseItem[]
-  'Ssl-dokument'?: SslDokumentResponseItem
-  'Ssl-spis'?: SslSpisResponseItem
-  'Ssl-obsah-spis'?: SslObsahSpisResponseItem | SslObsahSpisResponseItem[]
-  'Cj-dokumentu'?: CjDokumentuResponseItem
-  'Prilohy-dokumentu'?: PrilohyDokumentuResponseItem | PrilohyDokumentuResponseItem[]
-  'Souvisejici-dokumenty'?: SouvisejiciDokumentyResponseItem | SouvisejiciDokumentyResponseItem[]
-  Spisovna?: SpisovnaResponseItem | SpisovnaResponseItem[]
-  'Vlozeno-do-spisu'?: VlozenoDoSpisuResponseItem
-}
+const wflDokumentSchema = z.object({
+  'Id-dokumentu': z.string(),
+  'Id-spisu': z.string(),
+  'Priznak-spisu': z.string(),
+  'Priznak-cj': z.string(),
+  'Id-funkce-vlastnika': z.string(),
+  Vec: z.string().optional(),
+  Znacka: z.string().optional(),
+  'Stav-distribuce': z.string(),
+  'Stav-dokumentu': z.string(),
+  'Id-agendy': z.string(),
+  'Id-typu-dokumentu': z.string(),
+  'Priznak-doruceni': z.string(),
+  'Priznak-evidence-ssl': z.string(),
+  'Misto-vzniku': z.string().optional(),
+  'Datum-podani': z.string(),
+  'Priznak-fyz-existence': z.string(),
+  'Priznak-el-obrazu': z.string(),
+  'Id-souboru': z.string().optional(),
+  'Jmeno-souboru': z.string().optional(),
+  'Popis-souboru': z.string().optional(),
+  'Datum-zmeny': z.string(),
+  'Id-zmenu-provedl': z.string(),
+  'Id-originalu': z.string().optional(),
+  'Verze-souboru': z.string().optional(),
+  'Datum-zmeny-souboru': z.string().optional(),
+  'Velikost-souboru': z.string().optional(),
+  Barcode: z.string().optional(),
+  'Priznak-souboru-ro': z.string().optional(),
+})
+const doruceniSchema = z.object({
+  'Id-dokumentu': z.string(),
+  Stat: z.string().optional(),
+  Psc: z.string().optional(),
+  'Datum-odeslani': z.string().optional(),
+  'Znacka-odesilatele': z.string().optional(),
+  'Datum-ze-dne': z.string().optional(),
+  'Podaci-cislo': z.string().optional(),
+  'Zpusob-doruceni': z.string().optional(),
+  'Druh-zasilky': z.string(),
+  'Druh-zachazeni': z.string(),
+  'Datum-prijmu-podani': z.string().optional(),
+  'Id-odesilatele': z.string().optional(),
+  'Pocet-listu': z.string().optional(),
+  'Pocet-priloh': z.string().optional(),
+  'Pocet-stran': z.string().optional(),
+  'Pocet-kopii': z.string().optional(),
+  'Pocet-listu-priloh': z.string().optional(),
+  'Poznamka-k-doruceni': z.string().optional(),
+  'Id-uzlu-podani': z.string().optional(),
+  'Poradove-cislo-podani': z.string(),
+})
+const eDoruceniSchema = z.object({
+  'Datum-prijeti': z.string().optional(),
+  'Datum-doruceni': z.string().optional(),
+  'Id-ds-odesilatele': z.string(),
+})
+const historieDokumentuSchema = z.object({
+  'Id-dokumentu': z.string(),
+  'Text-zmeny': z.string().optional(),
+  Poznamka: z.string().optional(),
+  'Datum-zmeny': z.string(),
+  'Id-zmenu-provedl': z.string(),
+  'Id-ktg-zmeny': z.string(),
+})
+const sslDokumentSchema = z.object({
+  'Id-dokumentu': z.string(),
+  'Id-spisoveho-planu': z.string().optional(),
+  'Id-spisoveho-znaku': z.string().optional(),
+  'Skartacni-znak': z.string().optional(),
+  'Skartacni-lhuta': z.string().optional(),
+  Pristup: z.string().optional(),
+  'Id-stupne-utajeni': z.string().optional(),
+  'Vec-podrobne': z.string().optional(),
+  Poznamka: z.string().optional(),
+  'Pocet-listu': z.string().optional(),
+  'Pocet-priloh': z.string().optional(),
+  'Pocet-stran': z.string().optional(),
+  'Pocet-kopii': z.string().optional(),
+  'Pocet-listu-priloh': z.string().optional(),
+  'Id-umisteni': z.string().optional(),
+  Umisteni: z.string().optional(),
+  'Id-funkce-resitele': z.string().optional(),
+  'Datum-ulozeni': z.string().optional(),
+  'Datum-pravni-moci': z.string().optional(),
+  'Datum-vykonatelnosti': z.string().optional(),
+})
+const sslSpisSchema = z.object({
+  'Id-spisu': z.string(),
+  'Id-zpusob-vyrizeni': z.string().optional(),
+  'Poznamka-k-vyrizeni': z.string().optional(),
+  'Datum-vyrizeni': z.string().optional(),
+  'Id-funkce-vyrizovatele': z.string().optional(),
+  'Id-funkce-schvalovatele': z.string().optional(),
+  'Datum-uzavreni': z.string().optional(),
+  'Id-funkce-uzaviratele': z.string().optional(),
+  'Datum-pravni-moci': z.string().optional(),
+  'Datum-vyrizeni-do': z.string().optional(),
+  'Denik-spisu': z.string(),
+  'Rok-spisu': z.string(),
+  'Poradove-cislo-spisu': z.string(),
+  'Doplnek-cj': z.string().optional(),
+})
+const sslObsahSpisSchema = z.object({
+  'Id-spisu': z.string(),
+  'Id-vlozeneho-dokumentu': z.string(),
+  'Poradove-cislo': z.string().optional(),
+  'Datum-vlozeni': z.string().optional(),
+  'Datum-vyjmuti': z.string().optional(),
+  'Vztah-ke-spisu': z.string().optional(),
+  Aktivita: z.string(),
+  'Poradove-cislo-uziv': z.string().optional(),
+  Poznamka: z.string().optional(),
+})
+const cjDokumentuSchema = z.object({
+  'Id-init-dokumentu': z.string(),
+  'Id-vyriz-dokumentu': z.string().optional(),
+  'Denik-cj': z.string(),
+  'Rok-cj': z.string(),
+  'Poradove-cislo-cj': z.string(),
+  'Vec-cj': z.string().optional(),
+  'Znacka-cj': z.string(),
+  'Stav-cj': z.string(),
+  'Datum-evidence': z.string(),
+  'Datum-vyrizeni-do': z.string().optional(),
+  'Datum-vyrizeni': z.string().optional(),
+  'Datum-vlozeni': z.string().optional(),
+  'Datum-vyjmuti': z.string().optional(),
+  'Id-zpusob-vyrizeni': z.string().optional(),
+  'Doplnek-cj': z.string().optional(),
+})
+const prilohyDokumentuSchema = z.object({
+  'Poradove-cislo': z.string(),
+  Titulek: z.string().optional(),
+  Popis: z.string().optional(),
+  Poznamka: z.string().optional(),
+  'Priznak-el-obrazu': z.string(),
+  'Id-souboru': z.string().optional(),
+  'Verze-souboru': z.string().optional(),
+  'Datum-zmeny-souboru': z.string().optional(),
+  'Jmeno-souboru': z.string().optional(),
+  'Velikost-souboru': z.string().optional(),
+  'Ke-zverejneni': z.string().optional(),
+  'Stav-anonymizace': z.string().optional(),
+  'Kategorie-prilohy': z.string(),
+  'Kategorie-prilohy-txt': z.string().optional(),
+  'Priznak-souboru-ro': z.string().optional(),
+})
+const souvisejiciDokumentySchema = z.object({
+  'Typ-vazby': z.string(),
+  'Id-dokumentu': z.string(),
+  Poznamka: z.string().optional(),
+  'Id-agendy': z.string(),
+})
+const spisovnaSchema = z.object({
+  'Stav-ulozeni-kod': z.string(),
+  'Stav-ulozeni': z.string(),
+  'Datum-skartace': z.string().optional(),
+  'Id-archivu-nda': z.string().optional(),
+})
+const vlozenoDoSpisuSchema = z.object({
+  'Id-spisu': z.string(),
+  'Poradove-cislo': z.string().optional(),
+  'Poradove-cislo-uziv': z.string().optional(),
+  Poznamka: z.string().optional(),
+})
 
-type WflDokumentResponseItem = {
-  'Id-dokumentu': string
-  'Id-spisu': string
-  'Priznak-spisu': string
-  'Priznak-cj': string
-  'Id-funkce-vlastnika': string
-  Vec?: string
-  Znacka?: string
-  'Stav-distribuce': string
-  'Stav-dokumentu': string
-  'Id-agendy': string
-  'Id-typu-dokumentu': string
-  'Priznak-doruceni': string
-  'Priznak-evidence-ssl': string
-  'Misto-vzniku'?: string
-  'Datum-podani': string
-  'Priznak-fyz-existence': string
-  'Priznak-el-obrazu': string
-  'Id-souboru'?: string
-  'Jmeno-souboru'?: string
-  'Popis-souboru'?: string
-  'Datum-zmeny': string
-  'Id-zmenu-provedl': string
-  'Id-originalu'?: string
-  'Verze-souboru'?: string
-  'Datum-zmeny-souboru'?: string
-  'Velikost-souboru'?: string
-  Barcode?: string
-  'Priznak-souboru-ro'?: string
-}
-type DoruceniResponseItem = {
-  'Id-dokumentu': string
-  Stat?: string
-  Psc?: string
-  'Datum-odeslani'?: string
-  'Znacka-odesilatele'?: string
-  'Datum-ze-dne'?: string
-  'Podaci-cislo'?: string
-  'Zpusob-doruceni'?: string
-  'Druh-zasilky': string
-  'Druh-zachazeni': string
-  'Datum-prijmu-podani'?: string
-  'Id-odesilatele'?: string
-  'Pocet-listu'?: string
-  'Pocet-priloh'?: string
-  'Pocet-stran'?: string
-  'Pocet-kopii'?: string
-  'Pocet-listu-priloh'?: string
-  'Poznamka-k-doruceni'?: string
-  'Id-uzlu-podani'?: string
-  'Poradove-cislo-podani': string
-}
-type EDoruceniResponseItem = {
-  'Datum-prijeti'?: string
-  'Datum-doruceni'?: string
-  'Id-ds-odesilatele': string
-}
-type HistorieDokumentuResponseItem = {
-  'Id-dokumentu': string
-  'Text-zmeny'?: string
-  Poznamka?: string
-  'Datum-zmeny': string
-  'Id-zmenu-provedl': string
-  'Id-ktg-zmeny': string
-}
-type SslDokumentResponseItem = {
-  'Id-dokumentu': string
-  'Id-spisoveho-planu'?: string
-  'Id-spisoveho-znaku'?: string
-  'Skartacni-znak'?: string
-  'Skartacni-lhuta'?: string
-  Pristup?: string
-  'Id-stupne-utajeni'?: string
-  'Vec-podrobne'?: string
-  Poznamka?: string
-  'Pocet-listu'?: string
-  'Pocet-priloh'?: string
-  'Pocet-stran'?: string
-  'Pocet-kopii'?: string
-  'Pocet-listu-priloh'?: string
-  'Id-umisteni'?: string
-  Umisteni?: string
-  'Id-funkce-resitele'?: string
-  'Datum-ulozeni'?: string
-  'Datum-pravni-moci'?: string
-  'Datum-vykonatelnosti'?: string
-}
-type SslSpisResponseItem = {
-  'Id-spisu': string
-  'Id-zpusob-vyrizeni'?: string
-  'Poznamka-k-vyrizeni'?: string
-  'Datum-vyrizeni'?: string
-  'Id-funkce-vyrizovatele'?: string
-  'Id-funkce-schvalovatele'?: string
-  'Datum-uzavreni'?: string
-  'Id-funkce-uzaviratele'?: string
-  'Datum-pravni-moci'?: string
-  'Datum-vyrizeni-do'?: string
-  'Denik-spisu': string
-  'Rok-spisu': string
-  'Poradove-cislo-spisu': string
-  'Doplnek-cj'?: string
-}
-type SslObsahSpisResponseItem = {
-  'Id-spisu': string
-  'Id-vlozeneho-dokumentu': string
-  'Poradove-cislo'?: string
-  'Datum-vlozeni'?: string
-  'Datum-vyjmuti'?: string
-  'Vztah-ke-spisu'?: string
-  Aktivita: string
-  'Poradove-cislo-uziv'?: string
-  Poznamka?: string
-}
-type CjDokumentuResponseItem = {
-  'Id-init-dokumentu': string
-  'Id-vyriz-dokumentu'?: string
-  'Denik-cj': string
-  'Rok-cj': string
-  'Poradove-cislo-cj': string
-  'Vec-cj'?: string
-  'Znacka-cj': string
-  'Stav-cj': string
-  'Datum-evidence': string
-  'Datum-vyrizeni-do'?: string
-  'Datum-vyrizeni'?: string
-  'Datum-vlozeni'?: string
-  'Datum-vyjmuti'?: string
-  'Id-zpusob-vyrizeni'?: string
-  'Doplnek-cj'?: string
-}
-type PrilohyDokumentuResponseItem = {
-  'Poradove-cislo': string
-  Titulek?: string
-  Popis?: string
-  Poznamka?: string
-  'Priznak-el-obrazu': string
-  'Id-souboru'?: string
-  'Verze-souboru'?: string
-  'Datum-zmeny-souboru'?: string
-  'Jmeno-souboru'?: string
-  'Velikost-souboru'?: string
-  'Ke-zverejneni'?: string
-  'Stav-anonymizace'?: string
-  'Kategorie-prilohy': string
-  'Kategorie-prilohy-txt'?: string
-  'Priznak-souboru-ro'?: string
-}
-type SouvisejiciDokumentyResponseItem = {
-  'Typ-vazby': string
-  'Id-dokumentu': string
-  Poznamka?: string
-  'Id-agendy': string
-}
-type SpisovnaResponseItem = {
-  'Stav-ulozeni-kod': string
-  'Stav-ulozeni': string
-  'Datum-skartace'?: string
-  'Id-archivu-nda'?: string
-}
-type VlozenoDoSpisuResponseItem = {
-  'Id-spisu': string
-  'Poradove-cislo'?: string
-  'Poradove-cislo-uziv'?: string
-  Poznamka?: string
-}
+// https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
+const DetailDokumentuResponseSchema = z.object({
+  'Wfl-dokument': wflDokumentSchema,
+  Doruceni: doruceniSchema.optional(),
+  'E-doruceni': eDoruceniSchema.optional(),
+  'Historie-dokumentu': coercedArray(historieDokumentuSchema),
+  'Ssl-dokument': sslDokumentSchema.optional(),
+  'Ssl-spis': sslSpisSchema.optional(),
+  'Ssl-obsah-spis': coercedArray(sslObsahSpisSchema),
+  'Cj-dokumentu': cjDokumentuSchema.optional(),
+  'Prilohy-dokumentu': coercedArray(prilohyDokumentuSchema),
+  'Souvisejici-dokumenty': coercedArray(souvisejiciDokumentySchema),
+  Spisovna: coercedArray(spisovnaSchema),
+  'Vlozeno-do-spisu': vlozenoDoSpisuSchema.optional(),
+})
+
+export type DetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
   bodyObj: DetailDokumentuRequest
-): Promise<DetailDokumentuXrg> {
+): Promise<DetailDokumentuResponse> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
@@ -229,5 +232,5 @@ export async function detailDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson<DetailDokumentuXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, DetailDokumentuResponseSchema)
 }

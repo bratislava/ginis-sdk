@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -14,53 +15,54 @@ export type DetailReferentaRequest = {
   [K in (typeof detailReferentaRequestProperties)[number] as K]?: string
 }
 
-type DetailReferentaResponseItem = {
-  'Id-osoby': string
-  Aktivita: string
-  Nazev?: string
-  Zkratka?: string
-  Jmeno?: string
-  Prijmeni?: string
-  Poznamka?: string
-  'Datum-od': string
-  'Datum-do': string
-  'Id-spisoveho-uzlu': string
-  Login?: string
-  'Alt-login'?: string
-  'Ext-sys-login'?: string
-  'Titul-pred'?: string
-  'Titul-za'?: string
-  'Osobni-cislo'?: string
-  'Rodne-cislo'?: string
-  'Rodne-prijmeni'?: string
-  Mail?: string
-  Telefon?: string
-  'Telefon-privat'?: string
-  'Telefon-mobil'?: string
-  Fax?: string
-  'Datum-zmena': string
-  'Login-cs'?: string
-  'Alt-login-cs'?: string
+const detailReferentaSchema = z.object({
+  'Id-osoby': z.string(),
+  Aktivita: z.string(),
+  Nazev: z.string().optional(),
+  Zkratka: z.string().optional(),
+  Jmeno: z.string().optional(),
+  Prijmeni: z.string().optional(),
+  Poznamka: z.string().optional(),
+  'Datum-od': z.string(),
+  'Datum-do': z.string(),
+  'Id-spisoveho-uzlu': z.string(),
+  Login: z.string().optional(),
+  'Alt-login': z.string().optional(),
+  'Ext-sys-login': z.string().optional(),
+  'Titul-pred': z.string().optional(),
+  'Titul-za': z.string().optional(),
+  'Osobni-cislo': z.string().optional(),
+  'Rodne-cislo': z.string().optional(),
+  'Rodne-prijmeni': z.string().optional(),
+  Mail: z.string().optional(),
+  Telefon: z.string().optional(),
+  'Telefon-privat': z.string().optional(),
+  'Telefon-mobil': z.string().optional(),
+  Fax: z.string().optional(),
+  'Datum-zmena': z.string(),
+  'Login-cs': z.string().optional(),
+  'Alt-login-cs': z.string().optional(),
   /**
    * Kód typu autentizace. Hodnoty: -10 = žádná/není určeno, 0 = databázová, 10 = Windows, 20 = virtuální účet, 30 = Azure AD
    */
-  'Typ-autentizace-kod': string
+  'Typ-autentizace-kod': z.string(),
   /**
    * 	Kód typu autentizace k alternativnímu účtu. Hodnoty: -10 = žádná/není určeno, 0 = databázová, 10 = Windows, 20 = virtuální účet, 30 = Azure AD
    */
-  'Alt-typ-autentizace-kod': string
-}
+  'Alt-typ-autentizace-kod': z.string(),
+})
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-referenta&type=response
-export type DetailReferentaXrg = {
-  ixsExt?: string
-  'Detail-referenta': DetailReferentaResponseItem
-}
+const detailReferentaResponseSchema = z.object({
+  'Detail-referenta': detailReferentaSchema,
+})
+
+export type DetailReferentaResponse = z.infer<typeof detailReferentaResponseSchema>
 
 export async function detailReferenta(
   this: Ginis,
   bodyObj: DetailReferentaRequest
-): Promise<DetailReferentaXrg> {
+): Promise<DetailReferentaResponse> {
   const url = this.config.urls.gin
   if (!url) throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
 
@@ -79,5 +81,5 @@ export async function detailReferenta(
     }),
     this.config.debug
   )
-  return await extractResponseJson<DetailReferentaXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, detailReferentaResponseSchema)
 }

@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -6,6 +7,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
 } from '../../utils/request-util'
+import { coercedArray } from '../../utils/validation'
 
 /**
  * Full docs: https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=request
@@ -117,122 +119,123 @@ const seznamDokumentuRequestProperties = [
  * datova-schranka - datová schránka
  * interface-xrg - interface, xrg
  */
-export type SeznamDokumentuRequestBody = {
+export type SeznamDokumentuRequest = {
   [K in (typeof seznamDokumentuRequestProperties)[number] as K]?: string
 }
 
 /**
  * Manually typed according to https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=response#
  */
-export type SeznamDokumentuResponseItem = {
-  'Id-zaznamu': string
+const seznamDokumentuSchema = z.object({
+  'Id-zaznamu': z.string(),
   /**
    * pripraveno - Připraveno – schváleno k vyvěšení, ale ještě nenastalo datum vyvěšení. Záznamy s touto hodnotou se na výstupu mohou objevit pouze u desek, které vrací v metodě seznam-desek element Stav-pripraveno = 'true'.
    * vyveseno - Vyvěšeno – schváleno k vyvěšení + nastalo datum vyvěšení (a ještě nenastalo datum sejmutí)
    * sejmuto - Sejmuto – záznam byl na desce, ale už nastalo datum sejmutí a nebo byl ručně sejmut (a do okamžiku ručního sejmutí se posunulo datum sejmutí)
    */
-  Stav?: string
+  Stav: z.string().optional(),
   /**
    * Název kategorie.
    */
-  Kategorie: string
-  Nazev: string
-  Popis?: string
+  Kategorie: z.string(),
+  Nazev: z.string(),
+  Popis: z.string().optional(),
   /**
    * ISO-string date
    */
-  'Vyveseno-dne': string
+  'Vyveseno-dne': z.string(),
   /**
    * ISO-string date
    */
-  'Sejmuto-dne'?: string
-  Zdroj: string
+  'Sejmuto-dne': z.string().optional(),
+  Zdroj: z.string(),
   /**
    * Identifikace GINIS funkce, která navrhla dokument k vyvěšení.
    */
-  'Id-fun-navrhl': string
+  'Id-fun-navrhl': z.string(),
   /**
    * Osoba, která navrhla dokument k vyvěšení.
    */
-  Navrhl: string
+  Navrhl: z.string(),
   /**
    * Identifikace GINIS funkce, která dokument schválila resp. vyvěsila.
    */
-  'Id-fun-schvalil': string
+  'Id-fun-schvalil': z.string(),
   /**
    * Osoba, která dokument schválila resp. vyvěsila.
    */
-  Schvalil: string
+  Schvalil: z.string(),
   /**
    * Číslo jednací resp. značka.
    */
-  Cj?: string
+  Cj: z.string().optional(),
   /**
    * Počet vyvěšených souborů.
    * int
    */
-  'Pocet-souboru': string
+  'Pocet-souboru': z.string(),
   /**
    * Identifikace GINIS dokumentu. Vráceno v případě, že byl záznam vyvěšen zveřejněním el. obrazu nebo příloh z GINIS dokumentu.
    */
-  'Id-dokumentu'?: string
+  'Id-dokumentu': z.string().optional(),
   /**
    * Celkový počet vyvěšených dokumentů/záznamů.
    * int
    */
-  'Pocet-vyveseno': string
+  'Pocet-vyveseno': z.string(),
   /**
    * Celkový počet dokumentů/záznamů v archivu (sejmutých).
    * int
    */
-  'Pocet-archiv': string
+  'Pocet-archiv': z.string(),
   /**
    * Datum a čas změny záznamu na úřední desce.
    * dateTime
    */
-  'Datum-zmeny': string
-  'Puvod-dokumentu'?: string
-  'Odesilatel-dokumentu'?: string
-  'Typ-dokumentu'?: string
-  'El-obraz-podpis'?: string
-  'Cj-spisu'?: string
-  'Cislo-sml'?: string
-  'Typ-sml'?: string
-  'Nazev-sml'?: string
-  'Subjekt-sml'?: string
-  'Nazev-sub-sml'?: string
-  'Prijmeni-sub-sml'?: string
-  'Jmeno-sub-sml'?: string
-  'Ico-sub-sml'?: string
-  'Obec-sub-sml'?: string
-  'Ulice-sub-sml'?: string
-  'Cor-sub-sml'?: string
-  'Cpop-sub-sml'?: string
-  'Psc-sub-sml'?: string
-  'Typ-sub-sml'?: string
-  'Datum-uzavreni-sml'?: string
-  'Odbor-sml'?: string
-  'Celkova-castka-sml'?: string
-  'Mena-sml'?: string
-}
+  'Datum-zmeny': z.string(),
+  'Puvod-dokumentu': z.string().optional(),
+  'Odesilatel-dokumentu': z.string().optional(),
+  'Typ-dokumentu': z.string().optional(),
+  'El-obraz-podpis': z.string().optional(),
+  'Cj-spisu': z.string().optional(),
+  'Cislo-sml': z.string().optional(),
+  'Typ-sml': z.string().optional(),
+  'Nazev-sml': z.string().optional(),
+  'Subjekt-sml': z.string().optional(),
+  'Nazev-sub-sml': z.string().optional(),
+  'Prijmeni-sub-sml': z.string().optional(),
+  'Jmeno-sub-sml': z.string().optional(),
+  'Ico-sub-sml': z.string().optional(),
+  'Obec-sub-sml': z.string().optional(),
+  'Ulice-sub-sml': z.string().optional(),
+  'Cor-sub-sml': z.string().optional(),
+  'Cpop-sub-sml': z.string().optional(),
+  'Psc-sub-sml': z.string().optional(),
+  'Typ-sub-sml': z.string().optional(),
+  'Datum-uzavreni-sml': z.string().optional(),
+  'Odbor-sml': z.string().optional(),
+  'Celkova-castka-sml': z.string().optional(),
+  'Mena-sml': z.string().optional(),
+})
 
-export type DokumentyResponseItem = {
-  'Id-zaznamu'?: string
-  'Datum-zmeny'?: string
-}
+const dokumentySchema = z.object({
+  'Id-zaznamu': z.string().optional(),
+  'Datum-zmeny': z.string().optional(),
+})
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
-export type SeznamDokumentuResponseXrg = {
-  ixsExt: string
-  'Seznam-dokumentu'?: SeznamDokumentuResponseItem | SeznamDokumentuResponseItem[]
-  'Sejmute-dokumenty'?: DokumentyResponseItem | DokumentyResponseItem[]
-  'Zrusene-dokumenty'?: DokumentyResponseItem | DokumentyResponseItem[]
-}
+const seznamDokumentuResponseSchema = z.object({
+  'Seznam-dokumentu': coercedArray(seznamDokumentuSchema),
+  'Sejmute-dokumenty': coercedArray(dokumentySchema),
+  'Zrusene-dokumenty': coercedArray(dokumentySchema),
+})
+
+export type SeznamDokumentuResponse = z.infer<typeof seznamDokumentuResponseSchema>
 
 export async function seznamDokumentu(
   this: Ginis,
-  bodyObj: SeznamDokumentuRequestBody
-): Promise<SeznamDokumentuResponseXrg> {
+  bodyObj: SeznamDokumentuRequest
+): Promise<SeznamDokumentuResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -251,5 +254,5 @@ export async function seznamDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson<SeznamDokumentuResponseXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, seznamDokumentuResponseSchema)
 }

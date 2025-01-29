@@ -1,6 +1,7 @@
 import { GinisConfig } from '../ginis'
 import { parseStringPromise as parseXml } from 'xml2js'
 import { GinisError } from './errors'
+import { ZodTypeAny } from 'zod'
 
 export type XmlRequestInfo = {
   name: string
@@ -46,48 +47,25 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
 </s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1')
 }
 
-export async function extractResponseJson<T>(responseXml: string, requestName: string): Promise<T> {
-  const options = {
-    explicitArray: false,
-    ignoreAttrs: true,
-  }
-
-  let response: any
-
+export async function extractResponseJson<T>(
+  responseXml: string,
+  requestName: string,
+  responseSchema: ZodTypeAny
+): Promise<T> {
   try {
-    response = await parseXml(responseXml, options)
+    let response = await parseXml(responseXml, {
+      explicitArray: false,
+      ignoreAttrs: true,
+    })
+
+    return responseSchema.parse(
+      response?.['s:Envelope']?.['s:Body']?.[`${requestName}Response`]?.[`${requestName}Result`]
+        ?.Xrg
+    )
   } catch (error) {
-    let message = error instanceof Error ? `: ${error.message}` : ''
-    throw new GinisError(`Failed to parse XML${message}`)
+    let message = error instanceof Error ? `: ${error.toString()}` : ''
+    throw new GinisError(`Failed to parse XML response${message}\r\nResponse: ${responseXml}`)
   }
-
-  if (!response) {
-    throw new GinisError('Parsed XML response is empty.')
-  }
-
-  const xrg =
-    response?.['s:Envelope']?.['s:Body']?.[`${requestName}Response`]?.[`${requestName}Result`]?.Xrg
-  if (typeof xrg != 'undefined') {
-    return xrg
-  }
-
-  throwErrorFaultDetail(response, new GinisError(`Error parsing response data.`), false)
-}
-
-function throwErrorFaultDetail(response: any, error: any, includeError = true): never {
-  const fault = response?.['s:Envelope']?.['s:Body']?.['s:Fault']
-  if (typeof fault == 'undefined' || !fault) {
-    throw error
-  }
-  let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
-  if (!includeError) {
-    throw new GinisError(errorDetail)
-  }
-  try {
-    error.message = `${error.message}\r\n${errorDetail}`
-    throw error
-  } catch (ignored) {}
-  throw new GinisError(errorDetail)
 }
 
 export async function throwErrorResponseDetail(responseXml: string, error: any): Promise<never> {
@@ -97,5 +75,17 @@ export async function throwErrorResponseDetail(responseXml: string, error: any):
   } catch (ignored) {
     throw error
   }
-  throwErrorFaultDetail(response, error)
+
+  const fault = response?.['s:Envelope']?.['s:Body']?.['s:Fault']
+  if (typeof fault == 'undefined' || !fault) {
+    throw error
+  }
+
+  let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
+  try {
+    error.message = `${error.message}\r\n${errorDetail}`
+  } catch (ignored) {
+    throw new GinisError(errorDetail)
+  }
+  throw error
 }

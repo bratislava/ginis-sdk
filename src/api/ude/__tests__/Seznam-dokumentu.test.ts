@@ -21,11 +21,11 @@ describe('seznam-dokumentu', () => {
   })
 
   test('Basic request', async () => {
-    const dataXrg = await ginis.xml.ude.seznamDokumentu({
+    const data = await ginis.xml.ude.seznamDokumentu({
       Stav: 'vyveseno',
     })
 
-    let documents = dataXrg['Seznam-dokumentu']
+    let documents = data['Seznam-dokumentu']
 
     // Keeping the approach from old XML endpoint to double-check if documentFiles are always an array
     if (Array.isArray(documents)) {

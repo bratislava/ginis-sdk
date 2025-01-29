@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
@@ -6,6 +7,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
 } from '../../utils/request-util'
+import { coercedArray } from '../../utils/validation'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=request#
 const seznamKategoriiRequestProperties = [
@@ -16,37 +18,38 @@ const seznamKategoriiRequestProperties = [
 /**
  * 'Id-uredni-desky' - Identifikátor úřední desky. Pokud je v GINIS naadministrována jen jedna deska, nemusí být uvedeno.
  */
-type SeznamKategoriiRequestBody = {
+type SeznamKategoriiRequest = {
   [K in (typeof seznamKategoriiRequestProperties)[number] as K]?: string
 }
 
-type SeznamKategoriiResponseItem = {
-  'Id-kategorie': string
-  Nazev?: string
+const seznamKategoriiSchema = z.object({
+  'Id-kategorie': z.string(),
+  Nazev: z.string().optional(),
   /**
    * Počet vyvěšených dokumentů/záznamů v této kategorii.
    * int
    */
-  'Pocet-vyveseno': string
+  'Pocet-vyveseno': z.string(),
   /**
    * Počet dokumentů/záznamů v archivu (sejmutých) této kategorie.
    * int
    */
-  'Pocet-archiv': string
-}
+  'Pocet-archiv': z.string(),
+})
 
-export type SeznamKategoriiResponseXrg = {
-  ixsExt: string
+const seznamKategoriiResponseSchema = z.object({
   /**
    * Seznam-kategorii - vyžadován: Ne , max. výskyt: neomezeně
    */
-  'Seznam-kategorii'?: SeznamKategoriiResponseItem | SeznamKategoriiResponseItem[]
-}
+  'Seznam-kategorii': coercedArray(seznamKategoriiSchema),
+})
+
+export type SeznamKategoriiResponse = z.infer<typeof seznamKategoriiResponseSchema>
 
 export async function seznamKategorii(
   this: Ginis,
-  bodyObj: SeznamKategoriiRequestBody
-): Promise<SeznamKategoriiResponseXrg> {
+  bodyObj: SeznamKategoriiRequest
+): Promise<SeznamKategoriiResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -65,5 +68,5 @@ export async function seznamKategorii(
     }),
     this.config.debug
   )
-  return await extractResponseJson<SeznamKategoriiResponseXrg>(response.data, requestName)
+  return await extractResponseJson(response.data, requestName, seznamKategoriiResponseSchema)
 }
