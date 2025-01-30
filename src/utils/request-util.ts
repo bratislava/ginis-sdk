@@ -53,7 +53,7 @@ export async function extractResponseJson<T>(
   responseSchema: ZodTypeAny
 ): Promise<T> {
   try {
-    let response = await parseXml(responseXml, {
+    const response = await parseXml(responseXml, {
       explicitArray: false,
       ignoreAttrs: true,
     })
@@ -63,29 +63,7 @@ export async function extractResponseJson<T>(
         ?.Xrg
     )
   } catch (error) {
-    let message = error instanceof Error ? `: ${error.toString()}` : ''
+    const message = error instanceof Error ? `: ${error.toString()}` : ''
     throw new GinisError(`Failed to parse XML response${message}\r\nResponse: ${responseXml}`)
   }
-}
-
-export async function throwErrorResponseDetail(responseXml: string, error: any): Promise<never> {
-  let response: any
-  try {
-    response = await parseXml(responseXml, { explicitArray: false })
-  } catch (ignored) {
-    throw error
-  }
-
-  const fault = response?.['s:Envelope']?.['s:Body']?.['s:Fault']
-  if (typeof fault == 'undefined' || !fault) {
-    throw error
-  }
-
-  let errorDetail = `Error response details: ${JSON.stringify(fault, null, 2)}`
-  try {
-    error.message = `${error.message}\r\n${errorDetail}`
-  } catch (ignored) {
-    throw new GinisError(errorDetail)
-  }
-  throw error
 }

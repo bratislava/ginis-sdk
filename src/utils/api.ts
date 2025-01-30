@@ -1,5 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios'
-import { throwErrorResponseDetail } from './request-util'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import { GinisError } from './errors'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
@@ -39,7 +38,7 @@ export const makeAxiosRequest = async <T>(
       console.log('########### GINIS RESPONSE END ###########')
     }
     await throwErrorResponseDetail(anyError?.response?.data, error)
-    throw error
+    throw new GinisError('Axios POST failed with no ginis detail. This should never happen.')
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')
@@ -53,4 +52,24 @@ export const makeAxiosRequest = async <T>(
     status: responseAxios.status,
     statusText: responseAxios.statusText,
   }
+}
+
+export async function throwErrorResponseDetail(
+  responseData: unknown,
+  error: unknown
+): Promise<never> {
+  if (!(error instanceof Error)) {
+    throw new GinisError(
+      'Non-error passed to throwErrorFaultDetail in ginis-sdk. This should never happen.'
+    )
+  }
+
+  const errorDetail =
+    responseData != null && typeof responseData === 'string'
+      ? `${error.message}\r\nError response details: ${responseData}`
+      : error.message
+  if (error instanceof AxiosError) {
+    throw new GinisError(errorDetail, error)
+  }
+  throw new GinisError(errorDetail)
 }
