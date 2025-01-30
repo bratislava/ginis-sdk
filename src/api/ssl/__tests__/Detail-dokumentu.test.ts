@@ -22,6 +22,7 @@ describe('Detail-dokumentu', () => {
     const data = await ginis.xml.ssl.detailDokumentu({
       'Id-dokumentu': 'MAG0X03RYYSN',
     })
-    expect(data?.['Wfl-dokument']?.['Id-dokumentu']).toBe('MAG0X03RYYSN')
+
+    expect(data['Wfl-dokument']['Id-dokumentu']).toBe('MAG0X03RYYSN')
   })
 })

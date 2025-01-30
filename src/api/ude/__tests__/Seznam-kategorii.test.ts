@@ -23,17 +23,6 @@ describe('seznam-kategorii', () => {
   test('Basic request', async () => {
     const data = await ginis.xml.ude.seznamKategorii({})
 
-    let categories = data['Seznam-kategorii']
-
-    // Keeping the approach from old XML endpoint to double-check if documentFiles are always an array
-    if (Array.isArray(categories)) {
-      // do nothing
-    } else if (typeof categories === 'object') {
-      categories = [categories]
-    } else {
-      categories = []
-    }
-
-    expect(categories.length).toBeGreaterThan(0)
+    expect(data['Seznam-kategorii'].length).toBeGreaterThan(0)
   })
 })

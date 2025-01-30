@@ -25,18 +25,6 @@ describe('detail-dokumentu', () => {
       'Id-zaznamu': 'MAG00B0PVN5H#0',
     })
 
-    // const documentDetail = data.DetailDokumentu
-    let documentFiles = data['Soubory-dokumentu']
-
-    // Keeping the approach from old XML endpoint to double-check if documentFiles are always an array
-    if (Array.isArray(documentFiles)) {
-      // do nothing, needed for TS
-    } else if (typeof documentFiles === 'object') {
-      documentFiles = [documentFiles]
-    } else {
-      documentFiles = []
-    }
-
-    expect(documentFiles[0]?.['Id-souboru']).toBe('MAG00B0PVN5H#0#MAG00B0PVN5H')
+    expect(data['Soubory-dokumentu'][0]?.['Id-souboru']).toBe('MAG00B0PVN5H#0#MAG00B0PVN5H')
   })
 })

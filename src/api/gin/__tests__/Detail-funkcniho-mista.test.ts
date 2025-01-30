@@ -22,6 +22,7 @@ describe('Detail-funkcniho-mista', () => {
     const data = await ginis.xml.gin.detailFunkcnihoMista({
       'Id-funkce': 'MAG0SF00A19L',
     })
-    expect(data?.['Detail-funkcniho-mista']?.['Id-funkce']).toBe('MAG0SF00A19L')
+
+    expect(data['Detail-funkcniho-mista']['Id-funkce']).toBe('MAG0SF00A19L')
   })
 })

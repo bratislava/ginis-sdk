@@ -32,6 +32,7 @@ describe('Pridat-soubor', () => {
       'Typ-vazby': 'elektronicka-priloha',
       Data: contents,
     })
-    expect(data['Pridat-soubor']?.['Verze-souboru']).toBeTruthy()
+
+    expect(data['Pridat-soubor']['Verze-souboru']).toBeTruthy()
   })
 })

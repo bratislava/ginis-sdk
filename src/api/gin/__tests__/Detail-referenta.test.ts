@@ -22,6 +22,7 @@ describe('Detail-referenta', () => {
     const data = await ginis.xml.gin.detailReferenta({
       'Id-osoby': 'MAG0SR00A0BU',
     })
-    expect(data?.['Detail-referenta']?.['Id-osoby']).toBe('MAG0SR00A0BU')
+
+    expect(data['Detail-referenta']['Id-osoby']).toBe('MAG0SR00A0BU')
   })
 })

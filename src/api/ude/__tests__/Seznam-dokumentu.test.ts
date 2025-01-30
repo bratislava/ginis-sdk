@@ -25,17 +25,6 @@ describe('seznam-dokumentu', () => {
       Stav: 'vyveseno',
     })
 
-    let documents = data['Seznam-dokumentu']
-
-    // Keeping the approach from old XML endpoint to double-check if documentFiles are always an array
-    if (Array.isArray(documents)) {
-      // do nothing
-    } else if (typeof documents === 'object') {
-      documents = [documents]
-    } else {
-      documents = []
-    }
-
-    expect(documents.length).toBeGreaterThan(0)
+    expect(data['Seznam-dokumentu'].length).toBeGreaterThan(0)
   })
 })

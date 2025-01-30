@@ -1,4 +1,5 @@
 import { Ginis } from '../../../index'
+import { NacistSouborResponse } from '../Nacist-soubor'
 
 jest.setTimeout(20000)
 
@@ -21,12 +22,12 @@ describe('nacist-soubor', () => {
   })
 
   test('Basic request', async () => {
-    let data: any
+    let data: NacistSouborResponse
     try {
       data = await ginis.xml.ude.nacistSoubor({
         'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
       })
-    } catch (error: unknown) {
+    } catch (error) {
       if (!(error instanceof Error)) {
         throw error
       }
@@ -38,10 +39,12 @@ describe('nacist-soubor', () => {
         console.warn('Skipping test as no disk is available within this environment.')
         return
       }
+
+      throw error
     }
 
-    let loadedFile = data['Nacist-soubor']
-
-    expect(loadedFile?.['Jmeno-souboru']).toBe('Plnenie UZN c. 135_2015 február 2021.pdf')
+    expect(data['Nacist-soubor']?.['Jmeno-souboru']).toBe(
+      'Plnenie UZN c. 135_2015 február 2021.pdf'
+    )
   })
 })
