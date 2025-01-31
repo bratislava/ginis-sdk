@@ -1,7 +1,7 @@
 import { GinisConfig } from '../ginis'
 import { parseStringPromise as parseXml } from 'xml2js'
 import { GinisError } from './errors'
-import { ZodTypeAny } from 'zod'
+import { ZodType } from 'zod'
 
 export type XmlRequestInfo = {
   name: string
@@ -50,7 +50,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
 export async function extractResponseJson<T>(
   responseXml: string,
   requestName: string,
-  responseSchema: ZodTypeAny
+  responseSchema: ZodType<T, any, any>
 ): Promise<T> {
   try {
     const response = await parseXml(responseXml, {
