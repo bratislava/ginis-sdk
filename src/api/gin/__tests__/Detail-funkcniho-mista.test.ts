@@ -1,4 +1,4 @@
-import { Ginis } from '../../../../index'
+import { Ginis } from '../../../index'
 
 jest.setTimeout(20000)
 
@@ -10,7 +10,7 @@ describe('Detail-funkcniho-mista', () => {
     )
     ginis = new Ginis({
       urls: {
-        gin: 'http://172.25.1.195/gordic/ginis/ws/GIN01_BRA/Gin.svc',
+        gin: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/GIN01_TEST/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
@@ -19,9 +19,10 @@ describe('Detail-funkcniho-mista', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.gin.detailFunkcnihoMista({
+    const data = await ginis.gin.detailFunkcnihoMista({
       'Id-funkce': 'MAG0SF00A19L',
     })
-    expect(data?.DetailFunkcnihoMista[0]?.IdFunkce).toBe('MAG0SF00A19L')
+
+    expect(data['Detail-funkcniho-mista']['Id-funkce']).toBe('MAG0SF00A19L')
   })
 })
