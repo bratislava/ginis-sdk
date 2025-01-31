@@ -21,7 +21,7 @@ describe('seznam-dokumentu', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.ude.seznamDokumentu({
+    const data = await ginis.ude.seznamDokumentu({
       Stav: 'vyveseno',
     })
 

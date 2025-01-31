@@ -26,7 +26,7 @@ describe('Pridat-soubor', () => {
     })
     console.log('done reading ')
 
-    const data = await ginis.xml.ssl.pridatSoubor({
+    const data = await ginis.ssl.pridatSoubor({
       'Id-dokumentu': 'MAG0X03RYYSN',
       'Jmeno-souboru': 'raw-data.bin',
       'Typ-vazby': 'elektronicka-priloha',

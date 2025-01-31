@@ -19,7 +19,7 @@ describe('Detail-dokumentu', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.ssl.detailDokumentu({
+    const data = await ginis.ssl.detailDokumentu({
       'Id-dokumentu': 'MAG0X03RYYSN',
     })
 

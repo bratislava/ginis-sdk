@@ -19,7 +19,7 @@ describe('Detail-funkcniho-mista', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.gin.detailFunkcnihoMista({
+    const data = await ginis.gin.detailFunkcnihoMista({
       'Id-funkce': 'MAG0SF00A19L',
     })
 

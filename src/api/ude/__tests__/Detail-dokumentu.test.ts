@@ -21,7 +21,7 @@ describe('detail-dokumentu', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.ude.detailDokumentu({
+    const data = await ginis.ude.detailDokumentu({
       'Id-zaznamu': 'MAG00B0PVN5H#0',
     })
 

@@ -21,7 +21,7 @@ describe('seznam-kategorii', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.ude.seznamKategorii({})
+    const data = await ginis.ude.seznamKategorii({})
 
     expect(data['Seznam-kategorii'].length).toBeGreaterThan(0)
   })

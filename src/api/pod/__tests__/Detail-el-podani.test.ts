@@ -19,7 +19,7 @@ describe('Detail-el-podani', () => {
   })
 
   test('Basic request', async () => {
-    const data = await ginis.xml.pod.detailElPodani({
+    const data = await ginis.pod.detailElPodani({
       'Id-zpravy': '598f50c0-d08a-41bd-bfcd-6f1a1dad9843',
     })
 

@@ -24,7 +24,7 @@ describe('nacist-soubor', () => {
   test('Basic request', async () => {
     let data: NacistSouborResponse
     try {
-      data = await ginis.xml.ude.nacistSoubor({
+      data = await ginis.ude.nacistSoubor({
         'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
       })
     } catch (error) {

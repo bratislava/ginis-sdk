@@ -54,16 +54,11 @@ export type Gin = {
 // exports all services with server config bound to the one passed at construction
 export class Ginis {
   config: GinisConfig
-  /**
-   * Exports functions of the api's with config and url values bound.
-   * See documentation of the api for request options.
-   */
-  xml: {
-    ssl: Ssl
-    pod: Pod
-    gin: Gin
-    ude: Ude
-  }
+
+  ssl: Ssl
+  pod: Pod
+  gin: Gin
+  ude: Ude
 
   constructor(config: GinisConfig) {
     this.config = {
@@ -71,11 +66,9 @@ export class Ginis {
       ...config,
     }
 
-    this.xml = {
-      ssl: mapValues(ssl, (v) => bind(v, this)),
-      pod: mapValues(pod, (v) => bind(v, this)),
-      gin: mapValues(gin, (v) => bind(v, this)),
-      ude: mapValues(ude, (v) => bind(v, this)),
-    }
+    this.ssl = mapValues(ssl, (v) => bind(v, this))
+    this.pod = mapValues(pod, (v) => bind(v, this))
+    this.gin = mapValues(gin, (v) => bind(v, this))
+    this.ude = mapValues(ude, (v) => bind(v, this))
   }
 }
