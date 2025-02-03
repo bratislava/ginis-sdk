@@ -1,7 +1,8 @@
 import { detailDokumentu } from './Detail-dokumentu'
-import { pridatSoubor } from './Pridat-soubor'
+import { pridatSoubor, pridatSouborMtom } from './Pridat-soubor'
 
 export default {
   detailDokumentu,
   pridatSoubor,
+  pridatSouborMtom,
 }
