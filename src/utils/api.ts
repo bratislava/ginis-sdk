@@ -1,10 +1,9 @@
-import axios, { AxiosRequestConfig } from 'axios'
-import crypto from 'crypto'
-import type { GinisConfig } from '../ginis'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import { GinisError } from './errors'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'text/xml; charset=utf-8',
   },
 }
 
@@ -15,7 +14,7 @@ export const makeAxiosRequest = async <T>(
   debug?: boolean
 ) => {
   if (!url) {
-    throw new Error('Missing GINIS url for the service you are trying to reach.')
+    throw new GinisError('Missing GINIS url for the service you are trying to reach.')
   }
 
   const requestConfig = axiosConfig || defaultAxiosConfig
@@ -30,15 +29,15 @@ export const makeAxiosRequest = async <T>(
   try {
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
+    let anyError = error as any
     if (debug) {
-      let anyError = error as any
       console.log('########### GINIS ERROR RESPONSE ###########')
       console.log('status: ', anyError?.response?.status)
       console.log('statusText: ', anyError?.response?.statusText)
       console.log('data: ', anyError?.response?.data)
       console.log('########### GINIS RESPONSE END ###########')
     }
-    throw error
+    throw makeResponseDetailError(anyError?.response?.data, error)
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')
@@ -54,24 +53,19 @@ export const makeAxiosRequest = async <T>(
   }
 }
 
-export type GRestHeader = {
-  RequestName: string
-  RequestNamespace: string
-  User: string
-  Password: string
-  PasswordText: boolean
-  Nonce: string
-  Created: string
-}
-
-export const getGRestHeader = (config: GinisConfig, requestNamespace: string): GRestHeader => {
-  return {
-    RequestName: 'Xrg',
-    RequestNamespace: requestNamespace,
-    User: config.username,
-    Password: config.password,
-    PasswordText: true,
-    Nonce: crypto.randomBytes(10).toString('base64'),
-    Created: new Date().toISOString(),
+function makeResponseDetailError(responseData: unknown, error: unknown) {
+  if (!(error instanceof Error)) {
+    return new GinisError(
+      'Non-error passed to throwErrorFaultDetail in ginis-sdk. This should never happen.'
+    )
   }
+
+  const errorDetail =
+    responseData != null && typeof responseData === 'string'
+      ? `${error.message}\r\nError response details: ${responseData}`
+      : error.message
+  if (error instanceof AxiosError) {
+    return new GinisError(errorDetail, error)
+  }
+  return new GinisError(errorDetail)
 }

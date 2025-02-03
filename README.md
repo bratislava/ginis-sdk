@@ -6,10 +6,6 @@ A small wrapper for most commonly used requests towards the GINIS system. Made t
 
 ## Installation
 
-`yarn add @bratislava/ginis-sdk`
-
-or
-
 `npm i @bratislava/ginis-sdk`
 
 ## Using the library
@@ -63,7 +59,7 @@ You need to have GINIS credentials setup in `.env` file - see `.env.example`. If
 
 Start the test using
 
-`yarn test`
+`npm test`
 
 ## XML example
 

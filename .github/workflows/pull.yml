@@ -1,0 +1,38 @@
+name: Validate code
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+jobs:
+  build:
+    name: Typescript check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Typescript check
+        uses: EPMatt/reviewdog-action-tsc@v1
+        with:
+          # Change reviewdog reporter if you need
+          # [github-pr-check,github-check,github-pr-review].
+          # More about reviewdog reporters at
+          # https://github.com/reviewdog/reviewdog#reporters
+          reporter: github-check
+          # Change reporter level if you need
+          # [info,warning,error].
+          # More about reviewdog reporter level at
+          # https://github.com/reviewdog/reviewdog#reporters
+          level: warning
+      - name: Typescript strict plugin check
+        run: npm run typecheck
+
+      # Tests require internal network - until we have GINIS mocked for ci we're omitting
+      # - name: Tests
+      #   run: npm run test:ci

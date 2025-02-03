@@ -1,8 +1,8 @@
-import { Ginis } from '../../../../index'
+import { Ginis } from '../../../index'
 
 jest.setTimeout(20000)
 
-describe('Detail-dokumentu', () => {
+describe('Detail-referenta', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -10,18 +10,19 @@ describe('Detail-dokumentu', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://172.25.1.195/gordic/ginis/ws/SSL01_BRA/Ssl.svc',
+        gin: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/GIN01_TEST/Gin.svc',
       },
       username: process.env['GINIS_USERNAME']!,
       password: process.env['GINIS_PASSWORD']!,
-      debug: true,
+      debug: false,
     })
   })
 
   test('Basic request', async () => {
-    const data = await ginis.json.ssl.detailDokumentu({
-      'Id-dokumentu': 'MAG0X03RYYSN',
+    const data = await ginis.gin.detailReferenta({
+      'Id-osoby': 'MAG0SR00A0BU',
     })
-    expect(data?.HistorieDokumentu?.length).toBeGreaterThan(0)
+
+    expect(data['Detail-referenta']['Id-osoby']).toBe('MAG0SR00A0BU')
   })
 })
