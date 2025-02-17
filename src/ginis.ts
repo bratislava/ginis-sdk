@@ -10,6 +10,7 @@ export type GinisConfig = {
   urls: {
     ude?: string
     ssl?: string
+    ssl_mtom?: string
     pod?: string
     gin?: string
   }
