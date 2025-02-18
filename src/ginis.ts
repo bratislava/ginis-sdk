@@ -1,10 +1,11 @@
-import ssl from './api/ssl'
-import pod from './api/pod'
-import gin from './api/gin'
-import ude from './api/ude'
 import { bind, mapValues } from 'lodash'
 
-export type GinisConfig = {
+import gin from './api/gin'
+import pod from './api/pod'
+import ssl from './api/ssl'
+import ude from './api/ude'
+
+export interface GinisConfig {
   username: string
   password: string
   urls: {

@@ -14,8 +14,8 @@ describe('seznam-kategorii', () => {
           process.env['GINIS_UDE_HOST'] ??
           'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/Ude01/Ude.svc',
       },
-      username: process.env['GINIS_USERNAME']!,
-      password: process.env['GINIS_PASSWORD']!,
+      username: process.env['GINIS_USERNAME'] ?? '',
+      password: process.env['GINIS_PASSWORD'] ?? '',
       debug: false,
     })
   })

@@ -10,10 +10,12 @@ describe('Detail-dokumentu', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
+        ssl:
+          process.env['GINIS_SSL_HOST'] ??
+          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
       },
-      username: process.env['GINIS_USERNAME']!,
-      password: process.env['GINIS_PASSWORD']!,
+      username: process.env['GINIS_USERNAME'] ?? '',
+      password: process.env['GINIS_PASSWORD'] ?? '',
       debug: false,
     })
   })
