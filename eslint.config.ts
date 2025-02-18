@@ -96,7 +96,7 @@ export default tseslint.config(
       'sonarjs/todo-tag': ['warn'], // impossible with the default error level
       // eslint
       'sort-imports': 'off', // using simple-import-sort
-      'no-console': 'error', // we enforce logger use
+      'no-console': 'off', // console logs used only with debug true flag
       'array-callback-return': 'error',
       'no-constructor-return': 'error',
       'no-duplicate-imports': 'error',
@@ -112,7 +112,7 @@ export default tseslint.config(
       'no-div-regex': 'error',
       'no-else-return': 'error',
       'no-implicit-coercion': 'error',
-      'no-invalid-this': 'error',
+      'no-invalid-this': 'off', // the interface is split into non-class functions
       'no-lonely-if': 'error',
       'no-multi-spaces': 'error',
       'no-param-reassign': 'error',
@@ -142,6 +142,15 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
       'jest/unbound-method': 'error',
       '@typescript-eslint/no-unused-vars': 'warn',
+    },
+  },
+  {
+    files: ['**/*.test.ts'],
+    plugins: {
+      jest,
+    },
+    rules: {
+      'dot-notation': 'off', // bracket access env variables in tests
     },
   }
 )

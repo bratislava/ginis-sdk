@@ -9,6 +9,7 @@ export interface XmlRequestInfo {
   name: string
   namespace: string
   xrgNamespace: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paramsBody: any
   paramOrder: readonly string[]
 }
@@ -39,28 +40,37 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
       <requestXml>
         <Xrg xmlns="${requestInfo.xrgNamespace}">
           <${requestInfo.name}>${requestInfo.paramOrder
+            // find all parameters with respect to their strict order that are present in paramsBody
+            // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
             .filter((e) => requestInfo.paramsBody[e])
+            // wrap the value of the parameter into its XML tag
+            // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
             .map((e) => `<${e}>${requestInfo.paramsBody[e]}</${e}>`)
             .join('')}</${requestInfo.name}>
         </Xrg>
       </requestXml>
     </${requestInfo.name}>
   </s:Body>
-</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1') //regex removes whitespaces between elements
+</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1') // regex removes whitespaces between elements
 }
 
 export async function extractResponseJson<T>(
   responseXml: string,
   requestName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseSchema: ZodType<T, any, any>
 ): Promise<T> {
   try {
+    // try catch is covering all parsing, access and validation problems
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const response = await parseXml(responseXml, {
       explicitArray: false,
       ignoreAttrs: true,
     })
 
     return responseSchema.parse(
+      // try catch is covering all parsing, access and validation problems
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       response?.['s:Envelope']?.['s:Body']?.[`${requestName}Response`]?.[`${requestName}Result`]
         ?.Xrg
     )
