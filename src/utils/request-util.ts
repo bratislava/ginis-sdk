@@ -1,9 +1,11 @@
-import { GinisConfig } from '../ginis'
+/* eslint-disable sonarjs/slow-regex */
 import { parseStringPromise as parseXml } from 'xml2js'
-import { GinisError } from './errors'
 import { ZodType } from 'zod'
 
-export type XmlRequestInfo = {
+import { GinisConfig } from '../ginis'
+import { GinisError } from './errors'
+
+export interface XmlRequestInfo {
   name: string
   namespace: string
   xrgNamespace: string
@@ -44,7 +46,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
       </requestXml>
     </${requestInfo.name}>
   </s:Body>
-</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1')
+</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1') //regex removes whitespaces between elements
 }
 
 export async function extractResponseJson<T>(

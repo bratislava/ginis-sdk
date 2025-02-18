@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+
 import { GinisError } from './errors'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
@@ -29,7 +30,7 @@ export const makeAxiosRequest = async <T>(
   try {
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
-    let anyError = error as any
+    const anyError = error as any
     if (debug) {
       console.log('########### GINIS ERROR RESPONSE ###########')
       console.log('status: ', anyError?.response?.status)
