@@ -48,7 +48,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['src/generated-clients/*'],
+    ignores: ['dist/*', 'babel.config.js', 'jest.config.js'],
   },
   {
     languageOptions: {

@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/slow-regex */
-import { parseStringPromise as parseXml } from 'xml2js'
-import { PassThrough } from 'stream'
 import { ReadStream } from 'fs'
+import { PassThrough } from 'stream'
+import { parseStringPromise as parseXml } from 'xml2js'
 import { ZodType } from 'zod'
 
 import { GinisConfig } from '../ginis'
@@ -53,7 +53,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
       </requestXml>
     </${requestInfo.name}>
   </s:Body>
-</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1'); // regex removes whitespaces between elements
+</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1') // regex removes whitespaces between elements
 }
 
 export async function extractResponseJson<T>(
@@ -105,8 +105,8 @@ export function createMultipartRequestBody(
   requestContentId: string,
   fileContentId: string
 ) {
-  let xopFileInclude = `<Data><Include xmlns="http://www.w3.org/2004/08/xop/include" href="cid:${fileContentId}"/></Data>`
-  let xmlRequest = createXmlRequestBody(config, requestInfo).replace(
+  const xopFileInclude = `<Data><Include xmlns="http://www.w3.org/2004/08/xop/include" href="cid:${fileContentId}"/></Data>`
+  const xmlRequest = createXmlRequestBody(config, requestInfo).replace(
     `<Data>${fileContentId}</Data>`,
     xopFileInclude
   )
@@ -114,9 +114,9 @@ export function createMultipartRequestBody(
     `--${boundary}\r\n` +
     `Content-ID:<${requestContentId}>\r\n` +
     `Content-Transfer-Encoding: 8bit\r\n` +
-    `Content-Type: application/xop+xml;charset=utf-8;type="text/xml"\r\n\r\n` +
-    xmlRequest +
-    `\r\n--${boundary}\r\n` +
+    `Content-Type: application/xop+xml;charset=utf-8;type="text/xml"\r\n\r\n${
+      xmlRequest
+    }\r\n--${boundary}\r\n` +
     `Content-ID:<${fileContentId}>\r\n` +
     `Content-Transfer-Encoding: binary\r\n` +
     `Content-Type: application/octet-stream\r\n\r\n`
@@ -136,6 +136,7 @@ export function createMultipartRequestBody(
 export async function extractMultipartResponseJson<T>(
   responseString: string,
   requestName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseSchema: ZodType<T, any, any>
 ): Promise<T> {
   const startTag = '<s:Envelope'
@@ -152,5 +153,5 @@ export async function extractMultipartResponseJson<T>(
       `Failed to parse multipart response${message}\r\nResponse: ${responseString}`
     )
   }
-  return extractResponseJson(responseXml, requestName, responseSchema)
+  return await extractResponseJson(responseXml, requestName, responseSchema)
 }

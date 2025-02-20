@@ -1,5 +1,4 @@
-import { createReadStream } from 'fs'
-import { promises as fs } from 'fs'
+import { createReadStream, promises as fs } from 'fs'
 
 import { Ginis } from '../../../index'
 
@@ -16,7 +15,9 @@ describe('Pridat-soubor', () => {
         ssl:
           process.env['GINIS_SSL_HOST'] ??
           'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
-        ssl_mtom: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_BRA/Ssl.svc/mtom',
+        ssl_mtom:
+          process.env['GINIS_SSL_MTOM_HOST'] ??
+          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_BRA/Ssl.svc/mtom',
       },
       username: process.env['GINIS_USERNAME'] ?? '',
       password: process.env['GINIS_PASSWORD'] ?? '',
@@ -25,11 +26,9 @@ describe('Pridat-soubor', () => {
   })
 
   test('Basic request', async () => {
-    console.log('start reading')
     const contents = await fs.readFile('./src/api/ssl/__tests__/raw-data.bin', {
       encoding: 'base64',
     })
-    console.log('done reading ')
 
     const data = await ginis.ssl.pridatSoubor({
       'Id-dokumentu': 'MAG0X03RYYSN',
@@ -44,10 +43,7 @@ describe('Pridat-soubor', () => {
 
   test('MTOM request', async () => {
     const fileName = 'plain-data.txt'
-
-    console.log('start reading')
-    let contentStream = createReadStream(`./src/api/ssl/__tests__/${fileName}`)
-    console.log('done reading ')
+    const contentStream = createReadStream(`./src/api/ssl/__tests__/${fileName}`)
 
     const data = await ginis.ssl.pridatSouborMtom({
       'Id-dokumentu': 'MAG0X03RYYSN',
@@ -56,6 +52,6 @@ describe('Pridat-soubor', () => {
       'Popis-souboru': 'mtom-xop',
       Obsah: contentStream,
     })
-    expect(data['Pridat-soubor']?.['Verze-souboru']).toBeTruthy()
+    expect(data['Pridat-soubor']['Verze-souboru']).toBeTruthy()
   })
 })

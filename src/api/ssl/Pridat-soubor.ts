@@ -1,6 +1,6 @@
 import { ReadStream } from 'fs'
-import { z } from 'zod'
 import { v4 as uuidv4 } from 'uuid'
+import { z } from 'zod'
 
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
@@ -68,7 +68,7 @@ export async function pridatSoubor(
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
-  let requestInfo = {
+  const requestInfo = {
     name: requestName,
     namespace: requestNamespace,
     xrgNamespace: requestXrgNamespace,
@@ -96,7 +96,7 @@ export async function pridatSouborMtom(
   const url = this.config.urls.ssl_mtom
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
-  let requestInfo = {
+  const requestInfo = {
     name: requestName,
     namespace: requestNamespace,
     xrgNamespace: requestXrgNamespace,
@@ -105,11 +105,11 @@ export async function pridatSouborMtom(
   }
   const requestContentId = 'soap-req'
   const fileContentId = 'attachment-file'
-  const boundary = '----Boundary' + uuidv4()
+  const boundary = `----Boundary${uuidv4()}`
 
   bodyObj.Data = fileContentId
 
-  let requestBody = createMultipartRequestBody(
+  const requestBody = createMultipartRequestBody(
     this.config,
     requestInfo,
     bodyObj.Obsah,
@@ -118,7 +118,7 @@ export async function pridatSouborMtom(
     fileContentId
   )
 
-  let requestHeaders = createMultipartRequestConfig(
+  const requestHeaders = createMultipartRequestConfig(
     requestName,
     requestNamespace,
     boundary,
