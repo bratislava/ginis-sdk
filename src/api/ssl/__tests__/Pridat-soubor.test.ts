@@ -1,7 +1,7 @@
 import { createReadStream } from 'fs'
-import { Ginis } from '../../../index'
+import { promises as fs } from 'fs'
 
-const fs = require('fs').promises
+import { Ginis } from '../../../index'
 
 jest.setTimeout(20000)
 
@@ -13,11 +13,13 @@ describe('Pridat-soubor', () => {
     )
     ginis = new Ginis({
       urls: {
-        ssl: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
+        ssl:
+          process.env['GINIS_SSL_HOST'] ??
+          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
         ssl_mtom: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_BRA/Ssl.svc/mtom',
       },
-      username: process.env['GINIS_USERNAME']!,
-      password: process.env['GINIS_PASSWORD']!,
+      username: process.env['GINIS_USERNAME'] ?? '',
+      password: process.env['GINIS_PASSWORD'] ?? '',
       debug: false,
     })
   })

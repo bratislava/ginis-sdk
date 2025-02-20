@@ -1,13 +1,14 @@
 import { z } from 'zod'
+
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
-import { coercedArray } from '../../utils/validation'
 import { GinisError } from '../../utils/errors'
 import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
 } from '../../utils/request-util'
+import { coercedArray } from '../../utils/validation'
 
 const detailElPodaniRequestProperties = [
   'Id-zpravy',

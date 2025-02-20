@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+
 import { GinisError } from './errors'
 
 const defaultAxiosConfig: AxiosRequestConfig = {
@@ -7,12 +8,12 @@ const defaultAxiosConfig: AxiosRequestConfig = {
   },
 }
 
-export const makeAxiosRequest = async <T>(
+export async function makeAxiosRequest<T>(
   axiosConfig: AxiosRequestConfig | undefined,
   url: string | undefined,
   body: string | object,
   debug?: boolean
-) => {
+) {
   if (!url) {
     throw new GinisError('Missing GINIS url for the service you are trying to reach.')
   }
@@ -25,19 +26,21 @@ export const makeAxiosRequest = async <T>(
     console.log('body: ', body)
     console.log('########### GINIS REQUEST END ###########')
   }
-  let responseAxios
+  let responseAxios: AxiosResponse<T>
   try {
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
-    let anyError = error as any
+    if (!(error instanceof AxiosError)) {
+      throw makeResponseDetailError(error)
+    }
     if (debug) {
       console.log('########### GINIS ERROR RESPONSE ###########')
-      console.log('status: ', anyError?.response?.status)
-      console.log('statusText: ', anyError?.response?.statusText)
-      console.log('data: ', anyError?.response?.data)
+      console.log('status: ', error.response?.status)
+      console.log('statusText: ', error.response?.statusText)
+      console.log('data: ', error.response?.data)
       console.log('########### GINIS RESPONSE END ###########')
     }
-    throw makeResponseDetailError(anyError?.response?.data, error)
+    throw makeResponseDetailError(error, error.response?.data)
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')
@@ -46,14 +49,10 @@ export const makeAxiosRequest = async <T>(
     console.log('data: ', responseAxios.data)
     console.log('########### GINIS RESPONSE END ###########')
   }
-  return {
-    data: responseAxios.data,
-    status: responseAxios.status,
-    statusText: responseAxios.statusText,
-  }
+  return responseAxios
 }
 
-function makeResponseDetailError(responseData: unknown, error: unknown) {
+function makeResponseDetailError(error: unknown, responseData: unknown = null) {
   if (!(error instanceof Error)) {
     return new GinisError(
       'Non-error passed to throwErrorFaultDetail in ginis-sdk. This should never happen.'

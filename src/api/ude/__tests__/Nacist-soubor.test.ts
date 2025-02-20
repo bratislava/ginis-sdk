@@ -15,8 +15,8 @@ describe('nacist-soubor', () => {
           process.env['GINIS_UDE_HOST'] ??
           'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/Ude01/Ude.svc',
       },
-      username: process.env['GINIS_USERNAME']!,
-      password: process.env['GINIS_PASSWORD']!,
+      username: process.env['GINIS_USERNAME'] ?? '',
+      password: process.env['GINIS_PASSWORD'] ?? '',
       debug: false,
     })
   })
@@ -32,8 +32,9 @@ describe('nacist-soubor', () => {
         throw error
       }
 
-      let noDiskError = 'Chyba: El. dokument nelze stáhnout, protože se nachází na zrušeném disku.'
-      let noDiskErrorCode = 'kód: 24200135'
+      const noDiskError =
+        'Chyba: El. dokument nelze stáhnout, protože se nachází na zrušeném disku.'
+      const noDiskErrorCode = 'kód: 24200135'
       if (error.message.includes(noDiskError) || error.message.includes(noDiskErrorCode)) {
         // this means the request format is correct and file ID is valid
         console.warn('Skipping test as no disk is available within this environment.')

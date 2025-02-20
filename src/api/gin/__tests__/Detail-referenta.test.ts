@@ -10,10 +10,12 @@ describe('Detail-referenta', () => {
     )
     ginis = new Ginis({
       urls: {
-        gin: 'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/GIN01_TEST/Gin.svc',
+        gin:
+          process.env['GINIS_GIN_HOST'] ??
+          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/GIN01_TEST/Gin.svc',
       },
-      username: process.env['GINIS_USERNAME']!,
-      password: process.env['GINIS_PASSWORD']!,
+      username: process.env['GINIS_USERNAME'] ?? '',
+      password: process.env['GINIS_PASSWORD'] ?? '',
       debug: false,
     })
   })

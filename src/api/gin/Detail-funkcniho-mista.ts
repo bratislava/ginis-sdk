@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import type { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
