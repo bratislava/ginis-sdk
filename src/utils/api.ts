@@ -11,7 +11,7 @@ const defaultAxiosConfig: AxiosRequestConfig = {
 export async function makeAxiosRequest<T>(
   axiosConfig: AxiosRequestConfig | undefined,
   url: string | undefined,
-  body: string,
+  body: string | object,
   debug?: boolean
 ) {
   if (!url) {
