@@ -1,6 +1,6 @@
 {
   "name": "@bratislava/ginis-sdk",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "A small wrapper for most commonly used requests towards the Bratislava GINIS system",
   "main": "dist/index.js",
   "files": [
@@ -73,8 +73,8 @@
     "glob": "^11.0.1"
   },
   "engines": {
-    "node": ">=22.x.x",
-    "npm": ">=11.x.x"
+    "node": ">=20.9.x",
+    "npm": ">=10.2.x"
   },
   "dependencies": {
     "axios": "^1.7.9",
