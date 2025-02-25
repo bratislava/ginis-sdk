@@ -1,5 +1,4 @@
-import { Ginis } from '../../../index'
-import { NacistSouborResponse } from '../Nacist-soubor'
+import { Ginis, UdeNacistSouborResponse } from '../../../index'
 
 jest.setTimeout(20000)
 
@@ -22,7 +21,7 @@ describe('nacist-soubor', () => {
   })
 
   test('Basic request', async () => {
-    let data: NacistSouborResponse
+    let data: UdeNacistSouborResponse
     try {
       data = await ginis.ude.nacistSoubor({
         'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',

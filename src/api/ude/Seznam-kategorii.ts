@@ -19,7 +19,7 @@ const seznamKategoriiRequestProperties = [
 /**
  * 'Id-uredni-desky' - Identifikátor úřední desky. Pokud je v GINIS naadministrována jen jedna deska, nemusí být uvedeno.
  */
-type SeznamKategoriiRequest = {
+export type UdeSeznamKategoriiRequest = {
   [K in (typeof seznamKategoriiRequestProperties)[number] as K]?: string
 }
 
@@ -45,12 +45,13 @@ const seznamKategoriiResponseSchema = z.object({
   'Seznam-kategorii': coercedArray(seznamKategoriiSchema),
 })
 
-export type SeznamKategoriiResponse = z.infer<typeof seznamKategoriiResponseSchema>
+export type UdeSeznamKategoriiSeznamKategoriiItem = z.infer<typeof seznamKategoriiSchema>
+export type UdeSeznamKategoriiResponse = z.infer<typeof seznamKategoriiResponseSchema>
 
 export async function seznamKategorii(
   this: Ginis,
-  bodyObj: SeznamKategoriiRequest
-): Promise<SeznamKategoriiResponse> {
+  bodyObj: UdeSeznamKategoriiRequest
+): Promise<UdeSeznamKategoriiResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 

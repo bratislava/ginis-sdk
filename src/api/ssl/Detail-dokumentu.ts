@@ -22,7 +22,7 @@ const detailDokumentuRequestProperties = [
   'Id-eu',
 ] as const
 
-export type DetailDokumentuRequest = {
+export type SslDetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
 
@@ -209,12 +209,24 @@ const DetailDokumentuResponseSchema = z.object({
   'Vlozeno-do-spisu': vlozenoDoSpisuSchema.optional(),
 })
 
-export type DetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
+export type SslDetailDokumentuWflDokument = z.infer<typeof wflDokumentSchema>
+export type SslDetailDokumentuDoruceni = z.infer<typeof doruceniSchema>
+export type SslDetailDokumentuEDoruceni = z.infer<typeof eDoruceniSchema>
+export type SslDetailDokumentuHistorieDokumentuItem = z.infer<typeof historieDokumentuSchema>
+export type SslDetailDokumentuSslDokument = z.infer<typeof sslDokumentSchema>
+export type SslDetailDokumentuSslSpis = z.infer<typeof sslSpisSchema>
+export type SslDetailDokumentuSslObsahSpisItem = z.infer<typeof sslObsahSpisSchema>
+export type SslDetailDokumentuCjDokumentu = z.infer<typeof cjDokumentuSchema>
+export type SslDetailDokumentuPrilohyDokumentuItem = z.infer<typeof prilohyDokumentuSchema>
+export type SslDetailDokumentuSouvisejiciDokumentyItem = z.infer<typeof souvisejiciDokumentySchema>
+export type SslDetailDokumentuSpisovnaItem = z.infer<typeof spisovnaSchema>
+export type SslDetailDokumentuVlozenoDoSpisu = z.infer<typeof vlozenoDoSpisuSchema>
+export type SslDetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
-  bodyObj: DetailDokumentuRequest
-): Promise<DetailDokumentuResponse> {
+  bodyObj: SslDetailDokumentuRequest
+): Promise<SslDetailDokumentuResponse> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 

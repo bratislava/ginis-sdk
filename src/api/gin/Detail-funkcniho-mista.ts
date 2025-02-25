@@ -12,7 +12,7 @@ import {
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-funkcniho-mista&type=request
 const detailFunkcnihoMistaRequestProperties = ['Id-funkce'] as const
 
-export type DetailFunkcnihoMistaRequest = {
+export type GinDetailFunkcnihoMistaRequest = {
   [K in (typeof detailFunkcnihoMistaRequestProperties)[number] as K]?: string
 }
 
@@ -48,12 +48,13 @@ const detailFunkcnihoMistaResponseSchema = z.object({
   'Detail-funkcniho-mista': detailFunkcnihoMistaSchema,
 })
 
-export type DetailFunkcnihoMistaResponse = z.infer<typeof detailFunkcnihoMistaResponseSchema>
+export type GinDetailFunkcnihoMistaDetailFunkcnihoMista = z.infer<typeof detailFunkcnihoMistaSchema>
+export type GinDetailFunkcnihoMistaResponse = z.infer<typeof detailFunkcnihoMistaResponseSchema>
 
 export async function detailFunkcnihoMista(
   this: Ginis,
-  bodyObj: DetailFunkcnihoMistaRequest
-): Promise<DetailFunkcnihoMistaResponse> {
+  bodyObj: GinDetailFunkcnihoMistaRequest
+): Promise<GinDetailFunkcnihoMistaResponse> {
   const url = this.config.urls.gin
   if (!url) throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
 

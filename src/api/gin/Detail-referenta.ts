@@ -12,7 +12,7 @@ import {
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-referenta&type=request
 const detailReferentaRequestProperties = ['Id-osoby'] as const
 
-export type DetailReferentaRequest = {
+export type GinDetailReferentaRequest = {
   [K in (typeof detailReferentaRequestProperties)[number] as K]?: string
 }
 
@@ -58,12 +58,13 @@ const detailReferentaResponseSchema = z.object({
   'Detail-referenta': detailReferentaSchema,
 })
 
-export type DetailReferentaResponse = z.infer<typeof detailReferentaResponseSchema>
+export type GinDetailReferentaDetailReferenta = z.infer<typeof detailReferentaSchema>
+export type GinDetailReferentaResponse = z.infer<typeof detailReferentaResponseSchema>
 
 export async function detailReferenta(
   this: Ginis,
-  bodyObj: DetailReferentaRequest
-): Promise<DetailReferentaResponse> {
+  bodyObj: GinDetailReferentaRequest
+): Promise<GinDetailReferentaResponse> {
   const url = this.config.urls.gin
   if (!url) throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
 
