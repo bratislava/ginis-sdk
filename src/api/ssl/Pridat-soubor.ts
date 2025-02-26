@@ -37,7 +37,7 @@ const pridatSouborRequestProperties = [
  * In this scenario a multipart request is sent and the file is send using MTOM XOP
  * inside of Mime envelope. It allows for much faster a larger file transfers.
  */
-export type PridatSouborRequest = {
+export type SslPridatSouborRequest = {
   [K in (typeof pridatSouborRequestProperties)[number] as K]?: string
 } & {
   Obsah?: ReadStream
@@ -54,7 +54,8 @@ const pridatSouborResponseSchema = z.object({
   'Pridat-soubor': pridatSouborSchema,
 })
 
-export type PridatSouborResponse = z.infer<typeof pridatSouborResponseSchema>
+export type SslPridatSouborPridatSoubor = z.infer<typeof pridatSouborSchema>
+export type SslPridatSouborResponse = z.infer<typeof pridatSouborResponseSchema>
 
 const requestName = 'Pridat-soubor'
 const requestNamespace = 'http://www.gordic.cz/svc/xrg-ssl/v_1.0.0.0'
@@ -63,8 +64,8 @@ const requestXrgNamespace =
 
 export async function pridatSoubor(
   this: Ginis,
-  bodyObj: PridatSouborRequest
-): Promise<PridatSouborResponse> {
+  bodyObj: SslPridatSouborRequest
+): Promise<SslPridatSouborResponse> {
   const url = this.config.urls.ssl
   if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
 
@@ -87,8 +88,8 @@ export async function pridatSoubor(
 
 export async function pridatSouborMtom(
   this: Ginis,
-  bodyObj: PridatSouborRequest
-): Promise<PridatSouborResponse> {
+  bodyObj: SslPridatSouborRequest
+): Promise<SslPridatSouborResponse> {
   if (!bodyObj.Obsah) {
     bodyObj.Obsah = new ReadStream()
   }

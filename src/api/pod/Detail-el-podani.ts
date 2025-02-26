@@ -18,7 +18,7 @@ const detailElPodaniRequestProperties = [
   'Zaradit-navazane',
 ] as const
 
-export type DetailElPodaniRequest = {
+export type PodDetailElPodaniRequest = {
   [K in (typeof detailElPodaniRequestProperties)[number] as K]?: string
 }
 
@@ -48,12 +48,14 @@ const detailElPodaniResponseSchema = z.object({
   'Navazany-dokument': coercedArray(navazanyDokumentSchema),
 })
 
-export type DetailElPodaniResponse = z.infer<typeof detailElPodaniResponseSchema>
+export type PodDetailElPodaniDetailElPodani = z.infer<typeof detailElPodaniSchema>
+export type PodDetailElPodaniNavazanyDokumentItem = z.infer<typeof navazanyDokumentSchema>
+export type PodDetailElPodaniResponse = z.infer<typeof detailElPodaniResponseSchema>
 
 export async function detailElPodani(
   this: Ginis,
-  bodyObj: DetailElPodaniRequest
-): Promise<DetailElPodaniResponse> {
+  bodyObj: PodDetailElPodaniRequest
+): Promise<PodDetailElPodaniResponse> {
   const url = this.config.urls.pod
   if (!url) throw new GinisError('GINIS SDK Error: Missing POD url in GINIS config')
 

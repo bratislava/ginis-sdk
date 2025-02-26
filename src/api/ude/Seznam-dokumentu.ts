@@ -120,7 +120,7 @@ const seznamDokumentuRequestProperties = [
  * datova-schranka - datová schránka
  * interface-xrg - interface, xrg
  */
-export type SeznamDokumentuRequest = {
+export type UdeSeznamDokumentuRequest = {
   [K in (typeof seznamDokumentuRequestProperties)[number] as K]?: string
 }
 
@@ -231,12 +231,17 @@ const seznamDokumentuResponseSchema = z.object({
   'Zrusene-dokumenty': coercedArray(dokumentySchema),
 })
 
-export type SeznamDokumentuResponse = z.infer<typeof seznamDokumentuResponseSchema>
+export type UdeSeznamDokumentuSeznamDokumentuItem = z.infer<typeof seznamDokumentuSchema>
+export type UdeSeznamDokumentuSejmuteDokumentyItem = z.infer<typeof dokumentySchema>
+// for consistency of the API
+// eslint-disable-next-line sonarjs/redundant-type-aliases
+export type UdeSeznamDokumentuZruseneDokumentyItem = UdeSeznamDokumentuSejmuteDokumentyItem
+export type UdeSeznamDokumentuResponse = z.infer<typeof seznamDokumentuResponseSchema>
 
 export async function seznamDokumentu(
   this: Ginis,
-  bodyObj: SeznamDokumentuRequest
-): Promise<SeznamDokumentuResponse> {
+  bodyObj: UdeSeznamDokumentuRequest
+): Promise<UdeSeznamDokumentuResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 

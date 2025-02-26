@@ -13,7 +13,7 @@ import { coercedArray } from '../../utils/validation'
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=request#
 const detailDokumentuRequestProperties = ['Vratit-info', 'Id-zaznamu'] as const
 
-type DetailDokumentuRequest = {
+export type UdeDetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
 
@@ -156,12 +156,15 @@ const DetailDokumentuResponseSchema = z.object({
   'Protistrany-sml': coercedArray(protistranySmlSchema),
 })
 
-export type DetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
+export type UdeDetailDokumentuDetailDokumentu = z.infer<typeof detailDokumentuSchema>
+export type UdeDetailDokumentuSouboryDokumentuItem = z.infer<typeof souboryDokumentuSchema>
+export type UdeDetailDokumentuProtistranySmlItem = z.infer<typeof protistranySmlSchema>
+export type UdeDetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
-  bodyObj: DetailDokumentuRequest
-): Promise<DetailDokumentuResponse> {
+  bodyObj: UdeDetailDokumentuRequest
+): Promise<UdeDetailDokumentuResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 

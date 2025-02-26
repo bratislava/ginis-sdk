@@ -11,7 +11,7 @@ import {
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 
-type NacistSouborRequest = {
+export type UdeNacistSouborRequest = {
   [K in (typeof nacistSouborRequestProperties)[number] as K]?: string
 }
 
@@ -36,12 +36,13 @@ const nacistSouborResponseSchema = z.object({
   'Nacist-soubor': nacistSouborSchema.optional(),
 })
 
-export type NacistSouborResponse = z.infer<typeof nacistSouborResponseSchema>
+export type UdeNacistSouborNacistSoubor = z.infer<typeof nacistSouborSchema>
+export type UdeNacistSouborResponse = z.infer<typeof nacistSouborResponseSchema>
 
 export async function nacistSoubor(
   this: Ginis,
-  bodyObj: NacistSouborRequest
-): Promise<NacistSouborResponse> {
+  bodyObj: UdeNacistSouborRequest
+): Promise<UdeNacistSouborResponse> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
