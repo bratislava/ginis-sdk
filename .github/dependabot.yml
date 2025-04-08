@@ -17,5 +17,6 @@ updates:
           - 'eslint-*'
           - '@eslint/*'
           - '@types/eslint-*'
-          - '@typescript-eslint/*'
           - '@darraghor/eslint-plugin-nestjs-typed'
+          - 'typescript-eslint'
+          - '@typescript-eslint/*'
