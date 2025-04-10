@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/slow-regex */
-import { ReadStream } from 'fs'
-import { PassThrough } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import { parseStringPromise as parseXml } from 'xml2js'
 import { ZodType } from 'zod'
 
@@ -100,7 +99,7 @@ export function createMultipartRequestConfig(
 export function createMultipartRequestBody(
   config: GinisConfig,
   requestInfo: XmlRequestInfo,
-  fileStream: ReadStream,
+  fileStream: Readable,
   boundary: string,
   requestContentId: string,
   fileContentId: string
