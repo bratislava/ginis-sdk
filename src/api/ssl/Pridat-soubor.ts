@@ -1,4 +1,4 @@
-import { ReadStream } from 'fs'
+import { Readable } from 'stream'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 
@@ -40,7 +40,7 @@ const pridatSouborRequestProperties = [
 export type SslPridatSouborRequest = {
   [K in (typeof pridatSouborRequestProperties)[number] as K]?: string
 } & {
-  Obsah?: ReadStream
+  Obsah?: Readable
 }
 
 const pridatSouborSchema = z.object({
@@ -91,7 +91,11 @@ export async function pridatSouborMtom(
   bodyObj: SslPridatSouborRequest
 ): Promise<SslPridatSouborResponse> {
   if (!bodyObj.Obsah) {
-    bodyObj.Obsah = new ReadStream()
+    bodyObj.Obsah = new Readable({
+      read() {
+        this.push(null)
+      },
+    })
   }
 
   const url = this.config.urls.ssl_mtom
