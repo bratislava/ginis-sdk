@@ -1,8 +1,6 @@
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('Prehled-dokumentu', () => {
+describe('SSL-Prehled-dokumentu', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -41,5 +39,5 @@ describe('Prehled-dokumentu', () => {
     expect(data['Stav-prehledu']['Radku-celkem']).toBe('1')
     expect(data['Prehled-dokumentu'].length).toBe(1)
     expect(data['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe('MAG0X04X96LQ')
-  })
+  }, 20_000)
 })

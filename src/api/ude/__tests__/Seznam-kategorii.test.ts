@@ -1,8 +1,6 @@
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('seznam-kategorii', () => {
+describe('UDE-Seznam-kategorii', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -24,5 +22,5 @@ describe('seznam-kategorii', () => {
     const data = await ginis.ude.seznamKategorii({})
 
     expect(data['Seznam-kategorii'].length).toBeGreaterThan(0)
-  })
+  }, 20_000)
 })

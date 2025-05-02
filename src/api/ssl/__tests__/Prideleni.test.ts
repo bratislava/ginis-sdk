@@ -1,8 +1,6 @@
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('Prideleni', () => {
+describe('SSL-Prideleni', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -30,5 +28,5 @@ describe('Prideleni', () => {
     })
 
     expect(data['Prideleni']['Datum-zmeny']).toBeTruthy()
-  })
+  }, 20_000)
 })

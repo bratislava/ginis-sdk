@@ -2,9 +2,7 @@ import { createReadStream, promises as fs } from 'fs'
 
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('Pridat-soubor', () => {
+describe('SSL-Pridat-soubor', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -39,7 +37,7 @@ describe('Pridat-soubor', () => {
     })
 
     expect(data['Pridat-soubor']['Verze-souboru']).toBeTruthy()
-  })
+  }, 20_000)
 
   test('MTOM request', async () => {
     const fileName = 'plain-data.txt'
@@ -53,5 +51,5 @@ describe('Pridat-soubor', () => {
       Obsah: contentStream,
     })
     expect(data['Pridat-soubor']['Verze-souboru']).toBeTruthy()
-  })
+  }, 20_000)
 })
