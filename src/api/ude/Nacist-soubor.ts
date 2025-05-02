@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
@@ -14,6 +15,13 @@ const nacistSouborRequestProperties = ['Id-souboru'] as const
 export type UdeNacistSouborRequest = {
   [K in (typeof nacistSouborRequestProperties)[number] as K]?: string
 }
+
+const nacistSouborParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Nacist-soubor',
+    params: nacistSouborRequestProperties,
+  },
+]
 
 const nacistSouborSchema = z.object({
   /**
@@ -56,8 +64,8 @@ export async function nacistSoubor(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/ude/nacist-soubor/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: nacistSouborRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: nacistSouborParamOrders,
     }),
     this.config.debug
   )

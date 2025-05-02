@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-referenta&type=request
@@ -15,6 +16,13 @@ const detailReferentaRequestProperties = ['Id-osoby'] as const
 export type GinDetailReferentaRequest = {
   [K in (typeof detailReferentaRequestProperties)[number] as K]?: string
 }
+
+const detailReferentaParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Detail-referenta',
+    params: detailReferentaRequestProperties,
+  },
+]
 
 const detailReferentaSchema = z.object({
   'Id-osoby': z.string(),
@@ -78,8 +86,8 @@ export async function detailReferenta(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/gin/detail-referenta/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: detailReferentaRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: detailReferentaParamOrders,
     }),
     this.config.debug
   )

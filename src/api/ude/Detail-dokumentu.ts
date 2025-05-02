@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -16,6 +17,13 @@ const detailDokumentuRequestProperties = ['Vratit-info', 'Id-zaznamu'] as const
 export type UdeDetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
+
+const detailDokumentuParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Detail-dokumentu',
+    params: detailDokumentuRequestProperties,
+  },
+]
 
 /** These types were created manually:
  * - copied from https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=response
@@ -178,8 +186,8 @@ export async function detailDokumentu(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/ude/detail-dokumentu/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: detailDokumentuRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: detailDokumentuParamOrders,
     }),
     this.config.debug
   )

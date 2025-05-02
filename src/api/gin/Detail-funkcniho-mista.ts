@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-funkcniho-mista&type=request
@@ -15,6 +16,13 @@ const detailFunkcnihoMistaRequestProperties = ['Id-funkce'] as const
 export type GinDetailFunkcnihoMistaRequest = {
   [K in (typeof detailFunkcnihoMistaRequestProperties)[number] as K]?: string
 }
+
+const detailFunkcnihoMistaParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Detail-funkcniho-mista',
+    params: detailFunkcnihoMistaRequestProperties,
+  },
+]
 
 const detailFunkcnihoMistaSchema = z.object({
   'Id-funkce': z.string(),
@@ -68,8 +76,8 @@ export async function detailFunkcnihoMista(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/gin/detail-funkcniho-mista/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: detailFunkcnihoMistaRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: detailFunkcnihoMistaParamOrders,
     }),
     this.config.debug
   )

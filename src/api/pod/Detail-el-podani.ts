@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -21,6 +22,13 @@ const detailElPodaniRequestProperties = [
 export type PodDetailElPodaniRequest = {
   [K in (typeof detailElPodaniRequestProperties)[number] as K]?: string
 }
+
+const detailElPodaniParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Detail-el-podani',
+    params: detailElPodaniRequestProperties,
+  },
+]
 
 const detailElPodaniSchema = z.object({
   'Datum-prijeti': z.string(),
@@ -69,8 +77,8 @@ export async function detailElPodani(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/pod/detail-el-podani/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: detailElPodaniRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: detailElPodaniParamOrders,
     }),
     this.config.debug
   )
