@@ -26,3 +26,4 @@ export type {
   SslPridatSouborRequest,
   SslPridatSouborResponse,
 } from './Pridat-soubor'
+export type { SslPrideleniPrideleni, SslPrideleniRequest, SslPrideleniResponse } from './Prideleni'
