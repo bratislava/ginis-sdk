@@ -6,13 +6,18 @@ import { ZodType } from 'zod'
 import { GinisConfig } from '../ginis'
 import { GinisError } from './errors'
 
+export interface RequestParamOrder {
+  name: string
+  params: readonly string[]
+}
+
 export interface XmlRequestInfo {
   name: string
   namespace: string
   xrgNamespace: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paramsBody: any
-  paramOrder: readonly string[]
+  paramsBodies: any[]
+  paramOrders: readonly RequestParamOrder[]
 }
 
 export function createXmlRequestConfig(requestName: string, requestNamespace: string) {
@@ -22,6 +27,18 @@ export function createXmlRequestConfig(requestName: string, requestNamespace: st
       'Content-Type': 'text/xml; charset=utf-8',
     },
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateRequestNode(paramOrder: RequestParamOrder, paramsBody: any) {
+  return `<${paramOrder.name}>${paramOrder.params
+    // find all parameters with respect to their strict order that are present in paramsBody
+    // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
+    .filter((e) => paramsBody[e])
+    // wrap the value of the parameter into its XML tag
+    // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
+    .map((e) => `<${e}>${paramsBody[e]}</${e}>`)
+    .join('')}</${paramOrder.name}>`
 }
 
 export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlRequestInfo) {
@@ -38,16 +55,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
     <${requestInfo.name} xmlns="${requestInfo.namespace}">
       <requestXml>
         <Xrg xmlns="${requestInfo.xrgNamespace}">
-          <${requestInfo.name}>
-            ${requestInfo.paramOrder
-              // find all parameters with respect to their strict order that are present in paramsBody
-              // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
-              .filter((e) => requestInfo.paramsBody[e])
-              // wrap the value of the parameter into its XML tag
-              // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
-              .map((e) => `<${e}>${requestInfo.paramsBody[e]}</${e}>`)
-              .join('')}
-          </${requestInfo.name}>
+          ${requestInfo.paramOrders.map((e, i) => generateRequestNode(e, requestInfo.paramsBodies.at(i))).join('')}
         </Xrg>
       </requestXml>
     </${requestInfo.name}>

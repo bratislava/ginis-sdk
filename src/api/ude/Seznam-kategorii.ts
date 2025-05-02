@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -22,6 +23,13 @@ const seznamKategoriiRequestProperties = [
 export type UdeSeznamKategoriiRequest = {
   [K in (typeof seznamKategoriiRequestProperties)[number] as K]?: string
 }
+
+const seznamKategoriiParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Seznam-kategorii',
+    params: seznamKategoriiRequestProperties,
+  },
+]
 
 const seznamKategoriiSchema = z.object({
   'Id-kategorie': z.string(),
@@ -65,8 +73,8 @@ export async function seznamKategorii(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/ude/seznam-kategorii/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: seznamKategoriiRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: seznamKategoriiParamOrders,
     }),
     this.config.debug
   )

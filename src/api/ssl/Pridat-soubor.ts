@@ -12,6 +12,7 @@ import {
   createXmlRequestConfig,
   extractMultipartResponseJson,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=request
@@ -43,6 +44,13 @@ export type SslPridatSouborRequest = {
   Obsah?: Readable
 }
 
+const pridatSouborParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Pridat-soubor',
+    params: pridatSouborRequestProperties,
+  },
+]
+
 const pridatSouborSchema = z.object({
   'Datum-zmeny': z.string(),
   'Id-souboru': z.string(),
@@ -73,8 +81,8 @@ export async function pridatSoubor(
     name: requestName,
     namespace: requestNamespace,
     xrgNamespace: requestXrgNamespace,
-    paramsBody: bodyObj,
-    paramOrder: pridatSouborRequestProperties,
+    paramsBodies: [bodyObj],
+    paramOrders: pridatSouborParamOrders,
   }
 
   const response = await makeAxiosRequest<string>(
@@ -105,8 +113,8 @@ export async function pridatSouborMtom(
     name: requestName,
     namespace: requestNamespace,
     xrgNamespace: requestXrgNamespace,
-    paramsBody: bodyObj,
-    paramOrder: pridatSouborRequestProperties,
+    paramsBodies: [bodyObj],
+    paramOrders: pridatSouborParamOrders,
   }
   const requestContentId = 'soap-req'
   const fileContentId = 'attachment-file'

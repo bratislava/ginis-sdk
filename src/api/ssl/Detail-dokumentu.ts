@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -25,6 +26,13 @@ const detailDokumentuRequestProperties = [
 export type SslDetailDokumentuRequest = {
   [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
 }
+
+const detailDokumentuParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Detail-dokumentu',
+    params: detailDokumentuRequestProperties,
+  },
+]
 
 const wflDokumentSchema = z.object({
   'Id-dokumentu': z.string(),
@@ -240,8 +248,8 @@ export async function detailDokumentu(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/ssl/wfl-dokument/detail-dokumentu/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: detailDokumentuRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: detailDokumentuParamOrders,
     }),
     this.config.debug
   )

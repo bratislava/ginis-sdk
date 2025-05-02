@@ -7,6 +7,7 @@ import {
   createXmlRequestBody,
   createXmlRequestConfig,
   extractResponseJson,
+  RequestParamOrder,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -123,6 +124,13 @@ const seznamDokumentuRequestProperties = [
 export type UdeSeznamDokumentuRequest = {
   [K in (typeof seznamDokumentuRequestProperties)[number] as K]?: string
 }
+
+const seznamDokumentuParamOrders: RequestParamOrder[] = [
+  {
+    name: 'Seznam-dokumentu',
+    params: seznamDokumentuRequestProperties,
+  },
+]
 
 /**
  * Manually typed according to https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=390&methodName=seznam-dokumentu&type=response#
@@ -255,8 +263,8 @@ export async function seznamDokumentu(
       name: requestName,
       namespace: requestNamespace,
       xrgNamespace: 'http://www.gordic.cz/xrg/ude/seznam-dokumentu/request/v_1.0.0.0',
-      paramsBody: bodyObj,
-      paramOrder: seznamDokumentuRequestProperties,
+      paramsBodies: [bodyObj],
+      paramOrders: seznamDokumentuParamOrders,
     }),
     this.config.debug
   )
