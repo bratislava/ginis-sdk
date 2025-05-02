@@ -15,6 +15,13 @@ export type {
   SslDetailDokumentuWflDokument,
 } from './Detail-dokumentu'
 export type {
+  SslPrehledDokumentuPrehledDokumentuItem,
+  SslPrehledDokumentuRequest,
+  SslPrehledDokumentuRequestRizeniPrehledu,
+  SslPrehledDokumentuResponse,
+  SslPrehledDokumentuStavPrehledu,
+} from './Prehled-dokumentu'
+export type {
   SslPridatSouborPridatSoubor,
   SslPridatSouborRequest,
   SslPridatSouborResponse,
