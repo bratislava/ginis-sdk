@@ -1,8 +1,6 @@
 import { Ginis, UdeNacistSouborResponse } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('nacist-soubor', () => {
+describe('UDE-Nacist-soubor', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -46,5 +44,5 @@ describe('nacist-soubor', () => {
     expect(data['Nacist-soubor']?.['Jmeno-souboru']).toBe(
       'Plnenie UZN c. 135_2015 február 2021.pdf'
     )
-  })
+  }, 20_000)
 })

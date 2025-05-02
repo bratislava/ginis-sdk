@@ -1,8 +1,6 @@
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('Detail-referenta', () => {
+describe('GIN-Detail-referenta', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -26,5 +24,5 @@ describe('Detail-referenta', () => {
     })
 
     expect(data['Detail-referenta']['Id-osoby']).toBe('MAG0SR00A0BU')
-  })
+  }, 20_000)
 })

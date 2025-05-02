@@ -1,8 +1,6 @@
 import { Ginis } from '../../../index'
 
-jest.setTimeout(20000)
-
-describe('Detail-funkcniho-mista', () => {
+describe('GIN-Detail-funkcniho-mista', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
@@ -26,5 +24,5 @@ describe('Detail-funkcniho-mista', () => {
     })
 
     expect(data['Detail-funkcniho-mista']['Id-funkce']).toBe('MAG0SF00A19L')
-  })
+  }, 20_000)
 })
