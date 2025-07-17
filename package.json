@@ -70,7 +70,7 @@
     "typescript-eslint": "^8.37.0"
   },
   "overrides": {
-    "glob": "^11.0.1"
+    "glob": "^11.0.3"
   },
   "engines": {
     "node": ">=20.9.x",
