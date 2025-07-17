@@ -1,6 +1,7 @@
 import { Ginis } from '../../../index'
 
-describe('POD-Detail-el-podani', () => {
+// POD endpoints are disabled, as POD is not licensed after test period expired
+describe.skip('POD-Detail-el-podani', () => {
   let ginis: Ginis
   beforeAll(() => {
     console.log(
