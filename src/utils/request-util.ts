@@ -66,8 +66,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
 export async function extractResponseJson<T>(
   responseXml: string,
   requestName: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseSchema: ZodType<T, any, any>
+  responseSchema: ZodType<T>
 ): Promise<T> {
   try {
     // try catch is covering all parsing, access and validation problems
@@ -143,8 +142,7 @@ export function createMultipartRequestBody(
 export async function extractMultipartResponseJson<T>(
   responseString: string,
   requestName: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseSchema: ZodType<T, any, any>
+  responseSchema: ZodType<T>
 ): Promise<T> {
   const startTag = '<s:Envelope'
   const endTag = '</s:Envelope>'
