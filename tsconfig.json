@@ -3,9 +3,9 @@
   "display": "Node 16 + ESM + Strictest",
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["es2021"],
+    "lib": ["es2022"],
     "module": "es2022",
-    "target": "es2021",
+    "target": "es2022",
     "allowJs": true,
     "strict": true,
     "strictBindCallApply": true,
