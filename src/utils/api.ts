@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios'
 
 import { GinisError } from './errors'
 
@@ -30,7 +30,7 @@ export async function makeAxiosRequest<T>(
   try {
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
-    if (!(error instanceof AxiosError)) {
+    if (!isAxiosError(error)) {
       throw makeResponseDetailError(error)
     }
     if (debug) {
@@ -63,7 +63,7 @@ function makeResponseDetailError(error: unknown, responseData: unknown = null) {
     responseData != null && typeof responseData === 'string'
       ? `${error.message}\r\nError response details: ${responseData}`
       : error.message
-  if (error instanceof AxiosError) {
+  if (isAxiosError(error)) {
     return new GinisError(errorDetail, error)
   }
   return new GinisError(errorDetail)
