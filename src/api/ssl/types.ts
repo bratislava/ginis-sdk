@@ -27,3 +27,11 @@ export type {
   SslPridatSouborResponse,
 } from './Pridat-soubor'
 export type { SslPrideleniPrideleni, SslPrideleniRequest, SslPrideleniResponse } from './Prideleni'
+export type { SslZalozCjRequest, SslZalozCjResponse, SslZalozCjZalozCj } from './Zaloz-cj'
+export type {
+  SslZalozPisemnostRequestDoruceni,
+  SslZalozPisemnostRequestSslDokument,
+  SslZalozPisemnostRequestWflDokument,
+  SslZalozPisemnostResponse,
+  SslZalozPisemnostZalozPisemnost,
+} from './Zaloz-pisemnost'
