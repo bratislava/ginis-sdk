@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zaloz-pisemnost&type=request
@@ -21,7 +22,7 @@ const wflDokumentRequestProperties = [
 ]
 
 export type SslZalozPisemnostRequestWflDokument = {
-  [K in (typeof wflDokumentRequestProperties)[number] as K]?: string
+  [K in (typeof wflDokumentRequestProperties)[number] as K]?: RequestParamType
 }
 
 const doruceniRequestProperties = [
@@ -46,7 +47,7 @@ const doruceniRequestProperties = [
 ]
 
 export type SslZalozPisemnostRequestDoruceni = {
-  [K in (typeof doruceniRequestProperties)[number] as K]?: string
+  [K in (typeof doruceniRequestProperties)[number] as K]?: RequestParamType
 }
 
 const sslDokumentRequestProperties = [
@@ -67,7 +68,7 @@ const sslDokumentRequestProperties = [
 ]
 
 export type SslZalozPisemnostRequestSslDokument = {
-  [K in (typeof sslDokumentRequestProperties)[number] as K]?: string
+  [K in (typeof sslDokumentRequestProperties)[number] as K]?: RequestParamType
 }
 
 const prehledDokumentuParamOrders: RequestParamOrder[] = [

@@ -8,13 +8,14 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zaloz-cj&type=request
 const zalozCjRequestProperties = ['Id-init-dokumentu', 'Denik-cj', 'Rok-cj', 'Poradove-cislo-cj']
 
 export type SslZalozCjRequest = {
-  [K in (typeof zalozCjRequestProperties)[number] as K]?: string
+  [K in (typeof zalozCjRequestProperties)[number] as K]?: RequestParamType
 }
 
 const zalozCjParamOrders: RequestParamOrder[] = [

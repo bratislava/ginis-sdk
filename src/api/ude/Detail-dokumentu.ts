@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -15,7 +16,7 @@ import { coercedArray } from '../../utils/validation'
 const detailDokumentuRequestProperties = ['Vratit-info', 'Id-zaznamu'] as const
 
 export type UdeDetailDokumentuRequest = {
-  [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
+  [K in (typeof detailDokumentuRequestProperties)[number] as K]?: RequestParamType
 }
 
 const detailDokumentuParamOrders: RequestParamOrder[] = [

@@ -41,6 +41,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
 
     const data = await ginis.ssl.zalozPisemnost(
       {
+        'Id-dokumentu': { value: formId, attributes: ['externi="true"'] },
         Vec: `Žiadosť nájomko - test formulár ${formId.substring(0, 4)}`,
         'Id-typu-dokumentu': 'MAG00400ABKL',
         'Priznak-fyz-existence': 'neexistuje',

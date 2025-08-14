@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prideleni&type=request
@@ -21,7 +22,7 @@ const prideleniRequestProperties = [
 ]
 
 export type SslPrideleniRequest = {
-  [K in (typeof prideleniRequestProperties)[number] as K]?: string
+  [K in (typeof prideleniRequestProperties)[number] as K]?: RequestParamType
 }
 
 const prideleniParamOrders: RequestParamOrder[] = [

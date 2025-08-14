@@ -8,12 +8,13 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 
 export type UdeNacistSouborRequest = {
-  [K in (typeof nacistSouborRequestProperties)[number] as K]?: string
+  [K in (typeof nacistSouborRequestProperties)[number] as K]?: RequestParamType
 }
 
 const nacistSouborParamOrders: RequestParamOrder[] = [

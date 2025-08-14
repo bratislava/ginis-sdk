@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -46,7 +47,7 @@ const prehledDokumentuRequestProperties = [
 ]
 
 export type SslPrehledDokumentuRequest = {
-  [K in (typeof prehledDokumentuRequestProperties)[number] as K]?: string
+  [K in (typeof prehledDokumentuRequestProperties)[number] as K]?: RequestParamType
 }
 
 const rizeniPrehleduRequestProperties = [
@@ -58,7 +59,7 @@ const rizeniPrehleduRequestProperties = [
 ]
 
 export type SslPrehledDokumentuRequestRizeniPrehledu = {
-  [K in (typeof rizeniPrehleduRequestProperties)[number] as K]?: string
+  [K in (typeof rizeniPrehleduRequestProperties)[number] as K]?: RequestParamType
 }
 
 const prehledDokumentuParamOrders: RequestParamOrder[] = [
