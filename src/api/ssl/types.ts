@@ -15,6 +15,11 @@ export type {
   SslDetailDokumentuWflDokument,
 } from './Detail-dokumentu'
 export type {
+  SslNastavitVlastnostDokumentuNastavitVlastnostDokumentu,
+  SslNastavitVlastnostDokumentuRequest,
+  SslNastavitVlastnostDokumentuResponse,
+} from './Nastavit-vlastnost-dokumentu'
+export type {
   SslPrehledDokumentuPrehledDokumentuItem,
   SslPrehledDokumentuRequest,
   SslPrehledDokumentuRequestRizeniPrehledu,
@@ -35,3 +40,8 @@ export type {
   SslZalozPisemnostResponse,
   SslZalozPisemnostZalozPisemnost,
 } from './Zaloz-pisemnost'
+export type {
+  SslZalozitVlastnostDokumentuRequest,
+  SslZalozitVlastnostDokumentuResponse,
+  SslZalozitVlastnostDokumentuZalozitVlastnostDokumentu,
+} from './Zalozit-vlastnost-dokumentu'

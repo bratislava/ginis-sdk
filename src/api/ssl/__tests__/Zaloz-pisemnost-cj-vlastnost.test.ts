@@ -6,6 +6,9 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
   let ginis: Ginis
   const formId = uuidv4()
   let documentId: string
+  let propertyOrder: string
+  const testPropertyCode = 'IDSFOR'
+
   beforeAll(() => {
     console.log(
       'Loading GINIS credentials from .env - make sure you have correct local configuration.'
@@ -38,11 +41,12 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
 
   test('Zaloz-pisemnost', async () => {
     const todayIso = new Date().toISOString().split('T')[0]
+    const formPrefix = formId.substring(0, 4).toUpperCase()
 
     const data = await ginis.ssl.zalozPisemnost(
       {
         'Id-dokumentu': { value: formId, attributes: ['externi="true"'] },
-        Vec: `Žiadosť nájomko - test formulár ${formId.substring(0, 4)}`,
+        Vec: `Žiadosť nájomko - test formulár ${formPrefix}`,
         'Id-typu-dokumentu': 'MAG00400ABKL',
         'Priznak-fyz-existence': 'neexistuje',
       },
@@ -59,7 +63,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
       },
       {
         Pristup: 'ke zverejneni',
-        'Vec-podrobne': 'Žiadosť nájomko - test formulár - SSL podrobne',
+        'Vec-podrobne': `Žiadosť nájomko - test formulár ${formPrefix} - SSL podrobne`,
         Poznamka: 'SSL poznámka',
         'Datum-podani': `${todayIso}T00:00:00`,
       }
@@ -74,5 +78,27 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
       'Denik-cj': 'MAG',
     })
     expect(data['Zaloz-cj']['Znacka-cj']).toBeTruthy()
+  }, 20_000)
+
+  test('Zalozit-vlastnost-dokumentu', async () => {
+    const data = await ginis.ssl.zalozitVlastnostDokumentu({
+      'Id-dokumentu': documentId,
+      'Typ-objektu': 'vlastnost',
+      'Kod-objektu': testPropertyCode,
+    })
+    propertyOrder = data['Zalozit-vlastnost-dokumentu']['Poradove-cislo']
+    expect(propertyOrder).toBeTruthy()
+  }, 20_000)
+
+  test('Nastavit-vlastnost-dokumentu', async () => {
+    const data = await ginis.ssl.nastavitVlastnostDokumentu({
+      'Id-dokumentu': documentId,
+      'Kod-profilu': testPropertyCode,
+      'Kod-struktury': testPropertyCode,
+      'Kod-vlastnosti': testPropertyCode,
+      'Poradove-cislo': propertyOrder,
+      'Hodnota-raw': formId,
+    })
+    expect(data['Nastavit-vlastnost-dokumentu']['Poradove-cislo']).toBeTruthy()
   }, 20_000)
 })
