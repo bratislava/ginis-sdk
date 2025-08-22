@@ -58,7 +58,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
         'Druh-zasilky': 'neurceno',
         'Druh-zachazeni': 'neurceno',
         'Datum-prijmu-podani': `${todayIso}T00:00:00`,
-        'Id-odesilatele': 'MAG0SE14PG1L',
+        'Id-odesilatele': 'MAG0SE1BAPXI',
         'Poznamka-k-doruceni': 'D poznámka',
       },
       {
