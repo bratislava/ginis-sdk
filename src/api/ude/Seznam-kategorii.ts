@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -21,7 +22,7 @@ const seznamKategoriiRequestProperties = [
  * 'Id-uredni-desky' - Identifikátor úřední desky. Pokud je v GINIS naadministrována jen jedna deska, nemusí být uvedeno.
  */
 export type UdeSeznamKategoriiRequest = {
-  [K in (typeof seznamKategoriiRequestProperties)[number] as K]?: string
+  [K in (typeof seznamKategoriiRequestProperties)[number] as K]?: RequestParamType
 }
 
 const seznamKategoriiParamOrders: RequestParamOrder[] = [

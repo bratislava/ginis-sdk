@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -20,7 +21,7 @@ const detailElPodaniRequestProperties = [
 ] as const
 
 export type PodDetailElPodaniRequest = {
-  [K in (typeof detailElPodaniRequestProperties)[number] as K]?: string
+  [K in (typeof detailElPodaniRequestProperties)[number] as K]?: RequestParamType
 }
 
 const detailElPodaniParamOrders: RequestParamOrder[] = [

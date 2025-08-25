@@ -43,13 +43,15 @@ describe('SSL-Pridat-soubor', () => {
     const fileName = 'plain-data.txt'
     const contentStream = createReadStream(`./src/api/ssl/__tests__/${fileName}`)
 
-    const data = await ginis.ssl.pridatSouborMtom({
-      'Id-dokumentu': 'MAG0X03RYYSN',
-      'Jmeno-souboru': fileName,
-      'Typ-vazby': 'elektronicka-priloha',
-      'Popis-souboru': 'mtom-xop',
-      Obsah: contentStream,
-    })
+    const data = await ginis.ssl.pridatSouborMtom(
+      {
+        'Id-dokumentu': 'MAG0X03RYYSN',
+        'Jmeno-souboru': fileName,
+        'Typ-vazby': 'elektronicka-priloha',
+        'Popis-souboru': 'mtom-xop',
+      },
+      contentStream
+    )
     expect(data['Pridat-soubor']['Verze-souboru']).toBeTruthy()
   }, 20_000)
 })

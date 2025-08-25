@@ -13,6 +13,7 @@ import {
   extractMultipartResponseJson,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=request
@@ -30,18 +31,8 @@ const pridatSouborRequestProperties = [
   'Id-kategorie-typu-prilohy',
 ] as const
 
-/**
- * File can be provided according to the documentation as base64 encoded string
- * of its content inside of the Data attribute to send using a regular request.
- *
- * It is also possible to provide file as byte array inside of Obsah attribute.
- * In this scenario a multipart request is sent and the file is send using MTOM XOP
- * inside of Mime envelope. It allows for much faster a larger file transfers.
- */
 export type SslPridatSouborRequest = {
-  [K in (typeof pridatSouborRequestProperties)[number] as K]?: string
-} & {
-  Obsah?: Readable
+  [K in (typeof pridatSouborRequestProperties)[number] as K]?: RequestParamType
 }
 
 const pridatSouborParamOrders: RequestParamOrder[] = [
@@ -96,10 +87,12 @@ export async function pridatSoubor(
 
 export async function pridatSouborMtom(
   this: Ginis,
-  bodyObj: SslPridatSouborRequest
+  bodyObj: SslPridatSouborRequest,
+  fileStream?: Readable
 ): Promise<SslPridatSouborResponse> {
-  if (!bodyObj.Obsah) {
-    bodyObj.Obsah = new Readable({
+  let fileContent = fileStream
+  if (!fileContent) {
+    fileContent = new Readable({
       read() {
         this.push(null)
       },
@@ -125,7 +118,7 @@ export async function pridatSouborMtom(
   const requestBody = createMultipartRequestBody(
     this.config,
     requestInfo,
-    bodyObj.Obsah,
+    fileContent,
     boundary,
     requestContentId,
     fileContentId
