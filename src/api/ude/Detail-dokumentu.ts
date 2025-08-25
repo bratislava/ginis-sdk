@@ -159,7 +159,7 @@ const protistranySmlSchema = z.object({
  * - DetailDokumentu usually comes as an array with one item
  * - SouboryDokumentu usually comes as play item it there is only one file, array otherwise
  */
-const DetailDokumentuResponseSchema = z.object({
+const detailDokumentuResponseSchema = z.object({
   'Detail-dokumentu': detailDokumentuSchema.optional(),
   'Soubory-dokumentu': coercedArray(souboryDokumentuSchema),
   'Protistrany-sml': coercedArray(protistranySmlSchema),
@@ -168,7 +168,7 @@ const DetailDokumentuResponseSchema = z.object({
 export type UdeDetailDokumentuDetailDokumentu = z.infer<typeof detailDokumentuSchema>
 export type UdeDetailDokumentuSouboryDokumentuItem = z.infer<typeof souboryDokumentuSchema>
 export type UdeDetailDokumentuProtistranySmlItem = z.infer<typeof protistranySmlSchema>
-export type UdeDetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
+export type UdeDetailDokumentuResponse = z.infer<typeof detailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
@@ -192,5 +192,5 @@ export async function detailDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, DetailDokumentuResponseSchema)
+  return await extractResponseJson(response.data, requestName, detailDokumentuResponseSchema)
 }

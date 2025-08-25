@@ -47,7 +47,7 @@ const nastavitVlastnostDokumentuSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=nastavit-vlastnost-dokumentu&type=response
-const NastavitVlastnostDokumentuResponseSchema = z.object({
+const nastavitVlastnostDokumentuResponseSchema = z.object({
   'Nastavit-vlastnost-dokumentu': nastavitVlastnostDokumentuSchema,
 })
 
@@ -55,7 +55,7 @@ export type SslNastavitVlastnostDokumentuNastavitVlastnostDokumentu = z.infer<
   typeof nastavitVlastnostDokumentuSchema
 >
 export type SslNastavitVlastnostDokumentuResponse = z.infer<
-  typeof NastavitVlastnostDokumentuResponseSchema
+  typeof nastavitVlastnostDokumentuResponseSchema
 >
 
 export async function nastavitVlastnostDokumentu(
@@ -84,6 +84,6 @@ export async function nastavitVlastnostDokumentu(
   return await extractResponseJson(
     response.data,
     requestName,
-    NastavitVlastnostDokumentuResponseSchema
+    nastavitVlastnostDokumentuResponseSchema
   )
 }

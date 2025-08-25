@@ -39,7 +39,7 @@ const zalozitVlastnostDokumentuSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zalozit-vlastnost-dokumentu&type=response
-const ZalozitVlastnostDokumentuResponseSchema = z.object({
+const zalozitVlastnostDokumentuResponseSchema = z.object({
   'Zalozit-vlastnost-dokumentu': zalozitVlastnostDokumentuSchema,
 })
 
@@ -47,7 +47,7 @@ export type SslZalozitVlastnostDokumentuZalozitVlastnostDokumentu = z.infer<
   typeof zalozitVlastnostDokumentuSchema
 >
 export type SslZalozitVlastnostDokumentuResponse = z.infer<
-  typeof ZalozitVlastnostDokumentuResponseSchema
+  typeof zalozitVlastnostDokumentuResponseSchema
 >
 
 export async function zalozitVlastnostDokumentu(
@@ -76,6 +76,6 @@ export async function zalozitVlastnostDokumentu(
   return await extractResponseJson(
     response.data,
     requestName,
-    ZalozitVlastnostDokumentuResponseSchema
+    zalozitVlastnostDokumentuResponseSchema
   )
 }

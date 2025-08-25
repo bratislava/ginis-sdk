@@ -92,12 +92,12 @@ const zalozPisemnostSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zaloz-pisemnost&type=response
-const ZalozPisemnostResponseSchema = z.object({
+const zalozPisemnostResponseSchema = z.object({
   'Zaloz-pisemnost': zalozPisemnostSchema,
 })
 
 export type SslZalozPisemnostZalozPisemnost = z.infer<typeof zalozPisemnostSchema>
-export type SslZalozPisemnostResponse = z.infer<typeof ZalozPisemnostResponseSchema>
+export type SslZalozPisemnostResponse = z.infer<typeof zalozPisemnostResponseSchema>
 
 export async function zalozPisemnost(
   this: Ginis,
@@ -123,5 +123,5 @@ export async function zalozPisemnost(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, ZalozPisemnostResponseSchema)
+  return await extractResponseJson(response.data, requestName, zalozPisemnostResponseSchema)
 }

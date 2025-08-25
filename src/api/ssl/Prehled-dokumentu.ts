@@ -111,14 +111,14 @@ const stavPrehleduSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prehled-dokumentu&type=response
-const PrehledDokumentuResponseSchema = z.object({
+const prehledDokumentuResponseSchema = z.object({
   'Prehled-dokumentu': coercedArray(prehledDokumentuSchema),
   'Stav-prehledu': stavPrehleduSchema,
 })
 
 export type SslPrehledDokumentuPrehledDokumentuItem = z.infer<typeof prehledDokumentuSchema>
 export type SslPrehledDokumentuStavPrehledu = z.infer<typeof stavPrehleduSchema>
-export type SslPrehledDokumentuResponse = z.infer<typeof PrehledDokumentuResponseSchema>
+export type SslPrehledDokumentuResponse = z.infer<typeof prehledDokumentuResponseSchema>
 
 export async function prehledDokumentu(
   this: Ginis,
@@ -143,5 +143,5 @@ export async function prehledDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, PrehledDokumentuResponseSchema)
+  return await extractResponseJson(response.data, requestName, prehledDokumentuResponseSchema)
 }

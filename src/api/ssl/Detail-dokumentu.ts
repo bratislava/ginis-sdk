@@ -203,7 +203,7 @@ const vlozenoDoSpisuSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-dokumentu&type=response
-const DetailDokumentuResponseSchema = z.object({
+const detailDokumentuResponseSchema = z.object({
   'Wfl-dokument': wflDokumentSchema,
   Doruceni: doruceniSchema.optional(),
   'E-doruceni': eDoruceniSchema.optional(),
@@ -230,7 +230,7 @@ export type SslDetailDokumentuPrilohyDokumentuItem = z.infer<typeof prilohyDokum
 export type SslDetailDokumentuSouvisejiciDokumentyItem = z.infer<typeof souvisejiciDokumentySchema>
 export type SslDetailDokumentuSpisovnaItem = z.infer<typeof spisovnaSchema>
 export type SslDetailDokumentuVlozenoDoSpisu = z.infer<typeof vlozenoDoSpisuSchema>
-export type SslDetailDokumentuResponse = z.infer<typeof DetailDokumentuResponseSchema>
+export type SslDetailDokumentuResponse = z.infer<typeof detailDokumentuResponseSchema>
 
 export async function detailDokumentu(
   this: Ginis,
@@ -254,5 +254,5 @@ export async function detailDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, DetailDokumentuResponseSchema)
+  return await extractResponseJson(response.data, requestName, detailDokumentuResponseSchema)
 }

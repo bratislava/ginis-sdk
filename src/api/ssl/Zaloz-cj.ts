@@ -35,12 +35,12 @@ const zalozCjSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zaloz-cj&type=response
-const ZalozCjResponseSchema = z.object({
+const zalozCjResponseSchema = z.object({
   'Zaloz-cj': zalozCjSchema,
 })
 
 export type SslZalozCjZalozCj = z.infer<typeof zalozCjSchema>
-export type SslZalozCjResponse = z.infer<typeof ZalozCjResponseSchema>
+export type SslZalozCjResponse = z.infer<typeof zalozCjResponseSchema>
 
 /** Cj = číslo jednacie */
 export async function zalozCj(
@@ -65,5 +65,5 @@ export async function zalozCj(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, ZalozCjResponseSchema)
+  return await extractResponseJson(response.data, requestName, zalozCjResponseSchema)
 }
