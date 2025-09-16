@@ -87,11 +87,20 @@ const detailDokumentuRequestProperties = [
 ] as const
 
 export type DetailDokumentuRequest = {
-  [K in (typeof detailDokumentuRequestProperties)[number] as K]?: string
+  [K in (typeof detailDokumentuRequestProperties)[number] as K]?: RequestParamType
 }
 ```
 
-Currently, all request properties are marked as optional strings regardless of their actual type or if they are required by the endpoint. There is no input validation on the library side and all requests are ultimately accepted or rejected directly by the underlying Ginis API.
+Currently, all request properties are marked as optional strings regardless of their actual type or if they are required by the endpoint. There is also a way to include XML tag attributes. There is no input validation on the library side and all requests are ultimately accepted or rejected directly by the underlying Ginis API.
+
+```ts
+export interface RequestParamValue {
+  value: string
+  attributes: string[]
+}
+
+export type RequestParamType = string | undefined | RequestParamValue
+```
 
 #### Response type
 

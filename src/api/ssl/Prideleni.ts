@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prideleni&type=request
@@ -21,7 +22,7 @@ const prideleniRequestProperties = [
 ]
 
 export type SslPrideleniRequest = {
-  [K in (typeof prideleniRequestProperties)[number] as K]?: string
+  [K in (typeof prideleniRequestProperties)[number] as K]?: RequestParamType
 }
 
 const prideleniParamOrders: RequestParamOrder[] = [
@@ -36,12 +37,12 @@ const prideleniSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prideleni&type=response
-const PrideleniResponseSchema = z.object({
+const prideleniResponseSchema = z.object({
   Prideleni: prideleniSchema,
 })
 
 export type SslPrideleniPrideleni = z.infer<typeof prideleniSchema>
-export type SslPrideleniResponse = z.infer<typeof PrideleniResponseSchema>
+export type SslPrideleniResponse = z.infer<typeof prideleniResponseSchema>
 
 export async function prideleni(
   this: Ginis,
@@ -65,5 +66,5 @@ export async function prideleni(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, PrideleniResponseSchema)
+  return await extractResponseJson(response.data, requestName, prideleniResponseSchema)
 }

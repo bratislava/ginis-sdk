@@ -8,13 +8,14 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=Detail-referenta&type=request
 const detailReferentaRequestProperties = ['Id-osoby'] as const
 
 export type GinDetailReferentaRequest = {
-  [K in (typeof detailReferentaRequestProperties)[number] as K]?: string
+  [K in (typeof detailReferentaRequestProperties)[number] as K]?: RequestParamType
 }
 
 const detailReferentaParamOrders: RequestParamOrder[] = [

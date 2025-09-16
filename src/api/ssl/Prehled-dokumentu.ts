@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -46,7 +47,7 @@ const prehledDokumentuRequestProperties = [
 ]
 
 export type SslPrehledDokumentuRequest = {
-  [K in (typeof prehledDokumentuRequestProperties)[number] as K]?: string
+  [K in (typeof prehledDokumentuRequestProperties)[number] as K]?: RequestParamType
 }
 
 const rizeniPrehleduRequestProperties = [
@@ -58,7 +59,7 @@ const rizeniPrehleduRequestProperties = [
 ]
 
 export type SslPrehledDokumentuRequestRizeniPrehledu = {
-  [K in (typeof rizeniPrehleduRequestProperties)[number] as K]?: string
+  [K in (typeof rizeniPrehleduRequestProperties)[number] as K]?: RequestParamType
 }
 
 const prehledDokumentuParamOrders: RequestParamOrder[] = [
@@ -110,14 +111,14 @@ const stavPrehleduSchema = z.object({
 })
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prehled-dokumentu&type=response
-const PrehledDokumentuResponseSchema = z.object({
+const prehledDokumentuResponseSchema = z.object({
   'Prehled-dokumentu': coercedArray(prehledDokumentuSchema),
   'Stav-prehledu': stavPrehleduSchema,
 })
 
 export type SslPrehledDokumentuPrehledDokumentuItem = z.infer<typeof prehledDokumentuSchema>
 export type SslPrehledDokumentuStavPrehledu = z.infer<typeof stavPrehleduSchema>
-export type SslPrehledDokumentuResponse = z.infer<typeof PrehledDokumentuResponseSchema>
+export type SslPrehledDokumentuResponse = z.infer<typeof prehledDokumentuResponseSchema>
 
 export async function prehledDokumentu(
   this: Ginis,
@@ -142,5 +143,5 @@ export async function prehledDokumentu(
     }),
     this.config.debug
   )
-  return await extractResponseJson(response.data, requestName, PrehledDokumentuResponseSchema)
+  return await extractResponseJson(response.data, requestName, prehledDokumentuResponseSchema)
 }

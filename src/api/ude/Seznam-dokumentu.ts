@@ -8,6 +8,7 @@ import {
   createXmlRequestConfig,
   extractResponseJson,
   RequestParamOrder,
+  RequestParamType,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -122,7 +123,7 @@ const seznamDokumentuRequestProperties = [
  * interface-xrg - interface, xrg
  */
 export type UdeSeznamDokumentuRequest = {
-  [K in (typeof seznamDokumentuRequestProperties)[number] as K]?: string
+  [K in (typeof seznamDokumentuRequestProperties)[number] as K]?: RequestParamType
 }
 
 const seznamDokumentuParamOrders: RequestParamOrder[] = [

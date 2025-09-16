@@ -6,6 +6,14 @@ import { ZodType } from 'zod'
 import { GinisConfig } from '../ginis'
 import { GinisError } from './errors'
 
+export interface RequestParamValue {
+  value: string
+  attributes: string[]
+}
+
+export type RequestParamType = string | undefined | RequestParamValue
+export type RequestParamBody = Record<string, RequestParamType>
+
 export interface RequestParamOrder {
   name: string
   params: readonly string[]
@@ -15,8 +23,7 @@ export interface XmlRequestInfo {
   name: string
   namespace: string
   xrgNamespace: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  paramsBodies: any[]
+  paramsBodies: RequestParamBody[]
   paramOrders: readonly RequestParamOrder[]
 }
 
@@ -29,19 +36,49 @@ export function createXmlRequestConfig(requestName: string, requestNamespace: st
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generateRequestNode(paramOrder: RequestParamOrder, paramsBody: any) {
-  return `<${paramOrder.name}>${paramOrder.params
-    // find all parameters with respect to their strict order that are present in paramsBody
-    // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
-    .filter((e) => paramsBody[e])
-    // wrap the value of the parameter into its XML tag
-    // eslint-disable-next-line security/detect-object-injection, @typescript-eslint/no-unsafe-member-access
-    .map((e) => `<${e}>${paramsBody[e]}</${e}>`)
-    .join('')}</${paramOrder.name}>`
+export function sanitizeParamBody(
+  paramsBody: RequestParamBody
+): Record<string, RequestParamValue | undefined> {
+  return Object.fromEntries(
+    Object.entries(paramsBody).map(([key, val]) => {
+      if (!val) {
+        return [key, undefined]
+      }
+      if (typeof val === 'string') {
+        return [key, { value: val, attributes: [] }]
+      }
+      return [key, val]
+    })
+  )
+}
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function generateRequestNode(
+  paramOrder: RequestParamOrder,
+  paramsBody: Record<string, RequestParamValue | undefined>
+) {
+  return `<${paramOrder.name}>${paramOrder.params.reduce((xml, e) => {
+    // eslint-disable-next-line security/detect-object-injection
+    const param = paramsBody[e]
+    if (!param) {
+      return xml
+    }
+    const attrStr = param.attributes.length ? ` ${param.attributes.join(' ')}` : ''
+    return `${xml}<${e}${attrStr}>${escapeXml(param.value)}</${e}>`
+  }, '')}</${paramOrder.name}>`
 }
 
 export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlRequestInfo) {
+  const paramsBodies = requestInfo.paramsBodies.map(sanitizeParamBody)
+
   return `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
   <s:Header>
     <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
@@ -55,7 +92,7 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
     <${requestInfo.name} xmlns="${requestInfo.namespace}">
       <requestXml>
         <Xrg xmlns="${requestInfo.xrgNamespace}">
-          ${requestInfo.paramOrders.map((e, i) => generateRequestNode(e, requestInfo.paramsBodies.at(i))).join('')}
+          ${requestInfo.paramOrders.map((e, i) => generateRequestNode(e, paramsBodies.at(i) ?? {})).join('')}
         </Xrg>
       </requestXml>
     </${requestInfo.name}>
