@@ -37,7 +37,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@darraghor/eslint-plugin-nestjs-typed": "^6.8.1",
     "@eslint/js": "^9.35.0",
-    "@eslint/json": "^0.13.2",
+    "@eslint/json": "^0.14.0",
     "@eslint/markdown": "^7.2.0",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint-plugin-security": "^3.0.0",
