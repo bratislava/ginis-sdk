@@ -46,13 +46,11 @@ describe('GIN-Edit-esu', () => {
     expect(esuId).toBeTruthy()
 
     /**
-     * Should be 'zalozeni' only, since the name, surname and emails are all different and unique,
-     * but ginis sometimes returns 'pouzito-existujici'. This needs to be resolved with the vendor.
-     * It seems to work as intended with just the wrong return value (i.e. it seems to create a new
-     * contact card anyway), but we can't rule out the possibility of reusing the same contact card
-     * for different people at this point.
+     * Should be 'zalozeni' only, since the name, surname and emails are all different and unique.
+     * Previously ginis sometimes returned 'pouzito-existujici' incorrectly, but this seems to be
+     * fixed on the vendor side now.
      */
-    expect(['zalozeni', 'pouzito-existujici']).toContain(data['Vytvor-esu']['Provedena-operace'])
+    expect(data['Vytvor-esu']['Provedena-operace']).toBe('zalozeni')
   }, 20_000)
 
   test('Edit-esu request', async () => {
