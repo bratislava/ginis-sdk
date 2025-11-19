@@ -9,6 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
+  sanitizeParamBody,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -286,14 +287,15 @@ function groupByDocumentId(
   return grouped
 }
 
-function getArchivedFinalRecordIds(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): string[] {
+function getFinalRecordIds(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): string[] {
   let newestDate: Date | null = null
-  const archivedFinalRecordIds: string[] = []
+  const finalRecordIds: string[] = []
 
   for (const doc of documents) {
     const dateStr = doc['Sejmuto-dne']
     if (!dateStr) {
-      // final record is not archived
+      // even active records should have an archive date, just set in future
+      // if there is no date, the document is corrupt and it's safer to ignore it
       return []
     }
 
@@ -301,16 +303,16 @@ function getArchivedFinalRecordIds(documents: UdeSeznamDokumentuSeznamDokumentuI
     if (!newestDate || date.getTime() > newestDate.getTime()) {
       // Found a newer date, reset and start collecting
       newestDate = date
-      archivedFinalRecordIds.splice(0)
-      archivedFinalRecordIds.push(doc['Id-zaznamu'])
+      finalRecordIds.splice(0)
+      finalRecordIds.push(doc['Id-zaznamu'])
     } else if (date.getTime() === newestDate.getTime()) {
       // Same date as newest, add to collection
-      archivedFinalRecordIds.push(doc['Id-zaznamu'])
+      finalRecordIds.push(doc['Id-zaznamu'])
     }
     // If date is older, skip it
   }
 
-  return archivedFinalRecordIds
+  return finalRecordIds
 }
 
 function filterOutReplacedRecords(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): Set<string> {
@@ -321,31 +323,39 @@ function filterOutReplacedRecords(documents: UdeSeznamDokumentuSeznamDokumentuIt
       continue
     }
 
-    getArchivedFinalRecordIds(docs).forEach((recordId) => finalVersionRecordIds.add(recordId))
+    getFinalRecordIds(docs).forEach((recordId) => finalVersionRecordIds.add(recordId))
   }
   return finalVersionRecordIds
 }
 
 export async function seznamDokumentuFilterArchiv(
-  this: Ginis
+  this: Ginis,
+  bodyObj: UdeSeznamDokumentuRequest
 ): Promise<UdeSeznamDokumentuSeznamDokumentuItem[]> {
+  const CHANGES_EXPECTED_MONTHS = 1
+  const publishedUntil = sanitizeParamBody(bodyObj)['Vyveseno-od-horni-mez']?.value
+  let publishedUntilExtra: string | undefined = undefined
+  if (publishedUntil) {
+    const date = new Date(publishedUntil)
+    date.setMonth(date.getMonth() + CHANGES_EXPECTED_MONTHS)
+    publishedUntilExtra = date.toISOString().split('T')[0]
+  }
+
   // Fetch all archived and non-archived documents
-  const [activeData, archivedData] = await Promise.all([
-    this.ude.seznamDokumentu({
-      Stav: 'vyveseno',
-    }),
-    this.ude.seznamDokumentu({
-      Stav: 'sejmuto',
-    }),
-  ])
+  const data = await this.ude.seznamDokumentu({
+    ...bodyObj,
+    Stav: undefined,
+    'Vyveseno-od-horni-mez': publishedUntilExtra,
+  })
 
-  const archivedDocuments = archivedData['Seznam-dokumentu']
+  const allDocuments = data['Seznam-dokumentu']
 
-  const finalVersionRecordIds = filterOutReplacedRecords([
-    ...activeData['Seznam-dokumentu'],
-    ...archivedDocuments,
-  ])
+  const finalVersionRecordIds = filterOutReplacedRecords(allDocuments)
 
-  // Filter archived documents to only keep records that are in both archivedDocuments and finalVersionRecordIds
-  return archivedDocuments.filter((doc) => finalVersionRecordIds.has(doc['Id-zaznamu']))
+  return allDocuments.filter((doc) => {
+    if (publishedUntil && doc['Vyveseno-dne'] > publishedUntil) {
+      return false
+    }
+    return finalVersionRecordIds.has(doc['Id-zaznamu']) && doc.Stav === 'sejmuto'
+  })
 }
