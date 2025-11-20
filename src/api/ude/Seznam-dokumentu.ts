@@ -331,31 +331,51 @@ function filterOutReplacedRecords(documents: UdeSeznamDokumentuSeznamDokumentuIt
 export async function seznamDokumentuFilterArchiv(
   this: Ginis,
   bodyObj: UdeSeznamDokumentuRequest
-): Promise<UdeSeznamDokumentuSeznamDokumentuItem[]> {
+): Promise<UdeSeznamDokumentuResponse> {
+  const sanitizedParams = sanitizeParamBody(bodyObj)
+  // eslint-disable-next-line dot-notation
+  const requestedState = sanitizedParams['Stav']?.value
+
+  if (requestedState === 'vyveseno') {
+    throw new GinisError(
+      'GINIS SDK Error: Invalid request parameters. "Stav" cannot be "vyveseno".'
+    )
+  }
+
+  // period when published records could be replaced by newer versions
   const CHANGES_EXPECTED_MONTHS = 1
-  const publishedUntil = sanitizeParamBody(bodyObj)['Vyveseno-od-horni-mez']?.value
-  let publishedUntilExtra: string | undefined = undefined
+  const publishedUntil = sanitizedParams['Vyveseno-od-horni-mez']?.value
+  let changeCutoffDate: string | undefined = undefined
   if (publishedUntil) {
     const date = new Date(publishedUntil)
     date.setMonth(date.getMonth() + CHANGES_EXPECTED_MONTHS)
-    publishedUntilExtra = date.toISOString().split('T')[0]
+    changeCutoffDate = date.toISOString().split('T')[0]
   }
 
   // Fetch all archived and non-archived documents
   const data = await this.ude.seznamDokumentu({
     ...bodyObj,
     Stav: undefined,
-    'Vyveseno-od-horni-mez': publishedUntilExtra,
+    'Vyveseno-od-horni-mez': changeCutoffDate,
   })
 
   const allDocuments = data['Seznam-dokumentu']
 
   const finalVersionRecordIds = filterOutReplacedRecords(allDocuments)
 
-  return allDocuments.filter((doc) => {
+  data['Seznam-dokumentu'] = allDocuments.filter((doc) => {
+    // apply original published date filter
     if (publishedUntil && doc['Vyveseno-dne'] > publishedUntil) {
       return false
     }
-    return finalVersionRecordIds.has(doc['Id-zaznamu']) && doc.Stav === 'sejmuto'
+    // apply original state filter
+    if (requestedState && doc.Stav !== requestedState) {
+      return false
+    }
+
+    // filter out replaced records keeping only the final versions od each record
+    return finalVersionRecordIds.has(doc['Id-zaznamu'])
   })
+
+  return data
 }
