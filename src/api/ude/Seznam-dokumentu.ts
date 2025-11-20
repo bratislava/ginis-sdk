@@ -1,3 +1,4 @@
+import { groupBy } from 'lodash'
 import { z } from 'zod'
 
 import { Ginis } from '../../ginis'
@@ -9,6 +10,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
+  sanitizeParamBody,
 } from '../../utils/request-util'
 import { coercedArray } from '../../utils/validation'
 
@@ -270,4 +272,117 @@ export async function seznamDokumentu(
     this.config.debug
   )
   return await extractResponseJson(response.data, requestName, seznamDokumentuResponseSchema)
+}
+
+/**
+ * Gets the record ids with the latest archive date for one given document.
+ * All records shall have the same document id.
+ *
+ * @param records array of records to filter belonging to the same document
+ * @returns array of record ids with the latest archive date
+ */
+function getRecordIdsWithLatestArchiveDate(
+  records: UdeSeznamDokumentuSeznamDokumentuItem[]
+): string[] {
+  let latestDate: Date | null = null
+  const latestArchivedIds: string[] = []
+
+  for (const record of records) {
+    const dateStr = record['Sejmuto-dne']
+    if (!dateStr) {
+      // even active records should have an archive date, just set in future
+      // if there is no date, the whole document seems to be corrupt and it's safer to ignore it
+      return []
+    }
+
+    const date = new Date(dateStr)
+    if (!latestDate || date.getTime() > latestDate.getTime()) {
+      // Found a newer date, reset and start collecting
+      latestDate = date
+      latestArchivedIds.splice(0)
+      latestArchivedIds.push(record['Id-zaznamu'])
+    } else if (date.getTime() === latestDate.getTime()) {
+      // Same date as latest, add to collection
+      latestArchivedIds.push(record['Id-zaznamu'])
+    }
+    // If date is older, skip it
+  }
+
+  return latestArchivedIds
+}
+
+/**
+ * Filters out records that are replaced by newer versions.
+ * Keeps only the latest version of each record.
+ * @param allRecords array of records to filter
+ * @returns set of record ids that are the latest versions in their document
+ */
+function filterOutReplacedRecords(
+  allRecords: UdeSeznamDokumentuSeznamDokumentuItem[]
+): Set<string> {
+  const latestVersionRecordIds = new Set<string>()
+
+  const groupedByDocumentId = groupBy(allRecords, (doc) => doc['Id-dokumentu'] || doc['Id-zaznamu'])
+  for (const records of Object.values(groupedByDocumentId)) {
+    if (records.length === 0) {
+      continue
+    }
+
+    getRecordIdsWithLatestArchiveDate(records).forEach((recordId) =>
+      latestVersionRecordIds.add(recordId)
+    )
+  }
+  return latestVersionRecordIds
+}
+
+export async function seznamDokumentuFilterArchiv(
+  this: Ginis,
+  bodyObj: UdeSeznamDokumentuRequest
+): Promise<UdeSeznamDokumentuResponse> {
+  const sanitizedParams = sanitizeParamBody(bodyObj)
+  // eslint-disable-next-line dot-notation
+  const requestedState = sanitizedParams['Stav']?.value
+
+  if (requestedState === 'vyveseno') {
+    throw new GinisError(
+      'GINIS SDK Error: Invalid request parameters. "Stav" cannot be "vyveseno".'
+    )
+  }
+
+  // period when published records could be replaced by newer versions
+  const CHANGES_EXPECTED_MONTHS = 1
+  const publishedUntil = sanitizedParams['Vyveseno-od-horni-mez']?.value
+  let changeCutoffDate: string | undefined = undefined
+  if (publishedUntil) {
+    const date = new Date(publishedUntil)
+    date.setMonth(date.getMonth() + CHANGES_EXPECTED_MONTHS)
+    changeCutoffDate = date.toISOString().split('T')[0]
+  }
+
+  // Fetch all archived and non-archived records
+  const data = await this.ude.seznamDokumentu({
+    ...bodyObj,
+    Stav: undefined,
+    'Vyveseno-od-horni-mez': changeCutoffDate,
+  })
+
+  const allRecords = data['Seznam-dokumentu']
+
+  const latestVersionRecordIds = filterOutReplacedRecords(allRecords)
+
+  const filteredRecords = allRecords.filter((record) => {
+    // apply original published date filter
+    if (publishedUntil && record['Vyveseno-dne'] > publishedUntil) {
+      return false
+    }
+    // apply original state filter
+    if (requestedState && record.Stav !== requestedState) {
+      return false
+    }
+
+    // filter out replaced records keeping only the latest versions of each record
+    return latestVersionRecordIds.has(record['Id-zaznamu'])
+  })
+
+  return { ...data, 'Seznam-dokumentu': filteredRecords }
 }
