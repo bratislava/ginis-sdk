@@ -284,7 +284,7 @@ export async function seznamDokumentu(
 function getRecordIdsWithLatestArchiveDate(
   records: UdeSeznamDokumentuSeznamDokumentuItem[]
 ): string[] {
-  let newestDate: Date | null = null
+  let latestDate: Date | null = null
   const latestArchivedIds: string[] = []
 
   for (const record of records) {
@@ -296,13 +296,13 @@ function getRecordIdsWithLatestArchiveDate(
     }
 
     const date = new Date(dateStr)
-    if (!newestDate || date.getTime() > newestDate.getTime()) {
+    if (!latestDate || date.getTime() > latestDate.getTime()) {
       // Found a newer date, reset and start collecting
-      newestDate = date
+      latestDate = date
       latestArchivedIds.splice(0)
       latestArchivedIds.push(record['Id-zaznamu'])
-    } else if (date.getTime() === newestDate.getTime()) {
-      // Same date as newest, add to collection
+    } else if (date.getTime() === latestDate.getTime()) {
+      // Same date as latest, add to collection
       latestArchivedIds.push(record['Id-zaznamu'])
     }
     // If date is older, skip it
