@@ -1,3 +1,4 @@
+import { groupBy } from 'lodash'
 import { z } from 'zod'
 
 import { Ginis } from '../../ginis'
@@ -273,29 +274,24 @@ export async function seznamDokumentu(
   return await extractResponseJson(response.data, requestName, seznamDokumentuResponseSchema)
 }
 
-function groupByDocumentId(
-  documents: UdeSeznamDokumentuSeznamDokumentuItem[]
-): Map<string, UdeSeznamDokumentuSeznamDokumentuItem[]> {
-  const grouped = new Map<string, UdeSeznamDokumentuSeznamDokumentuItem[]>()
-  for (const doc of documents) {
-    // Group by Id-dokumentu if available, otherwise by Id-zaznamu (different formats, won't collide)
-    const id = doc['Id-dokumentu'] || doc['Id-zaznamu']
-    const existing = grouped.get(id) || []
-    existing.push(doc)
-    grouped.set(id, existing)
-  }
-  return grouped
-}
-
-function getFinalRecordIds(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): string[] {
+/**
+ * Gets the record ids with the latest archive date for one given document.
+ * All records shall have the same document id.
+ *
+ * @param records array of records to filter belonging to the same document
+ * @returns array of record ids with the latest archive date
+ */
+function getRecordIdsWithLatestArchiveDate(
+  records: UdeSeznamDokumentuSeznamDokumentuItem[]
+): string[] {
   let newestDate: Date | null = null
-  const finalRecordIds: string[] = []
+  const latestArchivedIds: string[] = []
 
-  for (const doc of documents) {
-    const dateStr = doc['Sejmuto-dne']
+  for (const record of records) {
+    const dateStr = record['Sejmuto-dne']
     if (!dateStr) {
       // even active records should have an archive date, just set in future
-      // if there is no date, the document is corrupt and it's safer to ignore it
+      // if there is no date, the whole document seems to be corrupt and it's safer to ignore it
       return []
     }
 
@@ -303,29 +299,40 @@ function getFinalRecordIds(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): 
     if (!newestDate || date.getTime() > newestDate.getTime()) {
       // Found a newer date, reset and start collecting
       newestDate = date
-      finalRecordIds.splice(0)
-      finalRecordIds.push(doc['Id-zaznamu'])
+      latestArchivedIds.splice(0)
+      latestArchivedIds.push(record['Id-zaznamu'])
     } else if (date.getTime() === newestDate.getTime()) {
       // Same date as newest, add to collection
-      finalRecordIds.push(doc['Id-zaznamu'])
+      latestArchivedIds.push(record['Id-zaznamu'])
     }
     // If date is older, skip it
   }
 
-  return finalRecordIds
+  return latestArchivedIds
 }
 
-function filterOutReplacedRecords(documents: UdeSeznamDokumentuSeznamDokumentuItem[]): Set<string> {
-  const groupedByDocumentId = groupByDocumentId(documents)
-  const finalVersionRecordIds = new Set<string>()
-  for (const docs of groupedByDocumentId.values()) {
-    if (docs.length === 0) {
+/**
+ * Filters out records that are replaced by newer versions.
+ * Keeps only the latest version of each record.
+ * @param allRecords array of records to filter
+ * @returns set of record ids that are the latest versions in their document
+ */
+function filterOutReplacedRecords(
+  allRecords: UdeSeznamDokumentuSeznamDokumentuItem[]
+): Set<string> {
+  const latestVersionRecordIds = new Set<string>()
+
+  const groupedByDocumentId = groupBy(allRecords, (doc) => doc['Id-dokumentu'] || doc['Id-zaznamu'])
+  for (const records of Object.values(groupedByDocumentId)) {
+    if (records.length === 0) {
       continue
     }
 
-    getFinalRecordIds(docs).forEach((recordId) => finalVersionRecordIds.add(recordId))
+    getRecordIdsWithLatestArchiveDate(records).forEach((recordId) =>
+      latestVersionRecordIds.add(recordId)
+    )
   }
-  return finalVersionRecordIds
+  return latestVersionRecordIds
 }
 
 export async function seznamDokumentuFilterArchiv(
@@ -352,30 +359,30 @@ export async function seznamDokumentuFilterArchiv(
     changeCutoffDate = date.toISOString().split('T')[0]
   }
 
-  // Fetch all archived and non-archived documents
+  // Fetch all archived and non-archived records
   const data = await this.ude.seznamDokumentu({
     ...bodyObj,
     Stav: undefined,
     'Vyveseno-od-horni-mez': changeCutoffDate,
   })
 
-  const allDocuments = data['Seznam-dokumentu']
+  const allRecords = data['Seznam-dokumentu']
 
-  const finalVersionRecordIds = filterOutReplacedRecords(allDocuments)
+  const latestVersionRecordIds = filterOutReplacedRecords(allRecords)
 
-  data['Seznam-dokumentu'] = allDocuments.filter((doc) => {
+  const filteredRecords = allRecords.filter((record) => {
     // apply original published date filter
-    if (publishedUntil && doc['Vyveseno-dne'] > publishedUntil) {
+    if (publishedUntil && record['Vyveseno-dne'] > publishedUntil) {
       return false
     }
     // apply original state filter
-    if (requestedState && doc.Stav !== requestedState) {
+    if (requestedState && record.Stav !== requestedState) {
       return false
     }
 
-    // filter out replaced records keeping only the final versions od each record
-    return finalVersionRecordIds.has(doc['Id-zaznamu'])
+    // filter out replaced records keeping only the latest versions of each record
+    return latestVersionRecordIds.has(record['Id-zaznamu'])
   })
 
-  return data
+  return { ...data, 'Seznam-dokumentu': filteredRecords }
 }
