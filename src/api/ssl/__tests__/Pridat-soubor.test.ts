@@ -29,7 +29,7 @@ describe('SSL-Pridat-soubor', () => {
     })
 
     const data = await ginis.ssl.pridatSoubor({
-      'Id-dokumentu': 'MAG0X03RYYSN',
+      'Id-dokumentu': 'MAG0X05DA0O1',
       'Jmeno-souboru': 'raw-data.bin',
       'Typ-vazby': 'elektronicka-priloha',
       'Popis-souboru': 'base64',
@@ -45,7 +45,7 @@ describe('SSL-Pridat-soubor', () => {
 
     const data = await ginis.ssl.pridatSouborMtom(
       {
-        'Id-dokumentu': 'MAG0X03RYYSN',
+        'Id-dokumentu': 'MAG0X05DA0O1',
         'Jmeno-souboru': fileName,
         'Typ-vazby': 'elektronicka-priloha',
         'Popis-souboru': 'mtom-xop',

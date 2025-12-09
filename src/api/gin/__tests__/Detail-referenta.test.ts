@@ -20,9 +20,10 @@ describe('GIN-Detail-referenta', () => {
 
   test('Basic request', async () => {
     const data = await ginis.gin.detailReferenta({
-      'Id-osoby': 'MAG0SR00A0BU',
+      'Id-osoby': 'MAG0SR00C0EP',
     })
 
-    expect(data['Detail-referenta']['Id-osoby']).toBe('MAG0SR00A0BU')
+    expect(data['Detail-referenta']['Id-osoby']).toBe('MAG0SR00C0EP')
+    expect(data['Detail-referenta']['Id-spisoveho-uzlu']).toBe('MAG0SS00A0C2')
   }, 20_000)
 })
