@@ -7,7 +7,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
   const formId = uuidv4()
   let documentId: string
   let propertyOrder: string
-  const testPropertyCode = 'IDSFOR'
+  const testPropertyId = 'MAG000V0A1LL'
 
   beforeAll(() => {
     console.log(
@@ -47,7 +47,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
       {
         'Id-dokumentu': { value: formId, attributes: ['externi="true"'] },
         Vec: `Žiadosť nájomko - test formulár ${formPrefix}`,
-        'Id-typu-dokumentu': 'MAG00400ABKL',
+        'Id-typu-dokumentu': 'MAG00400ACCI',
         'Priznak-fyz-existence': 'neexistuje',
       },
       {
@@ -58,7 +58,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
         'Druh-zasilky': 'neurceno',
         'Druh-zachazeni': 'neurceno',
         'Datum-prijmu-podani': `${todayIso}T00:00:00`,
-        'Id-odesilatele': 'MAG0SE1BAPXI',
+        'Id-odesilatele': 'MAG0SE1GGEW9',
         'Poznamka-k-doruceni': 'D poznámka',
       },
       {
@@ -70,6 +70,9 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
     )
     documentId = data['Zaloz-pisemnost']['Id-dokumentu']
     expect(documentId).toBeTruthy()
+
+    const detailData = await ginis.ssl.detailDokumentu({ 'Id-dokumentu': documentId })
+    expect(detailData['Cj-dokumentu']).toBeUndefined()
   }, 20_000)
 
   test('Zaloz-cj', async () => {
@@ -78,13 +81,16 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
       'Denik-cj': 'MAG',
     })
     expect(data['Zaloz-cj']['Znacka-cj']).toBeTruthy()
+
+    const detailData = await ginis.ssl.detailDokumentu({ 'Id-dokumentu': documentId })
+    expect(detailData['Cj-dokumentu']).toBeDefined()
   }, 20_000)
 
   test('Zalozit-vlastnost-dokumentu', async () => {
     const data = await ginis.ssl.zalozitVlastnostDokumentu({
       'Id-dokumentu': documentId,
       'Typ-objektu': 'vlastnost',
-      'Kod-objektu': testPropertyCode,
+      'Id-objektu': testPropertyId,
     })
     propertyOrder = data['Zalozit-vlastnost-dokumentu']['Poradove-cislo']
     expect(propertyOrder).toBeTruthy()
@@ -93,12 +99,31 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
   test('Nastavit-vlastnost-dokumentu', async () => {
     const data = await ginis.ssl.nastavitVlastnostDokumentu({
       'Id-dokumentu': documentId,
-      'Kod-profilu': testPropertyCode,
-      'Kod-struktury': testPropertyCode,
-      'Kod-vlastnosti': testPropertyCode,
+      'Id-profilu': testPropertyId,
+      'Id-struktury': testPropertyId,
+      'Id-vlastnosti': testPropertyId,
       'Poradove-cislo': propertyOrder,
       'Hodnota-raw': formId,
     })
     expect(data['Nastavit-vlastnost-dokumentu']['Poradove-cislo']).toBeTruthy()
+
+    const documentList = await ginis.ssl.prehledDokumentu(
+      {
+        'Datum-podani-od': '2025-05-02',
+        'Datum-podani-do': new Date().toISOString().slice(0, 10),
+        'Priznak-spisu': 'neurceno',
+        'Id-vlastnosti': testPropertyId,
+        'Hodnota-vlastnosti-raw': formId,
+      },
+      {
+        'Priznak-generovani': 'generovat',
+        'Radek-od': '1',
+        'Radek-do': '10',
+        'Priznak-zachovani': 'nezachovavat',
+        'Rozsah-prehledu': 'standardni',
+      }
+    )
+    expect(documentList['Prehled-dokumentu'].length).toBe(1)
+    expect(documentList['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe(documentId)
   }, 20_000)
 })

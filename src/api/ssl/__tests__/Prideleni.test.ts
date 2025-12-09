@@ -20,9 +20,9 @@ describe('SSL-Prideleni', () => {
 
   test('Basic request', async () => {
     const data = await ginis.ssl.prideleni({
-      'Id-dokumentu': 'MAG0X04X96LQ',
-      'Id-uzlu': 'MAG0SS00A01L',
-      'Id-funkce': 'MAG0SF00B73W',
+      'Id-dokumentu': 'MAG0X05DA0O1',
+      'Id-uzlu': 'MAG0SS00A0C2',
+      'Id-funkce': 'MAG0SF00BIM4',
       'Ucel-distribuce': 'test pridelenia',
       'Prime-prideleni': 'prime-prideleni',
     })

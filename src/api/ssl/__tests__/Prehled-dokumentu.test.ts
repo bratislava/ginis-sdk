@@ -21,11 +21,11 @@ describe('SSL-Prehled-dokumentu', () => {
   test('Basic request', async () => {
     const data = await ginis.ssl.prehledDokumentu(
       {
-        'Datum-podani-od': '2025-02-20',
-        'Datum-podani-do': '2025-04-10',
+        'Datum-podani-od': '2025-05-01',
+        'Datum-podani-do': '2025-12-31',
         'Priznak-spisu': 'neurceno',
-        'Id-vlastnosti': 'MAG000V0A1I0',
-        'Hodnota-vlastnosti-raw': '01234567-89ab-cdef-0123-000000000004',
+        'Id-vlastnosti': 'MAG000V0A1LL',
+        'Hodnota-vlastnosti-raw': '2d2d990a-8e2f-4f7a-ad49-3152e217be3c',
       },
       {
         'Priznak-generovani': 'generovat',
@@ -38,6 +38,6 @@ describe('SSL-Prehled-dokumentu', () => {
 
     expect(data['Stav-prehledu']['Radku-celkem']).toBe('1')
     expect(data['Prehled-dokumentu'].length).toBe(1)
-    expect(data['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe('MAG0X04X96LQ')
+    expect(data['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe('MAG0X05DA0O1')
   }, 20_000)
 })

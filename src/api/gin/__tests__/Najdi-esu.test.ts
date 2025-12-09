@@ -28,7 +28,7 @@ describe('GIN-Najdi-esu', () => {
       { 'Rozsah-prehledu': 'rozsireny' }
     )
 
-    expect(data['Najdi-esu'].some((item) => item['Id-esu'] === 'MAG0SE1BAPXI')).toBe(true)
+    expect(data['Najdi-esu'].some((item) => item['Id-esu'] === 'MAG0SE1FQ4O6')).toBe(true)
   }, 20_000)
 
   test('Uri request', async () => {
@@ -39,6 +39,6 @@ describe('GIN-Najdi-esu', () => {
       { 'Rozsah-prehledu': 'rozsireny' }
     )
 
-    expect(data['Najdi-esu'].some((item) => item['Id-esu'] === 'MAG0SE1BAPXI')).toBe(true)
+    expect(data['Najdi-esu'].some((item) => item['Id-esu'] === 'MAG0SE1FQ4O6')).toBe(true)
   }, 20_000)
 })

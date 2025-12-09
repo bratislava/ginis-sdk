@@ -20,9 +20,11 @@ describe('GIN-Detail-funkcniho-mista', () => {
 
   test('Basic request', async () => {
     const data = await ginis.gin.detailFunkcnihoMista({
-      'Id-funkce': 'MAG0SF00A19L',
+      'Id-funkce': 'MAG0SF00BIM4',
     })
 
-    expect(data['Detail-funkcniho-mista']['Id-funkce']).toBe('MAG0SF00A19L')
+    expect(data['Detail-funkcniho-mista']['Id-funkce']).toBe('MAG0SF00BIM4')
+    expect(data['Detail-funkcniho-mista']['Id-referenta']).toBe('MAG0SR00C0EP')
+    expect(data['Detail-funkcniho-mista']['Id-spisoveho-uzlu']).toBe('MAG0SS00A0C2')
   }, 20_000)
 })
