@@ -23,4 +23,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_READ_TOKEN }}
       - run: npm run build
-      - run: npm publish --access public --dry-run
+      - run: npm publish --access public
