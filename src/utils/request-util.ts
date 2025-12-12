@@ -113,12 +113,15 @@ export async function extractResponseJson<T>(
       ignoreAttrs: true,
     })
 
-    return responseSchema.parse(
-      // try catch is covering all parsing, access and validation problems
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+    const xrgContent =
       response?.['s:Envelope']?.['s:Body']?.[`${requestName}Response`]?.[`${requestName}Result`]
         ?.Xrg
-    )
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+
+    // xml2js parses empty self-closing tags (e.g. <Xrg/>) as empty string
+    // treat empty string as empty object for schema validation
+    return responseSchema.parse(xrgContent === '' ? {} : xrgContent)
   } catch (error) {
     const message = error instanceof Error ? `: ${error.toString()}` : ''
     throw new GinisError(`Failed to parse XML response${message}\r\nResponse: ${responseXml}`)
