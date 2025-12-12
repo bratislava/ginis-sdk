@@ -41,4 +41,14 @@ describe('GIN-Najdi-esu', () => {
 
     expect(data['Najdi-esu'].some((item) => item['Id-esu'] === 'MAG0SE1FQ4O6')).toBe(true)
   }, 20_000)
+
+  test('Empty result request', async () => {
+    const data = await ginis.gin.najdiEsu(
+      {
+        'Id-dat-schranky': 'not-existing-uri',
+      },
+      { 'Rozsah-prehledu': 'rozsireny' }
+    )
+    expect(data['Najdi-esu'].length).toBe(0)
+  }, 20_000)
 })
