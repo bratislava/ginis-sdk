@@ -10,7 +10,7 @@ A small wrapper for most commonly used requests towards the GINIS system. Made t
 
 ## Using the library
 
-To understand how the structure of `Ginis` and `urls` part of the config relates to the GINIS system, read the [GINIS section](https://bratislava.github.io/GINIS) of our documentation site.
+To understand how the structure of `Ginis` and `urls` part of the config relates to the GINIS system, read the [GINIS section](./docs/GINIS.md) of our documentation site.
 
 You'll need the GINIS credentials. If interacting with the Bratislava deployment, you also need to be connected through VPN or on internal network.
 
