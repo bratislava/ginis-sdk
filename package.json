@@ -1,6 +1,6 @@
 {
   "name": "@bratislava/ginis-sdk",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "A small wrapper for most commonly used requests towards the Bratislava GINIS system",
   "main": "dist/index.js",
   "files": [
