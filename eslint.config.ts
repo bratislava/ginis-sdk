@@ -1,4 +1,5 @@
 import eslintNestJs from '@darraghor/eslint-plugin-nestjs-typed'
+import { defineConfig } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import jest from 'eslint-plugin-jest'
 // the way we run eslint-config as ts prevents us from easily adding our own type definitions (and it's a bit of a hassle for single package either way)
@@ -6,26 +7,27 @@ import jest from 'eslint-plugin-jest'
 import noUnsanitized from 'eslint-plugin-no-unsanitized'
 import pluginSecurity from 'eslint-plugin-security'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
-import sonarjs from 'eslint-plugin-sonarjs'
+import { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 
 const __dirname = process.cwd()
+const sonarjsRecommended = sonarjsConfigs.recommended
 
 import eslint from '@eslint/js'
 import json from '@eslint/json'
 import markdown from '@eslint/markdown'
 import tseslint from 'typescript-eslint'
 
-export default tseslint.config(
+export default defineConfig([
   eslint.configs.recommended,
-  tseslint.configs.strictTypeChecked,
-  tseslint.configs.stylistic,
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylistic,
   eslintConfigPrettier,
   pluginSecurity.configs.recommended,
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   noUnsanitized.configs.recommended,
 
-  sonarjs.configs.recommended,
-  eslintNestJs.configs.flatRecommended,
+  sonarjsRecommended,
+  ...eslintNestJs.configs.flatRecommended,
   ...markdown.configs.recommended,
   {
     plugins: {
@@ -152,5 +154,5 @@ export default tseslint.config(
     rules: {
       'dot-notation': 'off', // bracket access env variables in tests
     },
-  }
-)
+  },
+])
