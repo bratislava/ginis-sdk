@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { z } from 'zod'
 
 import { Ginis } from '../../ginis'
@@ -70,5 +72,10 @@ export async function nacistSoubor(
     }),
     this.config.debug
   )
+
+  const outPath = path.resolve(process.cwd(), 'nacist-soubor-response.xml')
+  fs.writeFileSync(outPath, response.data, 'utf-8')
+  console.log(`Nacist-soubor full XML response saved to: ${outPath}`)
+
   return await extractResponseJson(response.data, requestName, nacistSouborResponseSchema)
 }

@@ -9,6 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --dts",
+    "build:watch": "tsup src/index.ts --dts --watch",
     "test": "jest --watch",
     "test:detect": "jest --watch --detectOpenHandles",
     "typecheck": "tsc",
