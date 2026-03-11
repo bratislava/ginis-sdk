@@ -16,7 +16,7 @@ import {
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 
 export type UdeNacistSouborRequest = {
-  [K in (typeof nacistSouborRequestProperties)[number] as K]?: RequestParamType
+  [K in (typeof nacistSouborRequestProperties)[number]as K]?: RequestParamType
 }
 
 const nacistSouborParamOrders: RequestParamOrder[] = [
