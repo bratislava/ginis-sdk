@@ -26,7 +26,7 @@ const nacistSouborParamOrders: RequestParamOrder[] = [
   },
 ]
 
-const nacistSouborSchema = z.object({
+export const nacistSouborSchema = z.object({
   /**
    * Jméno el. souboru.
    * string
@@ -40,7 +40,7 @@ const nacistSouborSchema = z.object({
   Data: z.string(),
 })
 
-const nacistSouborResponseSchema = z.object({
+export const nacistSouborResponseSchema = z.object({
   /**
    * Nacist-soubor - vyžadován: Ne , max. výskyt: 1
    */

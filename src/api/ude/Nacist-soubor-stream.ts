@@ -6,9 +6,11 @@ import { GinisError } from '../../utils/errors'
 import {
   createXmlRequestBody,
   createXmlRequestConfig,
+  extractResponseJson,
   RequestParamOrder,
   RequestParamType,
 } from '../../utils/request-util'
+import { nacistSouborResponseSchema } from './Nacist-soubor'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 
@@ -23,15 +25,9 @@ const nacistSouborParamOrders: RequestParamOrder[] = [
   },
 ]
 
-export interface NacistSouborStreamResult {
-  filename: string
-  dataStream: Readable
-}
-
 const DATA_OPEN = '<Data>'
 const DATA_CLOSE = '</Data>'
-const FILENAME_RE = /<Jmeno-souboru>([^<]+)<\/Jmeno-souboru>/
-const SOAP_FAULT_RE = /<faultstring>([^<]*)<\/faultstring>/
+const DATA_PLACEHOLDER = '<Data>placeholder</Data>'
 
 /**
  * Streaming XML parser for GINIS Nacist-soubor SOAP responses.
@@ -53,27 +49,41 @@ const SOAP_FAULT_RE = /<faultstring>([^<]*)<\/faultstring>/
  *     </s:Body>
  *   </s:Envelope>
  *
- * Why a custom parser instead of a library (sax, saxes, htmlparser2)?
- * All popular streaming XML parsers buffer the full text content of an element
- * before emitting `ontext`. For the <Data> element (hundreds of MB of base64),
- * that would load everything into memory — defeating the purpose of streaming.
  *
- * How it works — three-state machine:
+ * How it works — two things happen simultaneously:
  *
- * 1. `header` — Buffers everything before <Data> (a few hundred bytes).
- *    Extracts the filename from <Jmeno-souboru>. Once <Data> is found,
- *    resolves the outer promise with `{ filename, dataStream: this }` so the
- *    consumer can start piping immediately, then transitions to `data`.
+ * **Streaming binary data** (the main pipeline):
+ *   Chunks between `<Data>` and `</Data>` are base64-decoded on the fly and
+ *   pushed downstream via `this.push()`. The consumer can start piping as soon
+ *   as the promise resolves.
+ *
+ * **Building a skeleton XML for validation** (runs alongside):
+ *   The parser builds a "skeleton" copy of the full XML response, but with the
+ *   huge base64 blob replaced by a tiny placeholder: `<Data>placeholder</Data>`.
+ *   This skeleton is a few hundred bytes regardless of file size. When the stream
+ *   ends, `_flush` feeds the skeleton through `extractResponseJson` + the same
+ *   zod schema used by the non-streaming `nacistSoubor` — validating envelope
+ *   structure, SOAP faults, required fields, etc. If validation fails, the
+ *   stream emits an error so the consumer knows the response was invalid.
+ *
+ * Four-state machine:
+ *
+ * 1. `header` — Buffers everything before `<Data>` (a few hundred bytes).
+ *    Once `<Data>` is found, saves the header to the skeleton with a
+ *    placeholder, resolves the outer promise with `this` (the readable side
+ *    of this Transform), and transitions to `data`.
  *
  * 2. `data` — Receives raw base64 text in HTTP-sized chunks (~16-64 KB).
- *    Decodes each chunk to binary and pushes it downstream via `this.push()`.
- *    Keeps a small tail buffer (6 bytes) to safely detect `</Data>` even when
- *    the closing tag is split across two chunks. Also keeps a base64 remainder
- *    (0-3 chars) because base64 must be decoded in multiples of 4 characters.
+ *    Decodes each chunk to binary and pushes it downstream. Nothing is added
+ *    to the skeleton (the base64 blob is skipped). Keeps a small tail buffer
+ *    (6 bytes) to safely detect `</Data>` split across chunks, and a base64
+ *    remainder (0-3 chars) for 4-char alignment.
  *
- * 3. `done` — All remaining chunks are discarded (just the XML closing tags).
+ * 3. `tail` — Collects the XML closing tags after `</Data>` into the skeleton.
  *
- * Memory usage is O(1) regardless of file size — only the small header and
+ * 4. `done` — Reached after `_flush` validates the skeleton. All chunks discarded.
+ *
+ * Memory usage is O(1) regardless of file size — only the small skeleton and
  * fixed-size tail/remainder buffers are kept in memory.
  */
 class NacistSouborXmlParser extends Transform {
@@ -91,21 +101,23 @@ class NacistSouborXmlParser extends Transform {
    * the previous chunk is prepended to the next one.
    */
   private base64Rem = ''
-  private state: 'header' | 'data' | 'done' = 'header'
-  public filename: string | null = null
+  /**
+   * A lightweight copy of the full XML response with the huge base64 content
+   * replaced by `<Data>placeholder</Data>`. Used in `_flush` for zod validation
+   * of the SOAP envelope structure without holding the actual file data in memory.
+   */
+  private skeleton = ''
+  private state: 'header' | 'data' | 'tail' | 'done' = 'header'
 
   /**
    * The parser is constructed with the outer Promise's resolve/reject so it
-   * can settle the promise at the right moment (when filename + data stream
-   * are ready, or when an error / empty response is detected).
+   * can settle the promise at the right moment (when `<Data>` is found and
+   * data starts streaming, or when the response indicates a missing file / error).
    */
-  private resolvePromise: ((result: NacistSouborStreamResult | null) => void) | null
+  private resolvePromise: ((result: Readable | null) => void) | null
   private rejectPromise: ((error: Error) => void) | null
 
-  constructor(
-    resolve: (result: NacistSouborStreamResult | null) => void,
-    reject: (error: Error) => void
-  ) {
+  constructor(resolve: (result: Readable | null) => void, reject: (error: Error) => void) {
     super()
     this.resolvePromise = resolve
     this.rejectPromise = reject
@@ -119,8 +131,11 @@ class NacistSouborXmlParser extends Transform {
         this.handleHeader(str)
       } else if (this.state === 'data') {
         this.handleData(str)
+      } else if (this.state === 'tail') {
+        // Collect closing XML tags for skeleton validation
+        this.skeleton += str
       }
-      // state === 'done': discard remaining XML closing tags
+      // state === 'done': discard
 
       callback()
     } catch (err) {
@@ -129,61 +144,80 @@ class NacistSouborXmlParser extends Transform {
   }
 
   /**
-   * Called when the input stream ends. If we never found <Data>, the file
-   * doesn't exist (empty <Xrg/>) or the response is a SOAP fault.
+   * Called when the input stream ends. Validates the skeleton XML using
+   * `extractResponseJson` with the same zod schema as the non-streaming
+   * `nacistSoubor`. If the SOAP envelope is malformed, contains a fault,
+   * or is missing required fields, the stream emits an error.
+   *
+   * Validation runs _after_ all data chunks have been pushed but _before_
+   * the 'end' event — so the consumer's error handler will fire if it fails.
+   *
+   * For the `header` state (stream ended before `<Data>` was found), the full
+   * response is small — we use `headerBuf` directly as the skeleton. The zod
+   * validation will detect SOAP faults, empty Xrg, missing fields, etc.
    */
   override _flush(callback: TransformCallback) {
     if (this.state === 'header') {
-      const faultMatch = SOAP_FAULT_RE.exec(this.headerBuf)
-      if (faultMatch) {
-        this.reject(new GinisError(`SOAP Fault: ${faultMatch[1]}`))
-      } else if (!this.filename) {
-        // Empty <Xrg/> — file not found
-        this.resolve(null)
-      } else {
-        this.reject(new GinisError('Found <Jmeno-souboru> but no <Data> in response'))
-      }
-    } else if (this.state === 'data') {
-      // Stream ended mid-data (shouldn't happen with valid responses) — flush what we have
+      // Never found <Data> — the entire response is small, use it as the skeleton
+      this.skeleton = this.headerBuf
+      callback(new GinisError('Response stream ended before <Data> was found'))
+      return
+    }
+
+    if (this.state === 'data') {
+      // Stream truncated before </Data> — flush remaining base64 to give the
+      // consumer what we have, then fail with an explicit error.
       this.decodeBase64(this.tailBuf)
       this.flushBase64()
       this.tailBuf = ''
+      callback(new GinisError('Response stream ended before </Data> was found'))
+      return
     }
-    callback()
+
+    // Validate the skeleton XML with the same zod schema used by the
+    // non-streaming nacistSoubor. This catches SOAP faults, missing fields,
+    // or unexpected envelope structure.
+    extractResponseJson(this.skeleton, 'Nacist-soubor', nacistSouborResponseSchema)
+      .then((result) => {
+        // If the promise hasn't been settled yet (header state — no <Data> found),
+        // resolve based on whether Nacist-soubor is present in the validated result.
+        if (!result['Nacist-soubor']) {
+          this.resolve(null)
+        }
+        callback()
+      })
+      .catch((err: unknown) => {
+        // Reject the promise if it hasn't been settled yet (header/error states)
+        this.reject(err instanceof GinisError ? err : new GinisError(String(err)))
+        callback(err instanceof Error ? err : new Error(String(err)))
+      })
   }
 
   /**
-   * Accumulates the XML header. Once <Data> is found, extracts everything
-   * after it (which is the start of the base64 blob) and transitions to
-   * the `data` state. The promise is resolved here so the consumer can
-   * start piping from `dataStream` while data is still arriving.
+   * Accumulates the XML header. Once `<Data>` is found, saves everything
+   * before it to the skeleton (with a placeholder instead of actual base64),
+   * resolves the outer promise so the consumer can start piping, and
+   * transitions to the `data` state.
    */
   private handleHeader(str: string) {
     this.headerBuf += str
-
-    // <Jmeno-souboru> always appears before <Data> in the response
-    if (!this.filename) {
-      const match = FILENAME_RE.exec(this.headerBuf)
-      if (match?.[1]) this.filename = match[1]
-    }
 
     const idx = this.headerBuf.indexOf(DATA_OPEN)
     if (idx === -1) return
 
     // Split: everything after "<Data>" is base64 content
     const afterData = this.headerBuf.substring(idx + DATA_OPEN.length)
-    this.headerBuf = ''
 
-    if (!this.filename) {
-      this.reject(new GinisError('Found <Data> before <Jmeno-souboru> in XML response'))
-      this.state = 'done'
-      return
-    }
+    // Build skeleton: XML header up to <Data>, then a lightweight placeholder
+    // instead of the huge base64 blob. The closing tags will be appended in
+    // the `tail` state and in `handleData` when </Data> is found.
+    this.skeleton = this.headerBuf.substring(0, idx) + DATA_PLACEHOLDER
+    this.headerBuf = ''
 
     this.state = 'data'
     // Resolve now — the consumer can start piping from this Transform's
     // readable side while we continue pushing decoded chunks into it.
-    this.resolve({ filename: this.filename, dataStream: this })
+    this.resolve(this)
 
     // The chunk that contained <Data> may also contain the first bytes of
     // base64 content — process them immediately.
@@ -193,19 +227,24 @@ class NacistSouborXmlParser extends Transform {
   }
 
   /**
-   * Processes a chunk of base64 text from inside <Data>…</Data>.
+   * Processes a chunk of base64 text from inside `<Data>…</Data>`.
    * Prepends the previous tail buffer and checks for the closing tag.
+   * When `</Data>` is found, appends the trailing XML to the skeleton
+   * and transitions to the `tail` state.
    */
   private handleData(str: string) {
     const combined = this.tailBuf + str
 
     const closeIdx = combined.indexOf(DATA_CLOSE)
     if (closeIdx !== -1) {
-      // Found </Data> — decode everything before it and we're done
+      // Found </Data> — decode everything before it
       this.decodeBase64(combined.substring(0, closeIdx))
       this.flushBase64()
       this.tailBuf = ''
-      this.state = 'done'
+
+      // Append the XML closing tags after </Data> to the skeleton
+      this.skeleton += combined.substring(closeIdx + DATA_CLOSE.length)
+      this.state = 'tail'
       return
     }
 
@@ -246,7 +285,7 @@ class NacistSouborXmlParser extends Transform {
     }
   }
 
-  private resolve(result: NacistSouborStreamResult | null) {
+  private resolve(result: Readable | null) {
     this.resolvePromise?.(result)
     this.resolvePromise = null
     this.rejectPromise = null
@@ -271,23 +310,32 @@ class NacistSouborXmlParser extends Transform {
  * **How it works:**
  * 1. Sends the same SOAP request as `nacistSoubor`, but with `responseType: 'stream'`
  *    so axios returns a Node.js Readable instead of buffering the entire response.
- * 2. Pipes the response through {@link NacistSouborXmlParser}, which extracts the
- *    filename from `<Jmeno-souboru>` and base64-decodes `<Data>` content on the fly.
- * 3. Returns `{ filename, dataStream }` where `dataStream` is a Readable emitting
- *    decoded binary chunks. The consumer (e.g. a Next.js API route) can pipe this
- *    directly to the HTTP response — the file is never fully held in memory.
+ * 2. Pipes the response through {@link NacistSouborXmlParser}, which does two things
+ *    simultaneously:
+ *    - **Streams binary data:** base64-decodes `<Data>` content on the fly and pushes
+ *      decoded binary chunks downstream for the consumer to pipe.
+ *    - **Builds a skeleton XML:** collects the entire SOAP envelope *except* the base64
+ *      blob (replaced with a placeholder). When the stream ends, validates this skeleton
+ *      using `extractResponseJson` + the same zod schema as `nacistSoubor`.
+ * 3. Returns a `Readable` stream emitting decoded binary chunks. The consumer (e.g. a
+ *    Next.js API route) can pipe this directly to the HTTP response — the file is never
+ *    fully held in memory. Returns `null` when the file is not found.
+ *
+ * **Validation:** The skeleton XML is validated in `_flush` (after all data is pushed,
+ * before the `'end'` event). If validation fails, the stream emits `'error'` — the
+ * consumer's error handler fires and can act accordingly.
  *
  * **Backpressure:** The Transform stream handles backpressure automatically — if the
  * consumer reads slowly, Node.js pauses the upstream HTTP response accordingly.
  *
  * @param bodyObj - Request parameters, typically `{ 'Id-souboru': fileId }`.
- * @returns `{ filename, dataStream }` if the file exists, `null` if not found.
+ * @returns A `Readable` stream of decoded binary data if the file exists, `null` if not found.
  * @throws {GinisError} On network errors, SOAP faults, or malformed responses.
  */
 export async function nacistSouborStream(
   this: Ginis,
   bodyObj: UdeNacistSouborStreamRequest
-): Promise<NacistSouborStreamResult | null> {
+): Promise<Readable | null> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -326,10 +374,9 @@ export async function nacistSouborStream(
     throw error
   }
 
-  // The promise resolves once the parser has extracted the filename and is
-  // ready to stream data, or resolves with null / rejects if the response
-  // indicates a missing file or an error.
-  return new Promise<NacistSouborStreamResult | null>((resolve, reject) => {
+  // The promise resolves once the parser finds <Data> and is ready to stream,
+  // or resolves with null / rejects if the response indicates a missing file or error.
+  return new Promise<Readable | null>((resolve, reject) => {
     const parser = new NacistSouborXmlParser(resolve, reject)
 
     // Propagate HTTP stream errors to the parser
@@ -338,7 +385,7 @@ export async function nacistSouborStream(
       reject(new GinisError(`GINIS response stream error: ${err.message}`))
     })
 
-    // Propagate parser errors back (e.g. malformed XML)
+    // Propagate parser errors back (e.g. malformed XML, failed skeleton validation)
     parser.on('error', (err) => {
       responseStream.destroy()
       reject(err instanceof GinisError ? err : new GinisError(err.message))
