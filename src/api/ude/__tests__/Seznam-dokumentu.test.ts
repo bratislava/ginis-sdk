@@ -1,4 +1,5 @@
 import { Ginis } from '../../../index'
+import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('UDE-Seznam-dokumentu', () => {
   let ginis: Ginis
@@ -8,12 +9,10 @@ describe('UDE-Seznam-dokumentu', () => {
     )
     ginis = new Ginis({
       urls: {
-        ude:
-          process.env['GINIS_UDE_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/Ude01/Ude.svc',
+        ude: envGetOrThrow('GINIS_UDE_HOST'),
       },
-      username: process.env['GINIS_USERNAME'] ?? '',
-      password: process.env['GINIS_PASSWORD'] ?? '',
+      username: envGetOrThrow('GINIS_USERNAME'),
+      password: envGetOrThrow('GINIS_PASSWORD'),
       debug: false,
     })
   })
