@@ -5,9 +5,6 @@ import { envGetOrThrow } from '../../../utils/test-utils'
 describe.skip('POD-Detail-el-podani', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         pod: envGetOrThrow('GINIS_POD_HOST'),

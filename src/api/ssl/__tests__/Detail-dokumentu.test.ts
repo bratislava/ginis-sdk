@@ -4,9 +4,6 @@ import { envGetOrThrow } from '../../../utils/test-utils'
 describe('SSL-Detail-dokumentu', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         ssl: envGetOrThrow('GINIS_SSL_HOST'),

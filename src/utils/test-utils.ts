@@ -13,7 +13,7 @@ export function envGetOrThrow(envVariableName: GinisEnvVariable): string {
   const value = process.env[envVariableName]
 
   if (!value) {
-    throw new Error(`Missing required env var: ${envVariableName}`)
+    throw new Error(`Missing required env var in .env file: ${envVariableName}`)
   }
 
   return value

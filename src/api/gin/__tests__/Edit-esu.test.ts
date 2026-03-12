@@ -13,9 +13,6 @@ describe('GIN-Edit-esu', () => {
   let esuId: string
 
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         gin: envGetOrThrow('GINIS_GIN_HOST'),

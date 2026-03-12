@@ -4,9 +4,6 @@ import { envGetOrThrow } from '../../../utils/test-utils'
 describe('GIN-Detail-funkcniho-mista', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         gin: envGetOrThrow('GINIS_GIN_HOST'),

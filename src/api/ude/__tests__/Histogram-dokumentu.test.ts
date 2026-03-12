@@ -5,9 +5,6 @@ import { envGetOrThrow } from '../../../utils/test-utils'
 describe.skip('UDE-Histogram-dokumentu', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         ude: envGetOrThrow('GINIS_UDE_HOST'),

@@ -11,9 +11,6 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
   const testPropertyId = 'MAG000V0A1LL'
 
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
         ssl: envGetOrThrow('GINIS_SSL_HOST'),
