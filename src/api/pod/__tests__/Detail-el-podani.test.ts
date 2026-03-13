@@ -1,20 +1,16 @@
 import { Ginis } from '../../../index'
+import { envGetOrThrow } from '../../../utils/test-utils'
 
 // POD endpoints are disabled, as POD is not licensed after test period expired
 describe.skip('POD-Detail-el-podani', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
-        pod:
-          process.env['GINIS_POD_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/POD01/Pod.svc',
+        pod: envGetOrThrow('GINIS_POD_HOST'),
       },
-      username: process.env['GINIS_USERNAME'] ?? '',
-      password: process.env['GINIS_PASSWORD'] ?? '',
+      username: envGetOrThrow('GINIS_USERNAME'),
+      password: envGetOrThrow('GINIS_PASSWORD'),
       debug: false,
     })
   })
