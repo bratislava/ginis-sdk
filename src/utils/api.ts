@@ -1,4 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios'
+import { Readable } from 'stream'
+import { text } from 'stream/consumers'
 
 import { GinisError } from './errors'
 
@@ -31,7 +33,7 @@ export async function makeAxiosRequest<T>(
     responseAxios = await axios.post<T>(url, body, requestConfig)
   } catch (error) {
     if (!isAxiosError(error)) {
-      throw makeResponseDetailError(error)
+      throw await makeResponseDetailError(error)
     }
     if (debug) {
       console.log('########### GINIS ERROR RESPONSE ###########')
@@ -40,7 +42,7 @@ export async function makeAxiosRequest<T>(
       console.log('data: ', error.response?.data)
       console.log('########### GINIS RESPONSE END ###########')
     }
-    throw makeResponseDetailError(error, error.response?.data)
+    throw await makeResponseDetailError(error, error.response?.data)
   }
   if (debug) {
     console.log('########### GINIS RESPONSE ###########')
@@ -52,17 +54,30 @@ export async function makeAxiosRequest<T>(
   return responseAxios
 }
 
-function makeResponseDetailError(error: unknown, responseData: unknown = null) {
+async function makeResponseDetailError(
+  error: unknown,
+  responseData: unknown = null
+) {
   if (!(error instanceof Error)) {
     return new GinisError(
       'Non-error passed to throwErrorFaultDetail in ginis-sdk. This should never happen.'
     )
   }
 
-  const errorDetail =
-    responseData != null && typeof responseData === 'string'
-      ? `${error.message}\r\nError response details: ${responseData}`
-      : error.message
+  const responseText = await (async () => {
+    if (responseData instanceof Readable) {
+      return await text(responseData)
+    }
+    if (typeof responseData === 'string') {
+      return responseData
+    }
+    return null
+  })()
+
+  const errorDetail = responseText
+    ? `${error.message}\r\nError response details: ${responseText}`
+    : error.message
+
   if (isAxiosError(error)) {
     return new GinisError(errorDetail, error)
   }
