@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=nastavit-vlastnost-dokumentu&type=request
 const nastavitVlastnostDokumentuRequestProperties = [

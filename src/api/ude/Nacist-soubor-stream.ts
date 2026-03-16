@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 import { nacistSouborResponseSchema } from './Nacist-soubor'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const

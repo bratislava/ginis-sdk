@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=GIN&version=525&methodName=edit-esu&type=request
 const vytvorEsuRequestProperties = [

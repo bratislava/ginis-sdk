@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 import { coercedArray } from '../../utils/validation'
 
 const detailElPodaniRequestProperties = [
