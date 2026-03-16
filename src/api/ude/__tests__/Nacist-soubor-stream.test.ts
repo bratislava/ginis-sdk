@@ -3,21 +3,17 @@ import { Readable } from 'stream'
 import { Ginis } from '../../../index'
 import { GinisError } from '../../../utils/errors'
 import { NacistSouborXmlParser } from '../Nacist-soubor-stream'
+import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('UDE-Nacist-soubor-stream', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
-        ude:
-          process.env['GINIS_UDE_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/Ude01/Ude.svc',
+        ude: envGetOrThrow('GINIS_UDE_HOST'),
       },
-      username: process.env['GINIS_USERNAME'] ?? '',
-      password: process.env['GINIS_PASSWORD'] ?? '',
+      username: envGetOrThrow('GINIS_USERNAME'),
+      password: envGetOrThrow('GINIS_PASSWORD'),
       debug: false,
     })
   })
