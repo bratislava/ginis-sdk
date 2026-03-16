@@ -62,7 +62,9 @@ export async function nacistSoubor(
   bodyObj: UdeNacistSouborRequest
 ): Promise<UdeNacistSouborResponse> {
   const url = this.config.urls.ude
-  if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  }
 
   const response = await makeAxiosRequest<string>(
     createXmlRequestConfig(requestName, requestNamespace),
@@ -100,7 +102,9 @@ export async function nacistSouborStream(
   bodyObj: UdeNacistSouborRequest
 ): Promise<UdeNacistSouborStream> {
   const url = this.config.urls.ude
-  if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  }
 
   const response = await makeAxiosRequest<Readable>(
     { ...createXmlRequestConfig(requestName, requestNamespace), responseType: 'stream' },

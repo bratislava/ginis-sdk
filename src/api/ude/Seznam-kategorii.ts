@@ -62,7 +62,9 @@ export async function seznamKategorii(
   bodyObj: UdeSeznamKategoriiRequest
 ): Promise<UdeSeznamKategoriiResponse> {
   const url = this.config.urls.ude
-  if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
+  }
 
   const requestName = 'Seznam-kategorii'
   const requestNamespace = 'http://www.gordic.cz/svc/xrg-ude/v_1.0.0.0'
