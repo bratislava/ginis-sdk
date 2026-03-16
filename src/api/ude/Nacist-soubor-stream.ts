@@ -1,4 +1,5 @@
 import { pipeline, Readable, Transform, TransformCallback } from 'stream'
+import { ZodType } from 'zod'
 
 import { Ginis } from '../../ginis'
 import { makeAxiosRequest } from '../../utils/api'
@@ -29,8 +30,17 @@ const DATA_OPEN = '<Data>'
 const DATA_CLOSE = '</Data>'
 const DATA_PLACEHOLDER = `${DATA_OPEN}placeholder${DATA_CLOSE}`
 
+export interface XmlStreamResponseValidation<T> {
+  requestName: string
+  responseSchema: ZodType<T>
+}
+
+export interface XmlBase64DataStreamParserConfig<T = unknown> {
+  responseValidation: XmlStreamResponseValidation<T>
+}
+
 /**
- * Streaming XML parser for GINIS Nacist-soubor SOAP responses.
+ * Streaming XML parser for GINIS SOAP responses containing `<Data>` base64 payloads.
  *
  * The GINIS response XML has this structure (all on one line, no whitespace):
  *   <s:Envelope>
@@ -60,10 +70,11 @@ const DATA_PLACEHOLDER = `${DATA_OPEN}placeholder${DATA_CLOSE}`
  *   The parser builds a "skeleton" copy of the full XML response, but with the
  *   huge base64 blob replaced by a tiny placeholder: `<Data>placeholder</Data>`.
  *   This skeleton is a few hundred bytes regardless of file size. When the stream
- *   ends, `_flush` feeds the skeleton through `extractResponseJson` + the same
- *   zod schema used by the non-streaming `nacistSoubor` — validating envelope
- *   structure, SOAP faults, required fields, etc. If validation fails, the
- *   stream emits an error so the consumer knows the response was invalid.
+ *   ends, `_flush` validates the skeleton XML via `extractResponseJson`, using
+ *   constructor-provided `requestName` and `responseSchema` — validating
+ *   envelope structure, SOAP faults, required fields, etc. If validation
+ *   fails, the stream emits an error so the consumer knows the response
+ *   was invalid.
  *
  * Three-state machine:
  *
@@ -82,7 +93,8 @@ const DATA_PLACEHOLDER = `${DATA_OPEN}placeholder${DATA_CLOSE}`
  * Memory usage is O(1) regardless of file size — only the small skeleton and
  * fixed-size tail/remainder buffers are kept in memory.
  */
-export class NacistSouborXmlParser extends Transform {
+export class XmlBase64DataStreamParser extends Transform {
+  private readonly responseValidation: XmlStreamResponseValidation<unknown>
   /** Accumulates XML bytes before <Data> — only a few hundred bytes. */
   private headerBuf = ''
   /**
@@ -105,6 +117,11 @@ export class NacistSouborXmlParser extends Transform {
   private skeleton = ''
   private state: 'header' | 'data' | 'tail' = 'header'
 
+  constructor(config: XmlBase64DataStreamParserConfig) {
+    super()
+    this.responseValidation = config.responseValidation
+  }
+
   override _transform(chunk: Buffer, _encoding: BufferEncoding, callback: TransformCallback) {
     try {
       const str = chunk.toString('utf-8')
@@ -124,10 +141,10 @@ export class NacistSouborXmlParser extends Transform {
   }
 
   /**
-   * Called when the input stream ends. Validates the skeleton XML using
-   * `extractResponseJson` with the same zod schema as the non-streaming
-   * `nacistSoubor`. If the SOAP envelope is malformed, contains a fault,
-   * or is missing required fields, the stream emits an error.
+   * Called when the input stream ends. Validates the skeleton XML via
+   * `extractResponseJson` using configured `requestName` and `responseSchema`
+   * from constructor config. If the SOAP envelope is malformed, contains a
+   * fault, or is missing required fields, the stream emits an error.
    *
    * Validation runs _after_ all data chunks have been pushed but _before_
    * the 'end' event — so the consumer's error handler will fire if it fails.
@@ -142,12 +159,16 @@ export class NacistSouborXmlParser extends Transform {
       this.skeleton = this.headerBuf
     }
 
-    extractResponseJson(this.skeleton, 'Nacist-soubor', nacistSouborResponseSchema)
+    extractResponseJson(
+      this.skeleton,
+      this.responseValidation.requestName,
+      this.responseValidation.responseSchema
+    )
       .then(() => {
         callback()
       })
-      .catch((err: unknown) => {
-        callback(err as GinisError)
+      .catch((err) => {
+        callback(err instanceof Error ? err : new GinisError(String(err)))
       })
   }
 
@@ -280,7 +301,12 @@ export async function nacistSouborStream(
     this.config.debug
   )
 
-  const parser = new NacistSouborXmlParser()
+  const parser = new XmlBase64DataStreamParser({
+    responseValidation: {
+      requestName,
+      responseSchema: nacistSouborResponseSchema,
+    },
+  })
   pipeline(response.data, parser, (error) => {
     if (error && !parser.destroyed) {
       parser.destroy(error instanceof Error ? error : new Error(String(error)))

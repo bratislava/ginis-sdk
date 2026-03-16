@@ -2,7 +2,8 @@ import { Readable } from 'stream'
 
 import { Ginis } from '../../../index'
 import { GinisError } from '../../../utils/errors'
-import { NacistSouborXmlParser } from '../Nacist-soubor-stream'
+import { nacistSouborResponseSchema } from '../Nacist-soubor'
+import { XmlBase64DataStreamParser } from '../Nacist-soubor-stream'
 import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('UDE-Nacist-soubor-stream', () => {
@@ -54,8 +55,17 @@ describe('UDE-Nacist-soubor-stream', () => {
   }, 20_000)
 })
 
+function createNacistSouborParser() {
+  return new XmlBase64DataStreamParser({
+    responseValidation: {
+      requestName: 'Nacist-soubor',
+      responseSchema: nacistSouborResponseSchema,
+    },
+  })
+}
+
 /** Collect all data chunks from a Transform into a single Buffer. */
-async function collect(parser: NacistSouborXmlParser): Promise<Buffer> {
+async function collect(parser: XmlBase64DataStreamParser): Promise<Buffer> {
   return await new Promise((resolve, reject) => {
     const parts: Buffer[] = []
     parser.on('data', (chunk: Buffer) => parts.push(chunk))
@@ -70,7 +80,7 @@ async function collect(parser: NacistSouborXmlParser): Promise<Buffer> {
  * Push an array of string chunks into a parser as UTF-8 Buffers, then end it.
  * Returns the collect() promise so the caller can await or rejects.
  */
-async function feed(parser: NacistSouborXmlParser, chunks: string[]): Promise<Buffer> {
+async function feed(parser: XmlBase64DataStreamParser, chunks: string[]): Promise<Buffer> {
   const result = collect(parser)
   for (const c of chunks) parser.write(Buffer.from(c, 'utf-8'))
   parser.end()
@@ -100,13 +110,11 @@ function envelope(dataB64: string, filename = 'file.bin'): string {
   )
 }
 
-describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
+describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
   describe('Happy path', () => {
     test('decodes a small file in one chunk', async () => {
       const original = Buffer.from('Hello GINIS!')
-      const result = await feed(new NacistSouborXmlParser(), [
-        envelope(original.toString('base64')),
-      ])
+      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
@@ -116,26 +124,24 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
       const chunks: string[] = []
       for (let i = 0; i < xml.length; i += 20) chunks.push(xml.slice(i, i + 20))
 
-      const result = await feed(new NacistSouborXmlParser(), chunks)
+      const result = await feed(createNacistSouborParser(), chunks)
       expect(result).toEqual(original)
     })
 
     test('decodes a 1 KB binary blob', async () => {
       const original = Buffer.from(Array.from({ length: 1024 }, (_, i) => i % 256))
-      const result = await feed(new NacistSouborXmlParser(), [
-        envelope(original.toString('base64')),
-      ])
+      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
     test('handles an empty <Data> tag (zero-byte file)', async () => {
-      const result = await feed(new NacistSouborXmlParser(), [envelope('')])
+      const result = await feed(createNacistSouborParser(), [envelope('')])
       expect(result.length).toBe(0)
     })
 
     test('emits the "ready" event once <Data> is found', async () => {
       const original = Buffer.from('ready-event-test')
-      const parser = new NacistSouborXmlParser()
+      const parser = createNacistSouborParser()
       let readyFired = false
       parser.on('ready', () => {
         readyFired = true
@@ -146,7 +152,7 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
 
     test('"ready" fires before the first data chunk is pushed', async () => {
       const original = Buffer.from('ordering-test')
-      const parser = new NacistSouborXmlParser()
+      const parser = createNacistSouborParser()
       const events: string[] = []
       parser.on('ready', () => events.push('ready'))
       parser.on('data', () => {
@@ -179,25 +185,21 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
         xml.slice(dataEnd), // </Data> + tail
       ]
 
-      const result = await feed(new NacistSouborXmlParser(), chunks)
+      const result = await feed(createNacistSouborParser(), chunks)
       expect(result).toEqual(original)
     })
 
     test('handles base64 remainder of 1 leftover char', async () => {
       // 1 byte → "AQ==" — remainder of 1 char before padding
       const original = Buffer.from([0x01])
-      const result = await feed(new NacistSouborXmlParser(), [
-        envelope(original.toString('base64')),
-      ])
+      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
     test('handles base64 remainder of 2 leftover chars', async () => {
       // 2 bytes → "AAE=" — remainder of 2 chars before padding
       const original = Buffer.from([0x00, 0x01])
-      const result = await feed(new NacistSouborXmlParser(), [
-        envelope(original.toString('base64')),
-      ])
+      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
   })
@@ -209,7 +211,7 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
       const closeIdx = xml.indexOf('</Data>')
       const splitAt = closeIdx + 3 // "</Da" | "ta>..."
 
-      const result = await feed(new NacistSouborXmlParser(), [
+      const result = await feed(createNacistSouborParser(), [
         xml.slice(0, splitAt),
         xml.slice(splitAt),
       ])
@@ -222,7 +224,7 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
       const openIdx = xml.indexOf('<Data>')
       const splitAt = openIdx + 3 // "<Da" | "ta>..."
 
-      const result = await feed(new NacistSouborXmlParser(), [
+      const result = await feed(createNacistSouborParser(), [
         xml.slice(0, splitAt),
         xml.slice(splitAt),
       ])
@@ -232,14 +234,14 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
     test('works when every character arrives in its own chunk', async () => {
       const original = Buffer.from('one-char-chunks')
       const xml = envelope(original.toString('base64'))
-      const result = await feed(new NacistSouborXmlParser(), xml.split(''))
+      const result = await feed(createNacistSouborParser(), xml.split(''))
       expect(result).toEqual(original)
     })
 
     test('works when the entire payload arrives in a single character Buffer per write', async () => {
       const original = Buffer.from('single-byte-writes')
       const xml = envelope(original.toString('base64'))
-      const parser = new NacistSouborXmlParser()
+      const parser = createNacistSouborParser()
       const result = collect(parser)
       for (const byte of Buffer.from(xml, 'utf-8')) {
         parser.write(Buffer.from([byte]))
@@ -250,6 +252,19 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
   })
 
   describe('Error handling', () => {
+    test('allows overriding requestName/responseSchema for extractResponseJson', async () => {
+      const parser = new XmlBase64DataStreamParser({
+        responseValidation: {
+          requestName: 'Neexistujici-request',
+          responseSchema: nacistSouborResponseSchema,
+        },
+      })
+
+      await expect(
+        feed(parser, [envelope(Buffer.from('validator-test').toString('base64'))])
+      ).rejects.toThrow(GinisError)
+    })
+
     test('errors if stream ends while still in "data" state (no </Data>)', async () => {
       const truncated =
         '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
@@ -257,13 +272,13 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
         '<Jmeno-souboru>f.bin</Jmeno-souboru>' +
         '<Data>AAAA' // no closing tag
 
-      await expect(feed(new NacistSouborXmlParser(), [truncated])).rejects.toThrow(
+      await expect(feed(createNacistSouborParser(), [truncated])).rejects.toThrow(
         'Response stream ended before </Data> was found'
       )
     })
 
     test('errors on completely invalid XML (no <Data>, extractResponseJson fails)', async () => {
-      await expect(feed(new NacistSouborXmlParser(), ['this is not XML at all'])).rejects.toThrow(
+      await expect(feed(createNacistSouborParser(), ['this is not XML at all'])).rejects.toThrow(
         GinisError
       )
     })
@@ -277,7 +292,7 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
         '</s:Body>' +
         '</s:Envelope>'
 
-      await expect(feed(new NacistSouborXmlParser(), [fault])).rejects.toThrow(GinisError)
+      await expect(feed(createNacistSouborParser(), [fault])).rejects.toThrow(GinisError)
     })
 
     test('errors when <Xrg> is absent (xrgContent is undefined, zod rejects)', async () => {
@@ -294,7 +309,7 @@ describe('UDE-Nacist-soubor-stream — NacistSouborXmlParser', () => {
         '</s:Body>' +
         '</s:Envelope>'
 
-      await expect(feed(new NacistSouborXmlParser(), [missingXrg])).rejects.toThrow(GinisError)
+      await expect(feed(createNacistSouborParser(), [missingXrg])).rejects.toThrow(GinisError)
     })
   })
 })
