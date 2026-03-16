@@ -75,7 +75,9 @@ export async function detailReferenta(
   bodyObj: GinDetailReferentaRequest
 ): Promise<GinDetailReferentaResponse> {
   const url = this.config.urls.gin
-  if (!url) throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing GIN url in GINIS config')
+  }
 
   const requestName = 'Detail-referenta'
   const requestNamespace = 'http://www.gordic.cz/svc/xrg-gin/v_1.0.0.0'

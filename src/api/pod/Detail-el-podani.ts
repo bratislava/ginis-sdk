@@ -66,7 +66,9 @@ export async function detailElPodani(
   bodyObj: PodDetailElPodaniRequest
 ): Promise<PodDetailElPodaniResponse> {
   const url = this.config.urls.pod
-  if (!url) throw new GinisError('GINIS SDK Error: Missing POD url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing POD url in GINIS config')
+  }
 
   const requestName = 'Detail-el-podani'
   const requestNamespace = 'http://www.gordic.cz/svc/xrg-pod/v_1.0.0.0'

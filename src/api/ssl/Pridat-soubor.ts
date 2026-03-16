@@ -66,7 +66,9 @@ export async function pridatSoubor(
   bodyObj: SslPridatSouborRequest
 ): Promise<SslPridatSouborResponse> {
   const url = this.config.urls.ssl
-  if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  }
 
   const requestInfo = {
     name: requestName,
@@ -100,7 +102,9 @@ export async function pridatSouborMtom(
   }
 
   const url = this.config.urls.ssl_mtom
-  if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  }
 
   const requestInfo = {
     name: requestName,

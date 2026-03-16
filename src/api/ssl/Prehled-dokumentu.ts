@@ -126,7 +126,9 @@ export async function prehledDokumentu(
   requestRizeniPrehledu: SslPrehledDokumentuRequestRizeniPrehledu
 ): Promise<SslPrehledDokumentuResponse> {
   const url = this.config.urls.ssl
-  if (!url) throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  if (!url) {
+    throw new GinisError('GINIS SDK Error: Missing SSL url in GINIS config')
+  }
 
   const requestName = 'Prehled-dokumentu'
   const requestNamespace = 'http://www.gordic.cz/svc/xrg-ssl/v_1.0.0.0'
