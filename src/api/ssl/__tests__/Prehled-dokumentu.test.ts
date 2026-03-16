@@ -1,19 +1,15 @@
 import { Ginis } from '../../../index'
+import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('SSL-Prehled-dokumentu', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
-        ssl:
-          process.env['GINIS_SSL_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
+        ssl: envGetOrThrow('GINIS_SSL_HOST'),
       },
-      username: process.env['GINIS_USERNAME'] ?? '',
-      password: process.env['GINIS_PASSWORD'] ?? '',
+      username: envGetOrThrow('GINIS_USERNAME'),
+      password: envGetOrThrow('GINIS_PASSWORD'),
       debug: false,
     })
   })

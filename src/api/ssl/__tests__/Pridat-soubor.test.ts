@@ -1,24 +1,18 @@
 import { createReadStream, promises as fs } from 'fs'
 
 import { Ginis } from '../../../index'
+import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('SSL-Pridat-soubor', () => {
   let ginis: Ginis
   beforeAll(() => {
-    console.log(
-      'Loading GINIS credentials from .env - make sure you have correct local configuration.'
-    )
     ginis = new Ginis({
       urls: {
-        ssl:
-          process.env['GINIS_SSL_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_TEST/Ssl.svc',
-        ssl_mtom:
-          process.env['GINIS_SSL_MTOM_HOST'] ??
-          'http://is-ginis-apl-p.bratislava.sk/gordic/ginis/ws/SSL01_BRA/Ssl.svc/mtom',
+        ssl: envGetOrThrow('GINIS_SSL_HOST'),
+        ssl_mtom: envGetOrThrow('GINIS_SSL_MTOM_HOST'),
       },
-      username: process.env['GINIS_USERNAME'] ?? '',
-      password: process.env['GINIS_PASSWORD'] ?? '',
+      username: envGetOrThrow('GINIS_USERNAME'),
+      password: envGetOrThrow('GINIS_PASSWORD'),
       debug: false,
     })
   })
