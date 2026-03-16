@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 import { coercedArray } from '../../utils/validation'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=UDE&version=524&methodName=detail-dokumentu&type=request#

@@ -9,6 +9,7 @@ export type {
   UdeNacistSouborNacistSoubor,
   UdeNacistSouborRequest,
   UdeNacistSouborResponse,
+  UdeNacistSouborStream,
 } from './Nacist-soubor'
 export type {
   UdeSeznamDokumentuRequest,

@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 import { coercedArray } from '../../utils/validation'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prehled-dokumentu&type=request

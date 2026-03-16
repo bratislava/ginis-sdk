@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=prideleni&type=request
 const prideleniRequestProperties = [

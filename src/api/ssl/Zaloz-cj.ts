@@ -9,7 +9,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=525&methodName=zaloz-cj&type=request
 const zalozCjRequestProperties = ['Id-init-dokumentu', 'Denik-cj', 'Rok-cj', 'Poradove-cislo-cj']

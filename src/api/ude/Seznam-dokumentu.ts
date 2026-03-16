@@ -11,7 +11,7 @@ import {
   RequestParamOrder,
   RequestParamType,
   sanitizeParamBody,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 import { coercedArray } from '../../utils/validation'
 
 /**

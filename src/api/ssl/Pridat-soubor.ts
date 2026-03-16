@@ -14,7 +14,7 @@ import {
   extractResponseJson,
   RequestParamOrder,
   RequestParamType,
-} from '../../utils/request-util'
+} from '../../utils/request-utils'
 
 // https://robot.gordic.cz/xrg/Default.html?c=OpenMethodDetail&moduleName=SSL&version=390&methodName=pridat-soubor&type=request
 const pridatSouborRequestProperties = [
