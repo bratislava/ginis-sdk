@@ -1,4 +1,5 @@
 import z from 'zod'
+
 import { GinisError } from '../errors'
 import { XmlBase64DataStreamParser } from '../stream-utils'
 
@@ -13,17 +14,21 @@ const testSchema = z.object({
 export const testResponseSchema = z.object({
   [testFunctionName]: testSchema.optional(),
 })
+export type TestResponse = z.infer<typeof testResponseSchema>
+
 function createTestParser() {
-  return new XmlBase64DataStreamParser({
+  const parser = new XmlBase64DataStreamParser<TestResponse>({
     responseValidation: {
       requestName: testFunctionName,
       responseSchema: testResponseSchema,
     },
   })
+  void parser.response.catch(() => undefined)
+  return parser
 }
 
 /** Collect all data chunks from a Transform into a single Buffer. */
-async function collect(parser: XmlBase64DataStreamParser): Promise<Buffer> {
+async function collect<TResponse>(parser: XmlBase64DataStreamParser<TResponse>): Promise<Buffer> {
   return await new Promise((resolve, reject) => {
     const parts: Buffer[] = []
     parser.on('data', (chunk: Buffer) => parts.push(chunk))
@@ -38,7 +43,10 @@ async function collect(parser: XmlBase64DataStreamParser): Promise<Buffer> {
  * Push an array of string chunks into a parser as UTF-8 Buffers, then end it.
  * Returns the collect() promise so the caller can await or rejects.
  */
-async function feed(parser: XmlBase64DataStreamParser, chunks: string[]): Promise<Buffer> {
+async function feed<TResponse>(
+  parser: XmlBase64DataStreamParser<TResponse>,
+  chunks: string[]
+): Promise<Buffer> {
   const result = collect(parser)
   for (const c of chunks) parser.write(Buffer.from(c, 'utf-8'))
   parser.end()
@@ -118,6 +126,21 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
       })
       await feed(parser, [envelope(original.toString('base64'))])
       expect(events.indexOf('ready')).toBeLessThan(events.indexOf('data'))
+    })
+
+    test('exposes parsed XML response alongside streamed binary data', async () => {
+      const original = Buffer.from('response-metadata-test')
+      const parameterValue = 'meta-value'
+      const parser = createTestParser()
+
+      const [dataBuffer, parsedResponse] = await Promise.all([
+        feed(parser, [envelope(original.toString('base64'), parameterValue)]),
+        parser.response,
+      ])
+
+      expect(dataBuffer).toEqual(original)
+      // eslint-disable-next-line security/detect-object-injection
+      expect(parsedResponse[testFunctionName]?.[testParameterName]).toBe(parameterValue)
     })
   })
 
@@ -211,6 +234,7 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
           responseSchema: testResponseSchema,
         },
       })
+      void parser.response.catch(() => undefined)
 
       await expect(
         feed(parser, [envelope(Buffer.from('validator-test').toString('base64'))])

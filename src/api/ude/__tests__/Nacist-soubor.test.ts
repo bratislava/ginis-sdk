@@ -1,6 +1,4 @@
-import { Readable } from 'stream'
-
-import { Ginis, UdeNacistSouborResponse } from '../../../index'
+import { Ginis, UdeNacistSouborResponse, UdeNacistSouborStream } from '../../../index'
 import { envGetOrThrow } from '../../../utils/test-utils'
 
 describe('UDE-Nacist-soubor', () => {
@@ -9,6 +7,7 @@ describe('UDE-Nacist-soubor', () => {
   const noDiskError = 'Chyba: El. dokument nelze stáhnout, protože se nachází na zrušeném disku.'
   const noDiskErrorCode = 'kód: 24200135'
   const noDiskSkipMessage = 'Skipping test as no disk is available within this environment.'
+  const expectedFilename = 'Plnenie UZN c. 135_2015 február 2021.pdf'
 
   beforeAll(() => {
     ginis = new Ginis({
@@ -41,15 +40,13 @@ describe('UDE-Nacist-soubor', () => {
       throw error
     }
 
-    expect(data['Nacist-soubor']?.['Jmeno-souboru']).toBe(
-      'Plnenie UZN c. 135_2015 február 2021.pdf'
-    )
+    expect(data['Nacist-soubor']?.['Jmeno-souboru']).toBe(expectedFilename)
   }, 20_000)
 
   test('Stream request', async () => {
-    let stream: Readable
+    let streamResult: UdeNacistSouborStream
     try {
-      stream = await ginis.ude.nacistSouborStream({
+      streamResult = await ginis.ude.nacistSouborStream({
         'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
       })
     } catch (error) {
@@ -68,13 +65,16 @@ describe('UDE-Nacist-soubor', () => {
 
     const dataBuffer = await new Promise<Buffer>((resolve, reject) => {
       const parts: Buffer[] = []
-      stream.on('data', (chunk: Buffer) => parts.push(chunk))
-      stream.on('end', () => {
+      streamResult.on('data', (chunk: Buffer) => parts.push(chunk))
+      streamResult.on('end', () => {
         resolve(Buffer.concat(parts))
       })
-      stream.on('error', reject)
+      streamResult.on('error', reject)
     })
 
+    const parsedResponse = await streamResult.response
+
     expect(dataBuffer.length).toBeGreaterThan(0)
+    expect(parsedResponse['Nacist-soubor']?.['Jmeno-souboru']).toBe(expectedFilename)
   }, 20_000)
 })

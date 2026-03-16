@@ -49,6 +49,9 @@ export const nacistSouborResponseSchema = z.object({
 
 export type UdeNacistSouborNacistSoubor = z.infer<typeof nacistSouborSchema>
 export type UdeNacistSouborResponse = z.infer<typeof nacistSouborResponseSchema>
+export type UdeNacistSouborStream = Readable & {
+  response: Promise<UdeNacistSouborResponse>
+}
 
 const requestName = 'Nacist-soubor'
 const requestNamespace = 'http://www.gordic.cz/svc/xrg-ude/v_1.0.0.0'
@@ -84,14 +87,18 @@ export async function nacistSoubor(
  * For large files (50-200+ MB) this causes memory spikes of several GB
  * (the base64 string + parsed object + decoded buffer all coexist in memory).
  *
- * @param bodyObj - Request parameters, typically `{ 'Id-souboru': fileId }`.
- * @returns `Readable` stream of decoded binary data.
+ * `UdeNacistSouborResponse` is exposed via a promise in `response` attribute.
+ * The attribute `Data` in the response will always have value "placeholder",
+ * as the actual data will be available in the readable stream instead.
+ *
+ * @param bodyObj - Request parameters. See `UdeNacistSouborRequest` type for details.
+ * @returns Stream of decoded binary data with response data available in `response` attribute.
  * @throws {GinisError} on network errors, SOAP faults, or malformed responses.
  */
 export async function nacistSouborStream(
   this: Ginis,
   bodyObj: UdeNacistSouborRequest
-): Promise<Readable> {
+): Promise<UdeNacistSouborStream> {
   const url = this.config.urls.ude
   if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
 
@@ -108,7 +115,7 @@ export async function nacistSouborStream(
     this.config.debug
   )
 
-  const parser = new XmlBase64DataStreamParser({
+  const parser = new XmlBase64DataStreamParser<UdeNacistSouborResponse>({
     responseValidation: {
       requestName,
       responseSchema: nacistSouborResponseSchema,
@@ -119,6 +126,8 @@ export async function nacistSouborStream(
       parser.destroy(error instanceof Error ? error : new Error(String(error)))
     }
   })
+  // Stream consumers may ignore `response`; prevent unhandled rejections.
+  parser.response.catch(() => undefined)
 
-  return parser as Readable
+  return parser as UdeNacistSouborStream
 }

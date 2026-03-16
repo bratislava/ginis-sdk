@@ -71,8 +71,13 @@ export interface XmlBase64DataStreamParserConfig<T = unknown> {
  * Memory usage is O(1) regardless of file size — only the small skeleton and
  * fixed-size tail/remainder buffers are kept in memory.
  */
-export class XmlBase64DataStreamParser extends Transform {
-  private readonly responseValidation: XmlStreamResponseValidation<unknown>
+export class XmlBase64DataStreamParser<TResponse = unknown> extends Transform {
+  private readonly responseValidation: XmlStreamResponseValidation<TResponse>
+  private resolveResponse!: (value: TResponse) => void
+  private rejectResponse!: (error: Error) => void
+  private responseSettled = false
+  /** Parsed response payload resolved when stream parsing/validation completes. */
+  public readonly response: Promise<TResponse>
   /** Accumulates XML bytes before <Data> — only a few hundred bytes. */
   private headerBuf = ''
   /**
@@ -95,9 +100,13 @@ export class XmlBase64DataStreamParser extends Transform {
   private skeleton = ''
   private state: 'header' | 'data' | 'tail' = 'header'
 
-  constructor(config: XmlBase64DataStreamParserConfig) {
+  constructor(config: XmlBase64DataStreamParserConfig<TResponse>) {
     super()
     this.responseValidation = config.responseValidation
+    this.response = new Promise<TResponse>((resolve, reject) => {
+      this.resolveResponse = resolve
+      this.rejectResponse = reject
+    })
   }
 
   override _transform(chunk: Buffer, _encoding: BufferEncoding, callback: TransformCallback) {
@@ -113,8 +122,8 @@ export class XmlBase64DataStreamParser extends Transform {
       }
 
       callback()
-    } catch (err) {
-      callback(err instanceof Error ? err : new Error(String(err)))
+    } catch (error) {
+      callback(error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -129,7 +138,9 @@ export class XmlBase64DataStreamParser extends Transform {
    */
   override _flush(callback: TransformCallback) {
     if (this.state === 'data') {
-      callback(new GinisError('Response stream ended before </Data> was found'))
+      const error = new GinisError('Response stream ended before </Data> was found')
+      this.setResponseError(error)
+      callback(error)
       return
     }
 
@@ -142,12 +153,22 @@ export class XmlBase64DataStreamParser extends Transform {
       this.responseValidation.requestName,
       this.responseValidation.responseSchema
     )
-      .then(() => {
+      .then((parsedResponse) => {
+        this.setResponseValue(parsedResponse)
         callback()
       })
-      .catch((err) => {
-        callback(err instanceof Error ? err : new GinisError(String(err)))
+      .catch((error: unknown) => {
+        const responseError = error instanceof Error ? error : new GinisError(String(error))
+        this.setResponseError(responseError)
+        callback(responseError)
       })
+  }
+
+  override _destroy(error: Error | null, callback: (error?: Error | null) => void) {
+    if (error) {
+      this.setResponseError(error)
+    }
+    callback(error)
   }
 
   /**
@@ -240,5 +261,17 @@ export class XmlBase64DataStreamParser extends Transform {
       this.push(Buffer.from(this.base64Rem, 'base64'))
       this.base64Rem = ''
     }
+  }
+
+  private setResponseValue(value: TResponse) {
+    if (this.responseSettled) return
+    this.responseSettled = true
+    this.resolveResponse(value)
+  }
+
+  private setResponseError(error: Error) {
+    if (this.responseSettled) return
+    this.responseSettled = true
+    this.rejectResponse(error)
   }
 }
