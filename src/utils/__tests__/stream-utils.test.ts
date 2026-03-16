@@ -1,12 +1,23 @@
+import z from 'zod'
 import { GinisError } from '../errors'
-import { nacistSouborResponseSchema } from '../../api/ude/Nacist-soubor'
 import { XmlBase64DataStreamParser } from '../stream-utils'
 
-function createNacistSouborParser() {
+const testFunctionName = 'Test-function'
+const testParameterName = 'Some-parameter'
+const testXmlNamespace = 'http://www.test.com/test/v_1.0'
+const testSchema = z.object({
+  [testParameterName]: z.string(),
+  Data: z.string(),
+})
+
+export const testResponseSchema = z.object({
+  [testFunctionName]: testSchema.optional(),
+})
+function createTestParser() {
   return new XmlBase64DataStreamParser({
     responseValidation: {
-      requestName: 'Nacist-soubor',
-      responseSchema: nacistSouborResponseSchema,
+      requestName: testFunctionName,
+      responseSchema: testResponseSchema,
     },
   })
 }
@@ -35,33 +46,33 @@ async function feed(parser: XmlBase64DataStreamParser, chunks: string[]): Promis
 }
 
 /**
- * Build a minimal valid GINIS Nacist-soubor SOAP envelope string.
+ * Build a minimal valid GINIS Test-function SOAP envelope string.
  * `dataB64` is placed verbatim between <Data> and </Data>.
  */
-function envelope(dataB64: string, filename = 'file.bin'): string {
+function envelope(dataB64: string, parameterValue = 'parameter-value'): string {
   return (
     `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">` +
     `<s:Body>` +
-    `<Nacist-souborResponse xmlns="http://www.gordic.cz/svc/xrg-ude/v_1.0.0.0">` +
-    `<Nacist-souborResult>` +
+    `<${testFunctionName}Response xmlns="${testXmlNamespace}">` +
+    `<${testFunctionName}Result>` +
     `<Xrg>` +
-    `<Nacist-soubor>` +
-    `<Jmeno-souboru>${filename}</Jmeno-souboru>` +
+    `<${testFunctionName}>` +
+    `<${testParameterName}>${parameterValue}</${testParameterName}>` +
     `<Data>${dataB64}</Data>` +
-    `</Nacist-soubor>` +
+    `</${testFunctionName}>` +
     `</Xrg>` +
-    `</Nacist-souborResult>` +
-    `</Nacist-souborResponse>` +
+    `</${testFunctionName}Result>` +
+    `</${testFunctionName}Response>` +
     `</s:Body>` +
     `</s:Envelope>`
   )
 }
 
-describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
+describe('Stream-utils — XmlBase64DataStreamParser', () => {
   describe('Happy path', () => {
     test('decodes a small file in one chunk', async () => {
       const original = Buffer.from('Hello GINIS!')
-      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
+      const result = await feed(createTestParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
@@ -71,24 +82,24 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
       const chunks: string[] = []
       for (let i = 0; i < xml.length; i += 20) chunks.push(xml.slice(i, i + 20))
 
-      const result = await feed(createNacistSouborParser(), chunks)
+      const result = await feed(createTestParser(), chunks)
       expect(result).toEqual(original)
     })
 
     test('decodes a 1 KB binary blob', async () => {
       const original = Buffer.from(Array.from({ length: 1024 }, (_, i) => i % 256))
-      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
+      const result = await feed(createTestParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
     test('handles an empty <Data> tag (zero-byte file)', async () => {
-      const result = await feed(createNacistSouborParser(), [envelope('')])
+      const result = await feed(createTestParser(), [envelope('')])
       expect(result.length).toBe(0)
     })
 
     test('emits the "ready" event once <Data> is found', async () => {
       const original = Buffer.from('ready-event-test')
-      const parser = createNacistSouborParser()
+      const parser = createTestParser()
       let readyFired = false
       parser.on('ready', () => {
         readyFired = true
@@ -99,7 +110,7 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
 
     test('"ready" fires before the first data chunk is pushed', async () => {
       const original = Buffer.from('ordering-test')
-      const parser = createNacistSouborParser()
+      const parser = createTestParser()
       const events: string[] = []
       parser.on('ready', () => events.push('ready'))
       parser.on('data', () => {
@@ -132,21 +143,21 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
         xml.slice(dataEnd), // </Data> + tail
       ]
 
-      const result = await feed(createNacistSouborParser(), chunks)
+      const result = await feed(createTestParser(), chunks)
       expect(result).toEqual(original)
     })
 
     test('handles base64 remainder of 1 leftover char', async () => {
       // 1 byte → "AQ==" — remainder of 1 char before padding
       const original = Buffer.from([0x01])
-      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
+      const result = await feed(createTestParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
 
     test('handles base64 remainder of 2 leftover chars', async () => {
       // 2 bytes → "AAE=" — remainder of 2 chars before padding
       const original = Buffer.from([0x00, 0x01])
-      const result = await feed(createNacistSouborParser(), [envelope(original.toString('base64'))])
+      const result = await feed(createTestParser(), [envelope(original.toString('base64'))])
       expect(result).toEqual(original)
     })
   })
@@ -158,10 +169,7 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
       const closeIdx = xml.indexOf('</Data>')
       const splitAt = closeIdx + 3 // "</Da" | "ta>..."
 
-      const result = await feed(createNacistSouborParser(), [
-        xml.slice(0, splitAt),
-        xml.slice(splitAt),
-      ])
+      const result = await feed(createTestParser(), [xml.slice(0, splitAt), xml.slice(splitAt)])
       expect(result).toEqual(original)
     })
 
@@ -171,24 +179,21 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
       const openIdx = xml.indexOf('<Data>')
       const splitAt = openIdx + 3 // "<Da" | "ta>..."
 
-      const result = await feed(createNacistSouborParser(), [
-        xml.slice(0, splitAt),
-        xml.slice(splitAt),
-      ])
+      const result = await feed(createTestParser(), [xml.slice(0, splitAt), xml.slice(splitAt)])
       expect(result).toEqual(original)
     })
 
     test('works when every character arrives in its own chunk', async () => {
       const original = Buffer.from('one-char-chunks')
       const xml = envelope(original.toString('base64'))
-      const result = await feed(createNacistSouborParser(), xml.split(''))
+      const result = await feed(createTestParser(), xml.split(''))
       expect(result).toEqual(original)
     })
 
     test('works when the entire payload arrives in a single character Buffer per write', async () => {
       const original = Buffer.from('single-byte-writes')
       const xml = envelope(original.toString('base64'))
-      const parser = createNacistSouborParser()
+      const parser = createTestParser()
       const result = collect(parser)
       for (const byte of Buffer.from(xml, 'utf-8')) {
         parser.write(Buffer.from([byte]))
@@ -202,8 +207,8 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
     test('allows overriding requestName/responseSchema for extractResponseJson', async () => {
       const parser = new XmlBase64DataStreamParser({
         responseValidation: {
-          requestName: 'Neexistujici-request',
-          responseSchema: nacistSouborResponseSchema,
+          requestName: 'Non-existent-request',
+          responseSchema: testResponseSchema,
         },
       })
 
@@ -215,19 +220,17 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
     test('errors if stream ends while still in "data" state (no </Data>)', async () => {
       const truncated =
         '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
-        '<s:Body><Nacist-souborResponse><Nacist-souborResult><Xrg><Nacist-soubor>' +
-        '<Jmeno-souboru>f.bin</Jmeno-souboru>' +
+        `<s:Body><${testFunctionName}Response><${testFunctionName}Result><Xrg><${testFunctionName}>` +
+        `<${testParameterName}>test-value</${testParameterName}>` +
         '<Data>AAAA' // no closing tag
 
-      await expect(feed(createNacistSouborParser(), [truncated])).rejects.toThrow(
+      await expect(feed(createTestParser(), [truncated])).rejects.toThrow(
         'Response stream ended before </Data> was found'
       )
     })
 
     test('errors on completely invalid XML (no <Data>, extractResponseJson fails)', async () => {
-      await expect(feed(createNacistSouborParser(), ['this is not XML at all'])).rejects.toThrow(
-        GinisError
-      )
+      await expect(feed(createTestParser(), ['this is not XML at all'])).rejects.toThrow(GinisError)
     })
 
     test('errors when the SOAP body contains a Fault instead of the expected response', async () => {
@@ -239,7 +242,7 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
         '</s:Body>' +
         '</s:Envelope>'
 
-      await expect(feed(createNacistSouborParser(), [fault])).rejects.toThrow(GinisError)
+      await expect(feed(createTestParser(), [fault])).rejects.toThrow(GinisError)
     })
 
     test('errors when <Xrg> is absent (xrgContent is undefined, zod rejects)', async () => {
@@ -248,15 +251,15 @@ describe('UDE-Nacist-soubor-stream — XmlBase64DataStreamParser', () => {
       const missingXrg =
         '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' +
         '<s:Body>' +
-        '<Nacist-souborResponse xmlns="http://www.gordic.cz/svc/xrg-ude/v_1.0.0.0">' +
-        '<Nacist-souborResult>' +
+        `<${testFunctionName}Response xmlns="${testXmlNamespace}">` +
+        `<${testFunctionName}Result>` +
         // <Xrg> omitted → xrgContent === undefined → zod throws
-        '</Nacist-souborResult>' +
-        '</Nacist-souborResponse>' +
+        `</${testFunctionName}Result>` +
+        `</${testFunctionName}Response>` +
         '</s:Body>' +
         '</s:Envelope>'
 
-      await expect(feed(createNacistSouborParser(), [missingXrg])).rejects.toThrow(GinisError)
+      await expect(feed(createTestParser(), [missingXrg])).rejects.toThrow(GinisError)
     })
   })
 })

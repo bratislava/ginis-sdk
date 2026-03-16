@@ -24,16 +24,16 @@ export interface XmlBase64DataStreamParserConfig<T = unknown> {
  *   <s:Envelope>
  *     <s:Header>…</s:Header>
  *     <s:Body>
- *       <Nacist-souborResponse>
- *         <Nacist-souborResult>
+ *       <Function-nameResponse>
+ *         <Function-nameResult>
  *           <Xrg>
- *             <Nacist-soubor>
- *               <Jmeno-souboru>filename.pdf</Jmeno-souboru>
+ *             <Function-name>
+ *               <!-- other parameters can be present here, before or after <Data> -->
  *               <Data>...huge base64 blob...</Data>
- *             </Nacist-soubor>
+ *             </Function-name>
  *           </Xrg>
- *         </Nacist-souborResult>
- *       </Nacist-souborResponse>
+ *         </Function-nameResult>
+ *       </Function-nameResponse>
  *     </s:Body>
  *   </s:Envelope>
  *
