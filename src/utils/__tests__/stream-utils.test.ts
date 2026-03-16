@@ -48,7 +48,9 @@ async function feed<TResponse>(
   chunks: string[]
 ): Promise<Buffer> {
   const result = collect(parser)
-  for (const c of chunks) parser.write(Buffer.from(c, 'utf-8'))
+  for (const chunk of chunks) {
+    parser.write(Buffer.from(chunk, 'utf-8'))
+  }
   parser.end()
   return await result
 }
@@ -88,7 +90,9 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
       const original = Buffer.from('chunk-based binary content here')
       const xml = envelope(original.toString('base64'))
       const chunks: string[] = []
-      for (let i = 0; i < xml.length; i += 20) chunks.push(xml.slice(i, i + 20))
+      for (let i = 0; i < xml.length; i += 20) {
+        chunks.push(xml.slice(i, i + 20))
+      }
 
       const result = await feed(createTestParser(), chunks)
       expect(result).toEqual(original)
@@ -122,7 +126,9 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
       const events: string[] = []
       parser.on('ready', () => events.push('ready'))
       parser.on('data', () => {
-        if (!events.includes('data')) events.push('data')
+        if (!events.includes('data')) {
+          events.push('data')
+        }
       })
       await feed(parser, [envelope(original.toString('base64'))])
       expect(events.indexOf('ready')).toBeLessThan(events.indexOf('data'))
@@ -160,7 +166,9 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
         ...(() => {
           const parts: string[] = []
           const data = xml.slice(dataStart, dataEnd)
-          for (let i = 0; i < data.length; i += 3) parts.push(data.slice(i, i + 3))
+          for (let i = 0; i < data.length; i += 3) {
+            parts.push(data.slice(i, i + 3))
+          }
           return parts
         })(),
         xml.slice(dataEnd), // </Data> + tail

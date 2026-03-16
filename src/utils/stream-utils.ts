@@ -22,7 +22,7 @@ export interface XmlBase64DataStreamParserConfig<T = unknown> {
  *
  * The GINIS response XML has this structure (all on one line, no whitespace):
  *   <s:Envelope>
- *     <s:Header>…</s:Header>
+ *     <s:Header>...</s:Header>
  *     <s:Body>
  *       <Function-nameResponse>
  *         <Function-nameResult>
@@ -181,7 +181,9 @@ export class XmlBase64DataStreamParser<TResponse = unknown> extends Transform {
     this.headerBuf += str
 
     const dataOpenIndex = this.headerBuf.indexOf(DATA_OPEN)
-    if (dataOpenIndex === -1) return
+    if (dataOpenIndex === -1) {
+      return
+    }
 
     const afterData = this.headerBuf.substring(dataOpenIndex + DATA_OPEN.length)
 
@@ -197,7 +199,7 @@ export class XmlBase64DataStreamParser<TResponse = unknown> extends Transform {
   }
 
   /**
-   * Processes a chunk of base64 text from inside `<Data>…</Data>`.
+   * Processes a chunk of base64 text from inside `<Data>...</Data>`.
    * Prepends the previous tail buffer and checks for the closing tag.
    * When `</Data>` is found, appends the trailing XML to the skeleton
    * and transitions to the `tail` state.
@@ -245,7 +247,9 @@ export class XmlBase64DataStreamParser<TResponse = unknown> extends Transform {
    * (0-3) are saved in `base64Rem` and prepended to the next chunk.
    */
   private decodeBase64(str: string) {
-    if (str.length === 0) return
+    if (str.length === 0) {
+      return
+    }
 
     const full = this.base64Rem + str
     const aligned = full.length - (full.length % 4)
@@ -264,13 +268,17 @@ export class XmlBase64DataStreamParser<TResponse = unknown> extends Transform {
   }
 
   private setResponseValue(value: TResponse) {
-    if (this.responseSettled) return
+    if (this.responseSettled) {
+      return
+    }
     this.responseSettled = true
     this.resolveResponse(value)
   }
 
   private setResponseError(error: Error) {
-    if (this.responseSettled) return
+    if (this.responseSettled) {
+      return
+    }
     this.responseSettled = true
     this.rejectResponse(error)
   }
