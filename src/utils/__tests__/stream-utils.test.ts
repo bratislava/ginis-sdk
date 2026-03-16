@@ -1,6 +1,6 @@
-import { GinisError } from '../../../utils/errors'
-import { nacistSouborResponseSchema } from '../Nacist-soubor'
-import { XmlBase64DataStreamParser } from '../Nacist-soubor-stream'
+import { GinisError } from '../errors'
+import { nacistSouborResponseSchema } from '../../api/ude/Nacist-soubor'
+import { XmlBase64DataStreamParser } from '../stream-utils'
 
 function createNacistSouborParser() {
   return new XmlBase64DataStreamParser({

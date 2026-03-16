@@ -11,7 +11,7 @@ import {
   RequestParamOrder,
   RequestParamType,
 } from '../../utils/request-utils'
-import { XmlBase64DataStreamParser } from './Nacist-soubor-stream'
+import { XmlBase64DataStreamParser } from '../../utils/stream-utils'
 
 const nacistSouborRequestProperties = ['Id-souboru'] as const
 

@@ -1,8 +1,8 @@
 import { Transform, TransformCallback } from 'stream'
 import { ZodType } from 'zod'
 
-import { GinisError } from '../../utils/errors'
-import { extractResponseJson } from '../../utils/request-utils'
+import { GinisError } from './errors'
+import { extractResponseJson } from './request-utils'
 
 const DATA_OPEN = '<Data>'
 const DATA_CLOSE = '</Data>'
