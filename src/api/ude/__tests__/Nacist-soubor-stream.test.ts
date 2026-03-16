@@ -1,59 +1,6 @@
-import { Readable } from 'stream'
-
-import { Ginis } from '../../../index'
 import { GinisError } from '../../../utils/errors'
 import { nacistSouborResponseSchema } from '../Nacist-soubor'
 import { XmlBase64DataStreamParser } from '../Nacist-soubor-stream'
-import { envGetOrThrow } from '../../../utils/test-utils'
-
-describe('UDE-Nacist-soubor-stream', () => {
-  let ginis: Ginis
-  beforeAll(() => {
-    ginis = new Ginis({
-      urls: {
-        ude: envGetOrThrow('GINIS_UDE_HOST'),
-      },
-      username: envGetOrThrow('GINIS_USERNAME'),
-      password: envGetOrThrow('GINIS_PASSWORD'),
-      debug: false,
-    })
-  })
-
-  test('Basic request', async () => {
-    let stream: Readable
-    try {
-      stream = await ginis.ude.nacistSouborStream({
-        'Id-souboru': 'MAG00B0PVN5H#0#MAG00B0PVN5H',
-      })
-    } catch (error) {
-      if (!(error instanceof Error)) {
-        throw error
-      }
-
-      const noDiskError =
-        'Chyba: El. dokument nelze stáhnout, protože se nachází na zrušeném disku.'
-      const noDiskErrorCode = 'kód: 24200135'
-      if (error.message.includes(noDiskError) || error.message.includes(noDiskErrorCode)) {
-        // this means the request format is correct and file ID is valid
-        console.warn('Skipping test as no disk is available within this environment.')
-        return
-      }
-
-      throw error
-    }
-
-    const dataBuffer = await new Promise<Buffer>((resolve, reject) => {
-      const parts: Buffer[] = []
-      stream.on('data', (chunk: Buffer) => parts.push(chunk))
-      stream.on('end', () => {
-        resolve(Buffer.concat(parts))
-      })
-      stream.on('error', reject)
-    })
-
-    expect(dataBuffer.length).toBeGreaterThan(0)
-  }, 20_000)
-})
 
 function createNacistSouborParser() {
   return new XmlBase64DataStreamParser({

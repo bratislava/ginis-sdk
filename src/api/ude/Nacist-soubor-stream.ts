@@ -1,30 +1,8 @@
-import { pipeline, Readable, Transform, TransformCallback } from 'stream'
+import { Transform, TransformCallback } from 'stream'
 import { ZodType } from 'zod'
 
-import { Ginis } from '../../ginis'
-import { makeAxiosRequest } from '../../utils/api'
 import { GinisError } from '../../utils/errors'
-import {
-  createXmlRequestBody,
-  createXmlRequestConfig,
-  extractResponseJson,
-  RequestParamOrder,
-  RequestParamType,
-} from '../../utils/request-utils'
-import { nacistSouborResponseSchema } from './Nacist-soubor'
-
-const nacistSouborRequestProperties = ['Id-souboru'] as const
-
-export type UdeNacistSouborStreamRequest = {
-  [K in (typeof nacistSouborRequestProperties)[number] as K]?: RequestParamType
-}
-
-const nacistSouborParamOrders: RequestParamOrder[] = [
-  {
-    name: 'Nacist-soubor',
-    params: nacistSouborRequestProperties,
-  },
-]
+import { extractResponseJson } from '../../utils/request-utils'
 
 const DATA_OPEN = '<Data>'
 const DATA_CLOSE = '</Data>'
@@ -263,55 +241,4 @@ export class XmlBase64DataStreamParser extends Transform {
       this.base64Rem = ''
     }
   }
-}
-
-/**
- * Streaming variant of {@link nacistSoubor} for downloading files from the
- * GINIS UDE (Úřední deska) service.
- *
- * **Why this exists:** The non-streaming version loads the entire SOAP XML
- * response into memory, parses it with xml2js, then base64-decodes the file.
- * For large files (50-200+ MB) this causes memory spikes of several GB
- * (the base64 string + parsed object + decoded buffer all coexist in memory).
- *
- * @param bodyObj - Request parameters, typically `{ 'Id-souboru': fileId }`.
- * @returns A `Readable` stream of decoded binary data.
- * @throws {GinisError} On network errors, SOAP faults, or malformed responses.
- */
-export async function nacistSouborStream(
-  this: Ginis,
-  bodyObj: UdeNacistSouborStreamRequest
-): Promise<Readable> {
-  const url = this.config.urls.ude
-  if (!url) throw new GinisError('GINIS SDK Error: Missing UDE url in GINIS config')
-
-  const requestName = 'Nacist-soubor'
-  const requestNamespace = 'http://www.gordic.cz/svc/xrg-ude/v_1.0.0.0'
-
-  const response = await makeAxiosRequest<Readable>(
-    { ...createXmlRequestConfig(requestName, requestNamespace), responseType: 'stream' },
-    url,
-    createXmlRequestBody(this.config, {
-      name: requestName,
-      namespace: requestNamespace,
-      xrgNamespace: 'http://www.gordic.cz/xrg/ude/nacist-soubor/request/v_1.0.0.0',
-      paramsBodies: [bodyObj],
-      paramOrders: nacistSouborParamOrders,
-    }),
-    this.config.debug
-  )
-
-  const parser = new XmlBase64DataStreamParser({
-    responseValidation: {
-      requestName,
-      responseSchema: nacistSouborResponseSchema,
-    },
-  })
-  pipeline(response.data, parser, (error) => {
-    if (error && !parser.destroyed) {
-      parser.destroy(error instanceof Error ? error : new Error(String(error)))
-    }
-  })
-
-  return parser as Readable
 }
