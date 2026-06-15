@@ -133,5 +133,5 @@ export async function nacistSouborStream(
   // Stream consumers may ignore `response`; prevent unhandled rejections.
   parser.response.catch(() => undefined)
 
-  return parser as UdeNacistSouborStream
+  return parser
 }
