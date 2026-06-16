@@ -14,9 +14,4 @@ updates:
       eslint-dependencies:
         patterns:
           - 'eslint'
-          - 'eslint-*'
-          - '@eslint/*'
-          - '@types/eslint-*'
-          - '@darraghor/eslint-plugin-nestjs-typed'
-          - 'typescript-eslint'
-          - '@typescript-eslint/*'
+          - '@bratislava/eslint-config'

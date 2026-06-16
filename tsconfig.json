@@ -28,6 +28,6 @@
     "declarationMap": true,
     "plugins": []
   },
-  "include": ["src", "eslint.config.ts"],
+  "include": ["src"],
   "exclude": ["dist", "docs", "node_modules", "bin"]
 }
