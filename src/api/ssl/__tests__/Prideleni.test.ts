@@ -23,6 +23,6 @@ describe('SSL-Prideleni', () => {
       'Prime-prideleni': 'prime-prideleni',
     })
 
-    expect(data['Prideleni']['Datum-zmeny']).toBeTruthy()
+    expect(data.Prideleni['Datum-zmeny']).toBeTruthy()
   }, 20_000)
 })
