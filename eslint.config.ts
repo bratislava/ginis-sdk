@@ -4,8 +4,7 @@ export default [
   ...baseConfig,
   {
     rules: {
-      'sonarjs/no-clear-text-protocols': 'warn',
-      'dot-notation': 'warn',
+      'sonarjs/no-clear-text-protocols': 'off', // XML namespaces for Ginis use http.
     },
   },
 ]
