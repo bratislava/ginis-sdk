@@ -34,7 +34,7 @@
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/preset-env": "7.29.7",
-    "@babel/preset-typescript": "7.29.7",
+    "@babel/preset-typescript": "8.0.1",
     "@bratislava/eslint-config": "0.15.0",
     "@types/jest": "30.0.0",
     "@types/lodash": "4.17.24",
