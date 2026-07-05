@@ -44,7 +44,7 @@
     "eslint": "9.39.4",
     "jest": "30.4.2",
     "jiti": "2.7.0",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "ts-jest": "29.4.11",
     "ts-loader": "9.6.0",
     "tsup": "8.5.1",
