@@ -16,9 +16,6 @@
     "lint:report": "eslint -f json -o eslint-report.json \"{src,apps,libs,test}/**/*.{ts,js}\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.{ts,js}\" --fix"
   },
-  "bin": {
-    "ginis-sdk": "./bin/index.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bratislava/ginis-sdk.git"
