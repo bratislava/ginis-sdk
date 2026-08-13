@@ -45,6 +45,6 @@ describe('GIN-Najdi-esu', () => {
       },
       { 'Rozsah-prehledu': 'rozsireny' }
     )
-    expect(data['Najdi-esu'].length).toBe(0)
+    expect(data['Najdi-esu']).toHaveLength(0)
   }, 20_000)
 })
