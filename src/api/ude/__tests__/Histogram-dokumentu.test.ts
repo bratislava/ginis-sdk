@@ -76,7 +76,7 @@ describe.skip('UDE-Histogram-dokumentu', () => {
       }
     }
 
-    // Test always passes
-    expect(true).toBe(true)
+    // The histogram above is the actual output, we only assert there was data to build it from
+    expect(allDocuments).not.toHaveLength(0)
   }, 40_000)
 })

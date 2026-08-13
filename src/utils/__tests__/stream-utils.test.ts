@@ -106,7 +106,7 @@ describe('Stream-utils — XmlBase64DataStreamParser', () => {
 
     test('handles an empty <Data> tag (zero-byte file)', async () => {
       const result = await feed(createTestParser(), [envelope('')])
-      expect(result.length).toBe(0)
+      expect(result).toHaveLength(0)
     })
 
     test('emits the "ready" event once <Data> is found', async () => {

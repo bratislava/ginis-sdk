@@ -33,7 +33,7 @@ describe('SSL-Prehled-dokumentu', () => {
     )
 
     expect(data['Stav-prehledu']['Radku-celkem']).toBe('1')
-    expect(data['Prehled-dokumentu'].length).toBe(1)
+    expect(data['Prehled-dokumentu']).toHaveLength(1)
     expect(data['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe('MAG0X05DA0O1')
   }, 20_000)
 })

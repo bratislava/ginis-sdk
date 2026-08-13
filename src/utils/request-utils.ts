@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/slow-regex */
 import { PassThrough, Readable } from 'stream'
 import { parseStringPromise as parseXml } from 'xml2js'
 import { ZodType } from 'zod'
@@ -80,24 +79,24 @@ export function createXmlRequestBody(config: GinisConfig, requestInfo: XmlReques
   const paramsBodies = requestInfo.paramsBodies.map(sanitizeParamBody)
 
   return `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-  <s:Header>
-    <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-      <o:UsernameToken u:Id="uuid-ea5d8d3d-df90-4b69-b034-9026f34a3f21-1">
-        <o:Username>${config.username}</o:Username>
-        <o:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">${config.password}</o:Password>
-      </o:UsernameToken>
-    </o:Security>
-  </s:Header>
-  <s:Body>
-    <${requestInfo.name} xmlns="${requestInfo.namespace}">
-      <requestXml>
-        <Xrg xmlns="${requestInfo.xrgNamespace}">
-          ${requestInfo.paramOrders.map((e, i) => generateRequestNode(e, paramsBodies.at(i) ?? {})).join('')}
-        </Xrg>
-      </requestXml>
-    </${requestInfo.name}>
-  </s:Body>
-</s:Envelope>`.replaceAll(/\s*(<[^>]+>)\s*/g, '$1') // regex removes whitespaces between elements
+    <s:Header>
+      <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+        <o:UsernameToken u:Id="uuid-ea5d8d3d-df90-4b69-b034-9026f34a3f21-1">
+          <o:Username>${config.username}</o:Username>
+          <o:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">${config.password}</o:Password>
+        </o:UsernameToken>
+      </o:Security>
+    </s:Header>
+    <s:Body>
+      <${requestInfo.name} xmlns="${requestInfo.namespace}">
+        <requestXml>
+          <Xrg xmlns="${requestInfo.xrgNamespace}">
+            ${requestInfo.paramOrders.map((e, i) => generateRequestNode(e, paramsBodies.at(i) ?? {})).join('')}
+          </Xrg>
+        </requestXml>
+      </${requestInfo.name}>
+    </s:Body>
+  </s:Envelope>`.replaceAll(/>\s+</g, '><') // regex removes whitespaces between elements
 }
 
 export async function extractResponseJson<T>(

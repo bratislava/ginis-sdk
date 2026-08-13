@@ -119,7 +119,7 @@ describe('SSL-Zaloz-pisemnost-cj-vlastnost', () => {
         'Rozsah-prehledu': 'standardni',
       }
     )
-    expect(documentList['Prehled-dokumentu'].length).toBe(1)
+    expect(documentList['Prehled-dokumentu']).toHaveLength(1)
     expect(documentList['Prehled-dokumentu'][0]?.['Id-dokumentu']).toBe(documentId)
   }, 20_000)
 })
