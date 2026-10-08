@@ -18,15 +18,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup using Node ${{ matrix.node }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
         run: npm ci
       - name: Typescript reviewdog check
-        uses: EPMatt/reviewdog-action-tsc@v1
+        uses: EPMatt/reviewdog-action-tsc@63d923a3c5b4497671940b8874f58a404e2351b5 # v1.11.0
         with:
           # Change reviewdog reporter if you need
           # [github-pr-check,github-check,github-pr-review].
