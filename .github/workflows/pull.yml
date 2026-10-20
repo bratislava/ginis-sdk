@@ -25,19 +25,6 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
         run: npm ci
-      - name: Typescript reviewdog check
-        uses: EPMatt/reviewdog-action-tsc@63d923a3c5b4497671940b8874f58a404e2351b5 # v1.11.0
-        with:
-          # Change reviewdog reporter if you need
-          # [github-pr-check,github-check,github-pr-review].
-          # More about reviewdog reporters at
-          # https://github.com/reviewdog/reviewdog#reporters
-          reporter: github-check
-          # Change reporter level if you need
-          # [info,warning,error].
-          # More about reviewdog reporter level at
-          # https://github.com/reviewdog/reviewdog#reporters
-          level: warning
       - name: Typescript check
         run: npm run typecheck
       - name: ESlint check
